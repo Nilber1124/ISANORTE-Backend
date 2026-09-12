@@ -103,8 +103,9 @@ public class Servicio {
      */
     public void removeProyecto(Proyecto proyecto) {
         Objects.requireNonNull(proyecto, "El proyecto no puede ser null");
-        this.proyectos.remove(proyecto);
-        proyecto.getServicios().remove(this);
+        if (this.proyectos.remove(proyecto)) {
+            proyecto.getServicios().remove(this);
+        }
     }
 
     @PrePersist

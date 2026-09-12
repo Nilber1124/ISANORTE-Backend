@@ -38,6 +38,10 @@ public class Permiso {
     private UUID id;
 
     @NotBlank
+    @Column(nullable = false, unique = true, length = 100)
+    private String codigo;
+
+    @NotBlank
     @Column(nullable = false, length = 80)
     private String nombre;
 

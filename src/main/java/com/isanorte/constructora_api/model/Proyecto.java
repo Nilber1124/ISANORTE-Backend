@@ -111,8 +111,9 @@ public class Proyecto {
      */
     public void removeServicio(Servicio servicio) {
         Objects.requireNonNull(servicio, "El servicio no puede ser null");
-        this.servicios.remove(servicio);
-        servicio.getProyectos().remove(this);
+        if (this.servicios.remove(servicio)) {
+            servicio.getProyectos().remove(this);
+        }
     }
 
     /**
@@ -123,6 +124,9 @@ public class Proyecto {
      */
     public void addImagen(ImagenProyecto imagen) {
         Objects.requireNonNull(imagen, "La imagen del proyecto no puede ser null");
+        if (imagen.getProyecto() != null && imagen.getProyecto() != this) {
+            throw new IllegalStateException("La imagen ya pertenece a otro proyecto");
+        }
         this.imagenes.add(imagen);
         imagen.setProyecto(this);
     }
@@ -135,8 +139,9 @@ public class Proyecto {
      */
     public void removeImagen(ImagenProyecto imagen) {
         Objects.requireNonNull(imagen, "La imagen del proyecto no puede ser null");
-        this.imagenes.remove(imagen);
-        imagen.setProyecto(null);
+        if (this.imagenes.remove(imagen)) {
+            imagen.setProyecto(null);
+        }
     }
 
     @PrePersist

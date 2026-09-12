@@ -93,6 +93,9 @@ public class ConfiguracionSitio {
      */
     public void addSeccion(SeccionLanding seccion) {
         Objects.requireNonNull(seccion, "La sección landing no puede ser null");
+        if (seccion.getConfiguracionSitio() != null && seccion.getConfiguracionSitio() != this) {
+            throw new IllegalStateException("La sección landing ya pertenece a otra configuración de sitio");
+        }
         this.secciones.add(seccion);
         seccion.setConfiguracionSitio(this);
     }
@@ -106,8 +109,9 @@ public class ConfiguracionSitio {
      */
     public void removeSeccion(SeccionLanding seccion) {
         Objects.requireNonNull(seccion, "La sección landing no puede ser null");
-        this.secciones.remove(seccion);
-        seccion.setConfiguracionSitio(null);
+        if (this.secciones.remove(seccion)) {
+            seccion.setConfiguracionSitio(null);
+        }
     }
 
     @PrePersist

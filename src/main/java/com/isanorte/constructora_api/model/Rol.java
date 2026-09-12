@@ -89,8 +89,9 @@ public class Rol {
      */
     public void removePermiso(Permiso permiso) {
         Objects.requireNonNull(permiso, "El permiso no puede ser null");
-        this.permisos.remove(permiso);
-        permiso.getRoles().remove(this);
+        if (this.permisos.remove(permiso)) {
+            permiso.getRoles().remove(this);
+        }
     }
 
     /**
@@ -113,8 +114,9 @@ public class Rol {
      */
     public void removeAdministrador(Administrador administrador) {
         Objects.requireNonNull(administrador, "El administrador no puede ser null");
-        this.administradores.remove(administrador);
-        administrador.getRoles().remove(this);
+        if (this.administradores.remove(administrador)) {
+            administrador.getRoles().remove(this);
+        }
     }
 
     @PrePersist

@@ -91,20 +91,11 @@ public class UnidadNegocio {
      */
     public void addProducto(Producto producto) {
         Objects.requireNonNull(producto, "El producto no puede ser null");
+        if (producto.getUnidadNegocio() != null && producto.getUnidadNegocio() != this) {
+            throw new IllegalStateException("El producto ya pertenece a otra unidad de negocio");
+        }
         this.productos.add(producto);
         producto.setUnidadNegocio(this);
-    }
-
-    /**
-     * Remueve un producto de esta unidad de negocio y desvincula su referencia foránea.
-     *
-     * @param producto el producto a desasociar (no nulo)
-     * @throws NullPointerException si {@code producto} es {@code null}
-     */
-    public void removeProducto(Producto producto) {
-        Objects.requireNonNull(producto, "El producto no puede ser null");
-        this.productos.remove(producto);
-        producto.setUnidadNegocio(null);
     }
 
     @PrePersist

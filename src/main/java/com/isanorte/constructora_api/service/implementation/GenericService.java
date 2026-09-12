@@ -2,32 +2,31 @@ package com.isanorte.constructora_api.service.implementation;
 
 import java.util.List;
 
+import org.springframework.transaction.annotation.Transactional;
+
+import com.isanorte.constructora_api.exception.ModelNotFoundException;
+import com.isanorte.constructora_api.repository.IGenericRepository;
 import com.isanorte.constructora_api.service.IGenericService;
 
+@Transactional(readOnly = true)
 public abstract class GenericService<T, ID> implements IGenericService<T, ID> {
+
+    protected abstract IGenericRepository<T, ID> getRepo();
+
     @Override
-    public T save(T t) throws Exception {
-        throw new UnsupportedOperationException("Unimplemented method 'save'");
+    @Transactional
+    public T save(T t) {
+        return getRepo().save(t);
     }
 
     @Override
-    public T update(T t, ID id) throws Exception {
-        throw new UnsupportedOperationException("Unimplemented method 'update'");
+    public List<T> findAll() {
+        return getRepo().findAll();
     }
 
     @Override
-    public List<T> findAll() throws Exception {
-        throw new UnsupportedOperationException("Unimplemented method 'findAll'");
+    public T findById(ID id) {
+        return getRepo().findById(id)
+                .orElseThrow(() -> new ModelNotFoundException("Registro no encontrado con ID: " + id));
     }
-
-    @Override
-    public T findById(ID id) throws Exception {
-        throw new UnsupportedOperationException("Unimplemented method 'findById'");
-    }
-
-    @Override
-    public void delete(ID id) throws Exception {
-        throw new UnsupportedOperationException("Unimplemented method 'delete'");
-    }
-
 }

@@ -3,13 +3,10 @@ package com.isanorte.constructora_api.service;
 import java.util.List;
 
 public interface IGenericService<T, ID> {
-    T save(T t) throws Exception;
 
-    T update(T t, ID id) throws Exception;
+    T save(T t);
 
-    List<T> findAll() throws Exception;
+    List<T> findAll();
 
-    T findById(ID id) throws Exception;
-
-    void delete(ID id) throws Exception;
+    T findById(ID id);
 }

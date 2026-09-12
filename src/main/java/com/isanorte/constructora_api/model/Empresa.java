@@ -18,6 +18,7 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -65,9 +66,11 @@ public class Empresa {
     @Column(length = 30)
     private String telefonoSecundario;
 
+    @Email
     @Column(length = 120)
     private String email;
 
+    @Email
     @Column(length = 120)
     private String emailVentas;
 
@@ -115,6 +118,11 @@ public class Empresa {
      * @param nuevaConfiguracion la nueva configuración del sitio o {@code null} para desvincular
      */
     public void setConfiguracionSitio(ConfiguracionSitio nuevaConfiguracion) {
+        if (nuevaConfiguracion != null
+                && nuevaConfiguracion.getEmpresa() != null
+                && nuevaConfiguracion.getEmpresa() != this) {
+            throw new IllegalStateException("La configuración del sitio ya pertenece a otra empresa");
+        }
         if (this.configuracionSitio != null) {
             this.configuracionSitio.setEmpresa(null);
         }
@@ -132,6 +140,9 @@ public class Empresa {
      */
     public void addRedSocial(RedSocial redSocial) {
         Objects.requireNonNull(redSocial, "La red social no puede ser null");
+        if (redSocial.getEmpresa() != null && redSocial.getEmpresa() != this) {
+            throw new IllegalStateException("La red social ya pertenece a otra empresa");
+        }
         this.redesSociales.add(redSocial);
         redSocial.setEmpresa(this);
     }
@@ -144,8 +155,9 @@ public class Empresa {
      */
     public void removeRedSocial(RedSocial redSocial) {
         Objects.requireNonNull(redSocial, "La red social no puede ser null");
-        this.redesSociales.remove(redSocial);
-        redSocial.setEmpresa(null);
+        if (this.redesSociales.remove(redSocial)) {
+            redSocial.setEmpresa(null);
+        }
     }
 
     /**
@@ -156,20 +168,11 @@ public class Empresa {
      */
     public void addUnidadNegocio(UnidadNegocio unidadNegocio) {
         Objects.requireNonNull(unidadNegocio, "La unidad de negocio no puede ser null");
+        if (unidadNegocio.getEmpresa() != null && unidadNegocio.getEmpresa() != this) {
+            throw new IllegalStateException("La unidad de negocio ya pertenece a otra empresa");
+        }
         this.unidadesNegocio.add(unidadNegocio);
         unidadNegocio.setEmpresa(this);
-    }
-
-    /**
-     * Remueve una unidad de negocio de la empresa y desvincula la relación bidireccional.
-     *
-     * @param unidadNegocio la unidad de negocio a remover (no nula)
-     * @throws NullPointerException si {@code unidadNegocio} es {@code null}
-     */
-    public void removeUnidadNegocio(UnidadNegocio unidadNegocio) {
-        Objects.requireNonNull(unidadNegocio, "La unidad de negocio no puede ser null");
-        this.unidadesNegocio.remove(unidadNegocio);
-        unidadNegocio.setEmpresa(null);
     }
 
     @PrePersist

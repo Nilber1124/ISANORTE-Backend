@@ -18,6 +18,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -37,6 +38,7 @@ public class SeccionLanding {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @NotNull
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)
     private TipoSeccionLanding tipo;
@@ -65,7 +67,7 @@ public class SeccionLanding {
 
     @Builder.Default
     @Column(nullable = false)
-    private Boolean activo = true;
+    private Boolean visible = true;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "configuracion_sitio_id", nullable = false)
@@ -85,8 +87,8 @@ public class SeccionLanding {
         if (orden == null) {
             orden = 0;
         }
-        if (activo == null) {
-            activo = true;
+        if (visible == null) {
+            visible = true;
         }
     }
 

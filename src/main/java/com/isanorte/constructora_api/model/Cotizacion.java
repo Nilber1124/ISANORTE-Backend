@@ -25,6 +25,8 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -73,14 +75,17 @@ public class Cotizacion {
     @Column(columnDefinition = "TEXT")
     private String mensaje;
 
+    @NotNull
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
     private CanalCotizacion canal;
 
+    @NotNull
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
     private EstadoCotizacion estado;
 
+    @PositiveOrZero
     @Column(precision = 12, scale = 2)
     private BigDecimal totalEstimado;
 
@@ -108,6 +113,9 @@ public class Cotizacion {
      */
     public void addDetalle(DetalleCotizacion detalle) {
         Objects.requireNonNull(detalle, "El detalle de cotización no puede ser null");
+        if (detalle.getCotizacion() != null && detalle.getCotizacion() != this) {
+            throw new IllegalStateException("El detalle ya pertenece a otra cotización");
+        }
         this.detalles.add(detalle);
         detalle.setCotizacion(this);
     }
@@ -120,8 +128,9 @@ public class Cotizacion {
      */
     public void removeDetalle(DetalleCotizacion detalle) {
         Objects.requireNonNull(detalle, "El detalle de cotización no puede ser null");
-        this.detalles.remove(detalle);
-        detalle.setCotizacion(null);
+        if (this.detalles.remove(detalle)) {
+            detalle.setCotizacion(null);
+        }
     }
 
     /**
@@ -132,6 +141,9 @@ public class Cotizacion {
      */
     public void addSeguimiento(SeguimientoCotizacion seguimiento) {
         Objects.requireNonNull(seguimiento, "El seguimiento de cotización no puede ser null");
+        if (seguimiento.getCotizacion() != null && seguimiento.getCotizacion() != this) {
+            throw new IllegalStateException("El seguimiento ya pertenece a otra cotización");
+        }
         this.seguimientos.add(seguimiento);
         seguimiento.setCotizacion(this);
     }
@@ -144,8 +156,9 @@ public class Cotizacion {
      */
     public void removeSeguimiento(SeguimientoCotizacion seguimiento) {
         Objects.requireNonNull(seguimiento, "El seguimiento de cotización no puede ser null");
-        this.seguimientos.remove(seguimiento);
-        seguimiento.setCotizacion(null);
+        if (this.seguimientos.remove(seguimiento)) {
+            seguimiento.setCotizacion(null);
+        }
     }
 
     @PrePersist

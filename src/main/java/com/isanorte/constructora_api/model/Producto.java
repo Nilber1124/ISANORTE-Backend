@@ -31,7 +31,11 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -70,18 +74,24 @@ public class Producto {
     @Column(length = 500)
     private String resumen;
 
+    @NotBlank
     @Column(nullable = false, columnDefinition = "TEXT")
     private String descripcion;
 
+    @PositiveOrZero
     @Column(precision = 12, scale = 2)
     private BigDecimal precioBase;
 
+    @PositiveOrZero
     @Column(precision = 12, scale = 2)
     private BigDecimal precioAnterior;
 
+    @DecimalMin("0.0")
+    @DecimalMax("100.0")
     @Column(precision = 5, scale = 2)
     private BigDecimal descuentoPorcentaje;
 
+    @NotNull
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
     private EstadoDisponibilidad disponibilidad;
@@ -90,6 +100,7 @@ public class Producto {
     @Column(nullable = false)
     private Boolean destacado = false;
 
+    @NotNull
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
     private EstadoPublicacion estado;
@@ -159,8 +170,9 @@ public class Producto {
      */
     public void removeCategoria(CategoriaProducto categoria) {
         Objects.requireNonNull(categoria, "La categoría no puede ser null");
-        this.categorias.remove(categoria);
-        categoria.getProductos().remove(this);
+        if (this.categorias.remove(categoria)) {
+            categoria.getProductos().remove(this);
+        }
     }
 
     /**
@@ -171,6 +183,9 @@ public class Producto {
      */
     public void addVariante(VarianteProducto variante) {
         Objects.requireNonNull(variante, "La variante no puede ser null");
+        if (variante.getProducto() != null && variante.getProducto() != this) {
+            throw new IllegalStateException("La variante ya pertenece a otro producto");
+        }
         this.variantes.add(variante);
         variante.setProducto(this);
     }
@@ -183,8 +198,9 @@ public class Producto {
      */
     public void removeVariante(VarianteProducto variante) {
         Objects.requireNonNull(variante, "La variante no puede ser null");
-        this.variantes.remove(variante);
-        variante.setProducto(null);
+        if (this.variantes.remove(variante)) {
+            variante.setProducto(null);
+        }
     }
 
     /**
@@ -195,6 +211,9 @@ public class Producto {
      */
     public void addImagen(ImagenProducto imagen) {
         Objects.requireNonNull(imagen, "La imagen del producto no puede ser null");
+        if (imagen.getProducto() != null && imagen.getProducto() != this) {
+            throw new IllegalStateException("La imagen ya pertenece a otro producto");
+        }
         this.imagenes.add(imagen);
         imagen.setProducto(this);
     }
@@ -207,8 +226,9 @@ public class Producto {
      */
     public void removeImagen(ImagenProducto imagen) {
         Objects.requireNonNull(imagen, "La imagen del producto no puede ser null");
-        this.imagenes.remove(imagen);
-        imagen.setProducto(null);
+        if (this.imagenes.remove(imagen)) {
+            imagen.setProducto(null);
+        }
     }
 
     /**
@@ -219,6 +239,9 @@ public class Producto {
      */
     public void addEspecificacion(EspecificacionProducto especificacion) {
         Objects.requireNonNull(especificacion, "La especificación no puede ser null");
+        if (especificacion.getProducto() != null && especificacion.getProducto() != this) {
+            throw new IllegalStateException("La especificación ya pertenece a otro producto");
+        }
         this.especificaciones.add(especificacion);
         especificacion.setProducto(this);
     }
@@ -231,8 +254,9 @@ public class Producto {
      */
     public void removeEspecificacion(EspecificacionProducto especificacion) {
         Objects.requireNonNull(especificacion, "La especificación no puede ser null");
-        this.especificaciones.remove(especificacion);
-        especificacion.setProducto(null);
+        if (this.especificaciones.remove(especificacion)) {
+            especificacion.setProducto(null);
+        }
     }
 
     /**
@@ -243,6 +267,9 @@ public class Producto {
      */
     public void addDocumento(DocumentoProducto documento) {
         Objects.requireNonNull(documento, "El documento no puede ser null");
+        if (documento.getProducto() != null && documento.getProducto() != this) {
+            throw new IllegalStateException("El documento ya pertenece a otro producto");
+        }
         this.documentos.add(documento);
         documento.setProducto(this);
     }
@@ -255,8 +282,9 @@ public class Producto {
      */
     public void removeDocumento(DocumentoProducto documento) {
         Objects.requireNonNull(documento, "El documento no puede ser null");
-        this.documentos.remove(documento);
-        documento.setProducto(null);
+        if (this.documentos.remove(documento)) {
+            documento.setProducto(null);
+        }
     }
 
     /**
@@ -266,6 +294,11 @@ public class Producto {
      * @param nuevaConfiguracion la nueva configuración de cálculo o {@code null} para desvincular
      */
     public void setConfiguracionCalculo(ConfiguracionCalculo nuevaConfiguracion) {
+        if (nuevaConfiguracion != null
+                && nuevaConfiguracion.getProducto() != null
+                && nuevaConfiguracion.getProducto() != this) {
+            throw new IllegalStateException("La configuración de cálculo ya pertenece a otro producto");
+        }
         if (this.configuracionCalculo != null) {
             this.configuracionCalculo.setProducto(null);
         }

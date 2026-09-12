@@ -101,8 +101,9 @@ public class CategoriaProducto {
      */
     public void removeProducto(Producto producto) {
         Objects.requireNonNull(producto, "El producto no puede ser null");
-        this.productos.remove(producto);
-        producto.getCategorias().remove(this);
+        if (this.productos.remove(producto)) {
+            producto.getCategorias().remove(this);
+        }
     }
 
     @PrePersist

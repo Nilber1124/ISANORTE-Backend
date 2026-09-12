@@ -14,6 +14,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -53,12 +55,15 @@ public class DetalleCotizacion {
     private String sku;
 
     @NotNull
+    @Positive
     @Column(nullable = false)
     private Integer cantidad;
 
+    @PositiveOrZero
     @Column(precision = 12, scale = 2)
     private BigDecimal precioUnitario;
 
+    @PositiveOrZero
     @Column(precision = 12, scale = 2)
     private BigDecimal subtotal;
 

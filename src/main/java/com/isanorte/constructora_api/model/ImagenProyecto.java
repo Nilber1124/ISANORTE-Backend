@@ -18,6 +18,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -47,6 +48,7 @@ public class ImagenProyecto {
     @Column(length = 300)
     private String descripcion;
 
+    @NotNull
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
     private TipoImagenProyecto tipo;

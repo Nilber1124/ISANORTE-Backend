@@ -17,6 +17,8 @@ import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -49,9 +51,11 @@ public class VarianteProducto {
     @Column(length = 500)
     private String descripcion;
 
+    @PositiveOrZero
     @Column(precision = 12, scale = 2)
     private BigDecimal precio;
 
+    @NotNull
     @Builder.Default
     @Column(nullable = false)
     private Boolean disponible = true;

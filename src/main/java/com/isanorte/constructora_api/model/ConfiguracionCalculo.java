@@ -16,6 +16,8 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -45,7 +47,9 @@ public class ConfiguracionCalculo {
     @Column(length = 50)
     private String unidadEntrada;
 
-    @Column(precision = 12, scale = 4)
+    @NotNull
+    @Positive
+    @Column(nullable = false, precision = 12, scale = 4)
     private BigDecimal coberturaPorUnidad;
 
     @Column(length = 50)
@@ -87,8 +91,13 @@ public class ConfiguracionCalculo {
             throw new IllegalStateException("La cobertura por unidad no está configurada o es inválida.");
         }
 
-        BigDecimal division = medida.divide(coberturaPorUnidad, 6, RoundingMode.HALF_UP);
-        int cantidadCalculada = (int) Math.ceil(division.doubleValue());
+        if (!Boolean.TRUE.equals(habilitada)) {
+            throw new IllegalStateException("La calculadora no está habilitada");
+        }
+
+        int cantidadCalculada = medida
+                .divide(coberturaPorUnidad, 0, RoundingMode.CEILING)
+                .intValueExact();
 
         return ResultadoCalculo.builder()
                 .medidaIngresada(medida)

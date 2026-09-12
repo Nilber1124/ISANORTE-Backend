@@ -56,7 +56,7 @@ public class Administrador {
 
     @NotBlank
     @Column(nullable = false, length = 255)
-    private String password;
+    private String passwordHash;
 
     @Column(length = 30)
     private String telefono;
@@ -101,8 +101,9 @@ public class Administrador {
      */
     public void removeRol(Rol rol) {
         Objects.requireNonNull(rol, "El rol no puede ser null");
-        this.roles.remove(rol);
-        rol.getAdministradores().remove(this);
+        if (this.roles.remove(rol)) {
+            rol.getAdministradores().remove(this);
+        }
     }
 
     @PrePersist
