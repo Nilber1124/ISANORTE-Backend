@@ -1,8 +1,10 @@
 package com.isanorte.constructora_api.service.implementation;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.isanorte.constructora_api.exception.ModelNotFoundException;
 import com.isanorte.constructora_api.model.Administrador;
@@ -25,7 +27,29 @@ public class AdministradorService extends GenericService<Administrador, UUID> im
 
     @Override
     public Administrador findByEmail(String email) {
-        return administradorRepository.findByEmail(email)
+        Administrador administrador = administradorRepository.findByEmail(email)
                 .orElseThrow(() -> new ModelNotFoundException("Administrador no encontrado con email: " + email));
+        initializeForResponse(administrador);
+        return administrador;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Administrador> findAll() {
+        List<Administrador> administradores = super.findAll();
+        administradores.forEach(this::initializeForResponse);
+        return administradores;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Administrador findById(UUID id) {
+        Administrador administrador = super.findById(id);
+        initializeForResponse(administrador);
+        return administrador;
+    }
+
+    private void initializeForResponse(Administrador administrador) {
+        administrador.getRoles().size();
     }
 }
