@@ -2,9 +2,11 @@ package com.isanorte.constructora_api.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;
 
 import com.isanorte.constructora_api.dto.request.ProductoRequest;
+import com.isanorte.constructora_api.dto.request.ProductoUpdateRequest;
 import com.isanorte.constructora_api.dto.response.ProductoResponse;
 import com.isanorte.constructora_api.model.CategoriaProducto;
 import com.isanorte.constructora_api.model.ConfiguracionCalculo;
@@ -29,6 +31,18 @@ public interface ProductoMapper {
     @Mapping(target = "documentos", ignore = true)
     @Mapping(target = "configuracionCalculo", ignore = true)
     Producto toEntity(ProductoRequest request);
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "fechaCreacion", ignore = true)
+    @Mapping(target = "fechaActualizacion", ignore = true)
+    @Mapping(target = "unidadNegocio", ignore = true)
+    @Mapping(target = "categorias", ignore = true)
+    @Mapping(target = "variantes", ignore = true)
+    @Mapping(target = "imagenes", ignore = true)
+    @Mapping(target = "especificaciones", ignore = true)
+    @Mapping(target = "documentos", ignore = true)
+    @Mapping(target = "configuracionCalculo", ignore = true)
+    void updateEntity(ProductoUpdateRequest request, @MappingTarget Producto producto);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "producto", ignore = true)

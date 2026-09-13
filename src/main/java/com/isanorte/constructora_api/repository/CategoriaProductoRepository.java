@@ -13,7 +13,11 @@ public interface CategoriaProductoRepository extends IGenericRepository<Categori
 
     Optional<CategoriaProducto> findBySlug(String slug);
 
+    Optional<CategoriaProducto> findBySlugAndActivoTrue(String slug);
+
     boolean existsBySlug(String slug);
+
+    boolean existsBySlugAndIdNot(String slug, UUID id);
 
     List<CategoriaProducto> findByActivoTrueOrderByOrdenAsc();
 }

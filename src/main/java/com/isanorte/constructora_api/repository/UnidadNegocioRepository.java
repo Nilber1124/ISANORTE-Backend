@@ -13,5 +13,11 @@ public interface UnidadNegocioRepository extends IGenericRepository<UnidadNegoci
 
     Optional<UnidadNegocio> findBySlug(String slug);
 
+    Optional<UnidadNegocio> findBySlugAndActivoTrue(String slug);
+
     List<UnidadNegocio> findByActivoTrueOrderByOrdenAsc();
+
+    boolean existsBySlugAndIdNot(String slug, UUID id);
+
+    boolean existsByNombreAndIdNot(String nombre, UUID id);
 }

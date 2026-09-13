@@ -7,14 +7,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.isanorte.constructora_api.dto.request.ActivoRequest;
 import com.isanorte.constructora_api.dto.request.ServicioRequest;
+import com.isanorte.constructora_api.dto.request.ServicioUpdateRequest;
 import com.isanorte.constructora_api.dto.response.ServicioResponse;
-import com.isanorte.constructora_api.mapper.ServicioMapper;
 import com.isanorte.constructora_api.service.IServicioService;
 
 import jakarta.validation.Valid;
@@ -26,25 +29,46 @@ import lombok.RequiredArgsConstructor;
 public class ServicioController {
 
     private final IServicioService servicioService;
-    private final ServicioMapper servicioMapper;
 
     @GetMapping
-    public List<ServicioResponse> findAll() {
-        return servicioService.findAll().stream().map(servicioMapper::toResponse).toList();
+    public ResponseEntity<List<ServicioResponse>> findAll() {
+        return ResponseEntity.ok(servicioService.findAllResponse());
+    }
+
+    @GetMapping("/activos")
+    public ResponseEntity<List<ServicioResponse>> findActive() {
+        return ResponseEntity.ok(servicioService.findActiveResponses());
+    }
+
+    @GetMapping("/activos/slug/{slug}")
+    public ResponseEntity<ServicioResponse> findActiveBySlug(@PathVariable String slug) {
+        return ResponseEntity.ok(servicioService.findActiveBySlugResponse(slug));
     }
 
     @GetMapping("/{id}")
-    public ServicioResponse findById(@PathVariable UUID id) {
-        return servicioMapper.toResponse(servicioService.findById(id));
+    public ResponseEntity<ServicioResponse> findById(@PathVariable UUID id) {
+        return ResponseEntity.ok(servicioService.findByIdResponse(id));
     }
 
     @GetMapping("/slug/{slug}")
-    public ServicioResponse findBySlug(@PathVariable String slug) {
-        return servicioMapper.toResponse(servicioService.findBySlug(slug));
+    public ResponseEntity<ServicioResponse> findBySlug(@PathVariable String slug) {
+        return ResponseEntity.ok(servicioService.findBySlugResponse(slug));
     }
 
     @PostMapping
     public ResponseEntity<ServicioResponse> create(@Valid @RequestBody ServicioRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(servicioMapper.toResponse(servicioService.create(request)));
+        return ResponseEntity.status(HttpStatus.CREATED).body(servicioService.createResponse(request));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ServicioResponse> update(
+            @PathVariable UUID id, @Valid @RequestBody ServicioUpdateRequest request) {
+        return ResponseEntity.ok(servicioService.update(id, request));
+    }
+
+    @PatchMapping("/{id}/activo")
+    public ResponseEntity<ServicioResponse> updateActivo(
+            @PathVariable UUID id, @Valid @RequestBody ActivoRequest request) {
+        return ResponseEntity.ok(servicioService.updateActivo(id, request));
     }
 }

@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.isanorte.constructora_api.dto.request.ConfiguracionSitioRequest;
+import com.isanorte.constructora_api.dto.request.ConfiguracionSitioUpdateRequest;
+import com.isanorte.constructora_api.dto.response.ConfiguracionSitioResponse;
 import com.isanorte.constructora_api.exception.ModelNotFoundException;
 import com.isanorte.constructora_api.mapper.ConfiguracionSitioMapper;
 import com.isanorte.constructora_api.model.ConfiguracionSitio;
@@ -63,6 +65,32 @@ public class ConfiguracionSitioService extends GenericService<ConfiguracionSitio
         ConfiguracionSitio configuracion = super.findById(id);
         initializeForResponse(configuracion);
         return configuracion;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ConfiguracionSitioResponse> findAllResponse() {
+        return super.findAll().stream().map(configuracionSitioMapper::toResponse).toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ConfiguracionSitioResponse findByIdResponse(UUID id) {
+        return configuracionSitioMapper.toResponse(super.findById(id));
+    }
+
+    @Override
+    @Transactional
+    public ConfiguracionSitioResponse createResponse(ConfiguracionSitioRequest request) {
+        return configuracionSitioMapper.toResponse(create(request));
+    }
+
+    @Override
+    @Transactional
+    public ConfiguracionSitioResponse update(UUID id, ConfiguracionSitioUpdateRequest request) {
+        ConfiguracionSitio configuracion = super.findById(id);
+        configuracionSitioMapper.updateEntity(request, configuracion);
+        return configuracionSitioMapper.toResponse(configuracionSitioRepository.saveAndFlush(configuracion));
     }
 
     private void initializeForResponse(ConfiguracionSitio configuracion) {

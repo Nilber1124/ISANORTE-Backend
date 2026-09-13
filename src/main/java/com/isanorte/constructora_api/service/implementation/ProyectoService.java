@@ -1,12 +1,17 @@
 package com.isanorte.constructora_api.service.implementation;
 
 import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.isanorte.constructora_api.dto.request.ProyectoRequest;
+import com.isanorte.constructora_api.dto.request.ActivoRequest;
+import com.isanorte.constructora_api.dto.request.ProyectoUpdateRequest;
+import com.isanorte.constructora_api.dto.response.ProyectoResponse;
 import com.isanorte.constructora_api.exception.ModelNotFoundException;
 import com.isanorte.constructora_api.mapper.ProyectoMapper;
 import com.isanorte.constructora_api.model.Proyecto;
@@ -75,6 +80,85 @@ public class ProyectoService extends GenericService<Proyecto, UUID> implements I
         Proyecto proyecto = super.findById(id);
         initializeForResponse(proyecto);
         return proyecto;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ProyectoResponse> findAllResponse() {
+        return super.findAll().stream().map(proyectoMapper::toResponse).toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ProyectoResponse findByIdResponse(UUID id) {
+        return proyectoMapper.toResponse(super.findById(id));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ProyectoResponse findBySlugResponse(String slug) {
+        Proyecto proyecto = proyectoRepository.findBySlug(slug)
+                .orElseThrow(() -> new ModelNotFoundException("Proyecto no encontrado con slug: " + slug));
+        return proyectoMapper.toResponse(proyecto);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ProyectoResponse> findActiveResponses() {
+        return proyectoRepository.findByActivoTrue().stream().map(proyectoMapper::toResponse).toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ProyectoResponse findActiveBySlugResponse(String slug) {
+        Proyecto proyecto = proyectoRepository.findBySlugAndActivoTrue(slug)
+                .orElseThrow(() -> new ModelNotFoundException("Proyecto activo no encontrado con slug: " + slug));
+        return proyectoMapper.toResponse(proyecto);
+    }
+
+    @Override
+    @Transactional
+    public ProyectoResponse createResponse(ProyectoRequest request) {
+        return proyectoMapper.toResponse(create(request));
+    }
+
+    @Override
+    @Transactional
+    public ProyectoResponse update(UUID id, ProyectoUpdateRequest request) {
+        Proyecto proyecto = super.findById(id);
+        if (proyectoRepository.existsBySlugAndIdNot(request.slug(), id)) {
+            throw new IllegalStateException("Ya existe un proyecto con slug: " + request.slug());
+        }
+
+        Set<Servicio> servicios = new HashSet<>();
+        for (UUID servicioId : request.servicioIds()) {
+            servicios.add(servicioRepository.findById(servicioId)
+                    .orElseThrow(() -> new ModelNotFoundException("Servicio no encontrado con ID: " + servicioId)));
+        }
+
+        proyectoMapper.updateEntity(request, proyecto);
+        for (Servicio actual : new HashSet<>(proyecto.getServicios())) {
+            if (!request.servicioIds().contains(actual.getId())) {
+                proyecto.removeServicio(actual);
+            }
+        }
+        Set<UUID> idsActuales = proyecto.getServicios().stream()
+                .map(Servicio::getId)
+                .collect(java.util.stream.Collectors.toSet());
+        for (Servicio servicio : servicios) {
+            if (!idsActuales.contains(servicio.getId())) {
+                proyecto.addServicio(servicio);
+            }
+        }
+        return proyectoMapper.toResponse(proyectoRepository.saveAndFlush(proyecto));
+    }
+
+    @Override
+    @Transactional
+    public ProyectoResponse updateActivo(UUID id, ActivoRequest request) {
+        Proyecto proyecto = super.findById(id);
+        proyecto.setActivo(request.activo());
+        return proyectoMapper.toResponse(proyectoRepository.saveAndFlush(proyecto));
     }
 
     private void initializeForResponse(Proyecto proyecto) {

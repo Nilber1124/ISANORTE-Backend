@@ -94,8 +94,17 @@ public class UnidadNegocio {
         if (producto.getUnidadNegocio() != null && producto.getUnidadNegocio() != this) {
             throw new IllegalStateException("El producto ya pertenece a otra unidad de negocio");
         }
+        producto.cambiarUnidadNegocio(this);
+    }
+
+    void agregarProductoReferencia(Producto producto) {
+        Objects.requireNonNull(producto, "El producto no puede ser null");
         this.productos.add(producto);
-        producto.setUnidadNegocio(this);
+    }
+
+    void removerProductoReferencia(Producto producto) {
+        Objects.requireNonNull(producto, "El producto no puede ser null");
+        this.productos.remove(producto);
     }
 
     @PrePersist

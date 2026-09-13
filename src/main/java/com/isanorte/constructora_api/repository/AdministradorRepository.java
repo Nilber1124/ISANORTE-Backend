@@ -13,4 +13,6 @@ public interface AdministradorRepository extends IGenericRepository<Administrado
     Optional<Administrador> findByEmail(String email);
 
     boolean existsByEmail(String email);
+
+    boolean existsByEmailAndIdNot(String email, UUID id);
 }

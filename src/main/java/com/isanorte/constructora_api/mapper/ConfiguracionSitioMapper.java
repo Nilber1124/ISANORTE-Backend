@@ -2,9 +2,11 @@ package com.isanorte.constructora_api.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;
 
 import com.isanorte.constructora_api.dto.request.ConfiguracionSitioRequest;
+import com.isanorte.constructora_api.dto.request.ConfiguracionSitioUpdateRequest;
 import com.isanorte.constructora_api.dto.response.ConfiguracionSitioResponse;
 import com.isanorte.constructora_api.model.ConfiguracionSitio;
 import com.isanorte.constructora_api.model.Empresa;
@@ -20,6 +22,14 @@ public interface ConfiguracionSitioMapper {
     @Mapping(target = "secciones", ignore = true)
     @Mapping(target = "fechaActualizacion", ignore = true)
     ConfiguracionSitio toEntity(ConfiguracionSitioRequest request);
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "scriptsHead", ignore = true)
+    @Mapping(target = "scriptsBody", ignore = true)
+    @Mapping(target = "empresa", ignore = true)
+    @Mapping(target = "secciones", ignore = true)
+    @Mapping(target = "fechaActualizacion", ignore = true)
+    void updateEntity(ConfiguracionSitioUpdateRequest request, @MappingTarget ConfiguracionSitio configuracion);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "configuracionSitio", ignore = true)

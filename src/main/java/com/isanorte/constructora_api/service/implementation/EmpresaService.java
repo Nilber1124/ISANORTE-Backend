@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.isanorte.constructora_api.dto.request.EmpresaRequest;
+import com.isanorte.constructora_api.dto.request.EmpresaUpdateRequest;
+import com.isanorte.constructora_api.dto.response.EmpresaResponse;
 import com.isanorte.constructora_api.mapper.EmpresaMapper;
 import com.isanorte.constructora_api.model.Empresa;
 import com.isanorte.constructora_api.repository.EmpresaRepository;
@@ -53,6 +55,35 @@ public class EmpresaService extends GenericService<Empresa, UUID> implements IEm
         Empresa empresa = super.findById(id);
         initializeForResponse(empresa);
         return empresa;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<EmpresaResponse> findAllResponse() {
+        return super.findAll().stream().map(empresaMapper::toResponse).toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public EmpresaResponse findByIdResponse(UUID id) {
+        return empresaMapper.toResponse(super.findById(id));
+    }
+
+    @Override
+    @Transactional
+    public EmpresaResponse createResponse(EmpresaRequest request) {
+        return empresaMapper.toResponse(create(request));
+    }
+
+    @Override
+    @Transactional
+    public EmpresaResponse update(UUID id, EmpresaUpdateRequest request) {
+        Empresa empresa = super.findById(id);
+        if (empresaRepository.existsByRucAndIdNot(request.ruc(), id)) {
+            throw new IllegalStateException("Ya existe una empresa con RUC: " + request.ruc());
+        }
+        empresaMapper.updateEntity(request, empresa);
+        return empresaMapper.toResponse(empresaRepository.saveAndFlush(empresa));
     }
 
     private void initializeForResponse(Empresa empresa) {

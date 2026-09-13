@@ -6,7 +6,10 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.isanorte.constructora_api.dto.request.ActivoRequest;
 import com.isanorte.constructora_api.dto.request.UnidadNegocioRequest;
+import com.isanorte.constructora_api.dto.request.UnidadNegocioUpdateRequest;
+import com.isanorte.constructora_api.dto.response.UnidadNegocioResponse;
 import com.isanorte.constructora_api.exception.ModelNotFoundException;
 import com.isanorte.constructora_api.mapper.UnidadNegocioMapper;
 import com.isanorte.constructora_api.model.Empresa;
@@ -73,6 +76,75 @@ public class UnidadNegocioService extends GenericService<UnidadNegocio, UUID> im
         UnidadNegocio unidad = super.findById(id);
         initializeForResponse(unidad);
         return unidad;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<UnidadNegocioResponse> findAllResponse() {
+        return super.findAll().stream().map(unidadNegocioMapper::toResponse).toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public UnidadNegocioResponse findByIdResponse(UUID id) {
+        return unidadNegocioMapper.toResponse(super.findById(id));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public UnidadNegocioResponse findBySlugResponse(String slug) {
+        UnidadNegocio unidad = unidadNegocioRepository.findBySlug(slug)
+                .orElseThrow(() -> new ModelNotFoundException("Unidad de negocio no encontrada con slug: " + slug));
+        return unidadNegocioMapper.toResponse(unidad);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<UnidadNegocioResponse> findActiveResponses() {
+        return unidadNegocioRepository.findByActivoTrueOrderByOrdenAsc().stream()
+                .map(unidadNegocioMapper::toResponse).toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public UnidadNegocioResponse findActiveBySlugResponse(String slug) {
+        UnidadNegocio unidad = unidadNegocioRepository.findBySlugAndActivoTrue(slug)
+                .orElseThrow(() -> new ModelNotFoundException(
+                        "Unidad de negocio activa no encontrada con slug: " + slug));
+        return unidadNegocioMapper.toResponse(unidad);
+    }
+
+    @Override
+    @Transactional
+    public UnidadNegocioResponse createResponse(UnidadNegocioRequest request) {
+        return unidadNegocioMapper.toResponse(create(request));
+    }
+
+    @Override
+    @Transactional
+    public UnidadNegocioResponse update(UUID id, UnidadNegocioUpdateRequest request) {
+        UnidadNegocio unidad = super.findById(id);
+        if (unidadNegocioRepository.existsBySlugAndIdNot(request.slug(), id)) {
+            throw new IllegalStateException("Ya existe una unidad de negocio con slug: " + request.slug());
+        }
+        if (unidadNegocioRepository.existsByNombreAndIdNot(request.nombre(), id)) {
+            throw new IllegalStateException("Ya existe una unidad de negocio con nombre: " + request.nombre());
+        }
+        Empresa empresa = empresaRepository.findById(request.empresaId())
+                .orElseThrow(() -> new ModelNotFoundException("Empresa no encontrada con ID: " + request.empresaId()));
+        if (!unidad.getEmpresa().getId().equals(empresa.getId())) {
+            throw new IllegalStateException("No se permite cambiar la empresa de una unidad de negocio existente");
+        }
+        unidadNegocioMapper.updateEntity(request, unidad);
+        return unidadNegocioMapper.toResponse(unidadNegocioRepository.saveAndFlush(unidad));
+    }
+
+    @Override
+    @Transactional
+    public UnidadNegocioResponse updateActivo(UUID id, ActivoRequest request) {
+        UnidadNegocio unidad = super.findById(id);
+        unidad.setActivo(request.activo());
+        return unidadNegocioMapper.toResponse(unidadNegocioRepository.saveAndFlush(unidad));
     }
 
     private void initializeForResponse(UnidadNegocio unidad) {

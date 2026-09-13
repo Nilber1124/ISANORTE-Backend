@@ -9,12 +9,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.isanorte.constructora_api.dto.request.CotizacionRequest;
+import com.isanorte.constructora_api.dto.request.EstadoCotizacionRequest;
+import com.isanorte.constructora_api.dto.response.CotizacionResponse;
 import com.isanorte.constructora_api.enums.EstadoCotizacion;
 import com.isanorte.constructora_api.exception.ModelNotFoundException;
 import com.isanorte.constructora_api.mapper.CotizacionMapper;
 import com.isanorte.constructora_api.model.Cotizacion;
 import com.isanorte.constructora_api.model.DetalleCotizacion;
 import com.isanorte.constructora_api.model.Producto;
+import com.isanorte.constructora_api.model.SeguimientoCotizacion;
 import com.isanorte.constructora_api.model.VarianteProducto;
 import com.isanorte.constructora_api.repository.CotizacionRepository;
 import com.isanorte.constructora_api.repository.IGenericRepository;
@@ -104,6 +107,56 @@ public class CotizacionService extends GenericService<Cotizacion, UUID> implemen
         Cotizacion cotizacion = super.findById(id);
         initializeForResponse(cotizacion);
         return cotizacion;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<CotizacionResponse> findAllResponse() {
+        return super.findAll().stream().map(cotizacionMapper::toResponse).toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public CotizacionResponse findByIdResponse(UUID id) {
+        return cotizacionMapper.toResponse(super.findById(id));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public CotizacionResponse findByCodigoResponse(String codigo) {
+        Cotizacion cotizacion = cotizacionRepository.findByCodigo(codigo)
+                .orElseThrow(() -> new ModelNotFoundException("Cotización no encontrada con código: " + codigo));
+        return cotizacionMapper.toResponse(cotizacion);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<CotizacionResponse> findByEstadoResponse(EstadoCotizacion estado) {
+        return cotizacionRepository.findByEstado(estado).stream().map(cotizacionMapper::toResponse).toList();
+    }
+
+    @Override
+    @Transactional
+    public CotizacionResponse createResponse(CotizacionRequest request) {
+        return cotizacionMapper.toResponse(create(request));
+    }
+
+    @Override
+    @Transactional
+    public CotizacionResponse updateEstado(UUID id, EstadoCotizacionRequest request) {
+        Cotizacion cotizacion = super.findById(id);
+        EstadoCotizacion estadoAnterior = cotizacion.getEstado();
+        if (estadoAnterior != request.estado()) {
+            cotizacion.setEstado(request.estado());
+            SeguimientoCotizacion seguimiento = SeguimientoCotizacion.builder()
+                    .estadoAnterior(estadoAnterior)
+                    .estadoNuevo(request.estado())
+                    .comentario("Cambio de estado administrativo")
+                    .build();
+            cotizacion.addSeguimiento(seguimiento);
+            cotizacionRepository.saveAndFlush(cotizacion);
+        }
+        return cotizacionMapper.toResponse(cotizacion);
     }
 
     private VarianteProducto resolveVariante(Producto producto, UUID varianteId) {

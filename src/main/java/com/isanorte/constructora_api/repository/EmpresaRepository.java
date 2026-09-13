@@ -9,4 +9,5 @@ import com.isanorte.constructora_api.model.Empresa;
 @Repository
 public interface EmpresaRepository extends IGenericRepository<Empresa, UUID> {
 
+    boolean existsByRucAndIdNot(String ruc, UUID id);
 }

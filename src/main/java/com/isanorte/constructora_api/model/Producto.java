@@ -119,6 +119,7 @@ public class Producto {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "unidad_negocio_id", nullable = false)
+    @Setter(AccessLevel.NONE)
     private UnidadNegocio unidadNegocio;
 
     @Setter(AccessLevel.NONE)
@@ -149,6 +150,28 @@ public class Producto {
 
     @OneToOne(mappedBy = "producto", cascade = CascadeType.ALL, orphanRemoval = true)
     private ConfiguracionCalculo configuracionCalculo;
+
+    /**
+     * Cambia la unidad de negocio manteniendo sincronizados ambos lados de la
+     * relación sin dejar temporalmente al producto sin unidad.
+     *
+     * @param nuevaUnidad nueva unidad de negocio obligatoria
+     * @throws NullPointerException si {@code nuevaUnidad} es {@code null}
+     */
+    public void cambiarUnidadNegocio(UnidadNegocio nuevaUnidad) {
+        Objects.requireNonNull(nuevaUnidad, "La unidad de negocio no puede ser null");
+        if (this.unidadNegocio == nuevaUnidad) {
+            return;
+        }
+
+        UnidadNegocio unidadAnterior = this.unidadNegocio;
+        if (unidadAnterior != null) {
+            unidadAnterior.removerProductoReferencia(this);
+        }
+
+        this.unidadNegocio = nuevaUnidad;
+        nuevaUnidad.agregarProductoReferencia(this);
+    }
 
     /**
      * Asocia una categoría a este producto, sincronizando ambos lados de la relación {@code ManyToMany}.

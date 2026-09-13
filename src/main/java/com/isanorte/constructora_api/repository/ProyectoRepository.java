@@ -1,5 +1,6 @@
 package com.isanorte.constructora_api.repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -12,5 +13,11 @@ public interface ProyectoRepository extends IGenericRepository<Proyecto, UUID> {
 
     Optional<Proyecto> findBySlug(String slug);
 
+    List<Proyecto> findByActivoTrue();
+
+    Optional<Proyecto> findBySlugAndActivoTrue(String slug);
+
     boolean existsBySlug(String slug);
+
+    boolean existsBySlugAndIdNot(String slug, UUID id);
 }
