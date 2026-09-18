@@ -8,13 +8,13 @@ info:
     `x-access-intent` expresa el acceso previsto y no una protección efectiva.
 x-contract-audit:
   controllers: 10
-  paths: 59
-  operations: 82
+  paths: 62
+  operations: 85
   get: 40
-  post: 14
-  put: 15
+  post: 15
+  put: 16
   patch: 8
-  delete: 5
+  delete: 6
 x-security-status: NOT_IMPLEMENTED
 servers:
   - url: http://localhost:8080
@@ -395,6 +395,81 @@ paths:
               schema: {$ref: '#/components/schemas/EmpresaResponse'}
         '400': {$ref: '#/components/responses/BadRequest'}
         '409': {$ref: '#/components/responses/Conflict'}
+  /api/empresa/{empresaId}/redes-sociales:
+    post:
+      tags: [Empresa]
+      operationId: crearRedSocialEmpresa
+      summary: Agrega un enlace social a una empresa existente
+      description: Endpoint administrativo temporalmente sin Security/JWT. No acepta empresaId, id ni timestamps en el body.
+      x-access-intent: ADMINISTRATIVO
+      parameters:
+        - name: empresaId
+          in: path
+          required: true
+          schema: {type: string, format: uuid}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/RedSocialRequest'}
+      responses:
+        '201':
+          description: Red social creada
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RedSocialResponse'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
+  /api/empresa/{empresaId}/redes-sociales/{redSocialId}:
+    put:
+      tags: [Empresa]
+      operationId: actualizarRedSocialEmpresa
+      summary: Actualiza un enlace social sin cambiar de empresa
+      description: Si la red existe pero pertenece a otra empresa, responde 400. Endpoint administrativo temporalmente sin Security/JWT.
+      x-access-intent: ADMINISTRATIVO
+      parameters:
+        - name: empresaId
+          in: path
+          required: true
+          schema: {type: string, format: uuid}
+        - name: redSocialId
+          in: path
+          required: true
+          schema: {type: string, format: uuid}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/RedSocialRequest'}
+      responses:
+        '200':
+          description: Red social actualizada
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RedSocialResponse'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
+    delete:
+      tags: [Empresa]
+      operationId: eliminarRedSocialEmpresa
+      summary: Elimina un enlace social de una empresa
+      description: Retira el hijo del agregado; orphanRemoval elimina la fila. Endpoint administrativo temporalmente sin Security/JWT.
+      x-access-intent: ADMINISTRATIVO
+      parameters:
+        - name: empresaId
+          in: path
+          required: true
+          schema: {type: string, format: uuid}
+        - name: redSocialId
+          in: path
+          required: true
+          schema: {type: string, format: uuid}
+      responses:
+        '204': {description: Red social eliminada}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '404': {$ref: '#/components/responses/NotFound'}
   /api/empresa/{id}:
     get:
       tags: [Empresa]
@@ -1552,6 +1627,7 @@ components:
           items: {$ref: '#/components/schemas/RedSocialRequest'}
     RedSocialRequest:
       type: object
+      description: No acepta id, empresaId, timestamps ni entidades JPA.
       required: [nombre, url]
       properties:
         nombre: {type: string, minLength: 1}

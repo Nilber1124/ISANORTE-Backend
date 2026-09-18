@@ -23,12 +23,4 @@ public record EmpresaRequest(
     String valores,
     String resumenNosotros,
     List<@Valid RedSocialRequest> redesSociales) {
-
-    public record RedSocialRequest(
-        @NotBlank String nombre,
-        @NotBlank String url,
-        String icono,
-        Integer orden,
-        Boolean activo) {
-    }
 }

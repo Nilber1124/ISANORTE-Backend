@@ -9,9 +9,8 @@ import com.isanorte.constructora_api.dto.request.EmpresaRequest;
 import com.isanorte.constructora_api.dto.request.EmpresaUpdateRequest;
 import com.isanorte.constructora_api.dto.response.EmpresaResponse;
 import com.isanorte.constructora_api.model.Empresa;
-import com.isanorte.constructora_api.model.RedSocial;
 
-@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.ERROR)
+@Mapper(componentModel = "spring", uses = RedSocialMapper.class, unmappedTargetPolicy = ReportingPolicy.ERROR)
 public interface EmpresaMapper {
 
     @Mapping(target = "id", ignore = true)
@@ -30,13 +29,5 @@ public interface EmpresaMapper {
     @Mapping(target = "fechaActualizacion", ignore = true)
     void updateEntity(EmpresaUpdateRequest request, @MappingTarget Empresa empresa);
 
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "empresa", ignore = true)
-    @Mapping(target = "fechaCreacion", ignore = true)
-    @Mapping(target = "fechaActualizacion", ignore = true)
-    RedSocial toRedSocialEntity(EmpresaRequest.RedSocialRequest request);
-
     EmpresaResponse toResponse(Empresa empresa);
-
-    EmpresaResponse.RedSocialResponse toRedSocialResponse(RedSocial redSocial);
 }

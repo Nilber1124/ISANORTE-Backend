@@ -1,6 +1,7 @@
 package com.isanorte.constructora_api.service.implementation;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -8,11 +9,16 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.isanorte.constructora_api.dto.request.EmpresaRequest;
 import com.isanorte.constructora_api.dto.request.EmpresaUpdateRequest;
+import com.isanorte.constructora_api.dto.request.RedSocialRequest;
 import com.isanorte.constructora_api.dto.response.EmpresaResponse;
+import com.isanorte.constructora_api.dto.response.RedSocialResponse;
 import com.isanorte.constructora_api.mapper.EmpresaMapper;
+import com.isanorte.constructora_api.mapper.RedSocialMapper;
 import com.isanorte.constructora_api.model.Empresa;
+import com.isanorte.constructora_api.model.RedSocial;
 import com.isanorte.constructora_api.repository.EmpresaRepository;
 import com.isanorte.constructora_api.repository.IGenericRepository;
+import com.isanorte.constructora_api.repository.RedSocialRepository;
 import com.isanorte.constructora_api.service.IEmpresaService;
 
 import lombok.RequiredArgsConstructor;
@@ -22,7 +28,9 @@ import lombok.RequiredArgsConstructor;
 public class EmpresaService extends GenericService<Empresa, UUID> implements IEmpresaService {
 
     private final EmpresaRepository empresaRepository;
+    private final RedSocialRepository redSocialRepository;
     private final EmpresaMapper empresaMapper;
+    private final RedSocialMapper redSocialMapper;
 
     @Override
     protected IGenericRepository<Empresa, UUID> getRepo() {
@@ -35,7 +43,7 @@ public class EmpresaService extends GenericService<Empresa, UUID> implements IEm
         Empresa empresa = empresaMapper.toEntity(request);
         if (request.redesSociales() != null) {
             request.redesSociales().stream()
-                    .map(empresaMapper::toRedSocialEntity)
+                    .map(redSocialMapper::toEntity)
                     .forEach(empresa::addRedSocial);
         }
         return empresaRepository.save(empresa);
@@ -84,6 +92,49 @@ public class EmpresaService extends GenericService<Empresa, UUID> implements IEm
         }
         empresaMapper.updateEntity(request, empresa);
         return empresaMapper.toResponse(empresaRepository.saveAndFlush(empresa));
+    }
+
+    @Override
+    @Transactional
+    public RedSocialResponse createRedSocial(UUID empresaId, RedSocialRequest request) {
+        Empresa empresa = findEmpresaParaAdministracion(empresaId);
+        RedSocial redSocial = redSocialMapper.toEntity(request);
+        empresa.addRedSocial(redSocial);
+        return redSocialMapper.toResponse(redSocialRepository.saveAndFlush(redSocial));
+    }
+
+    @Override
+    @Transactional
+    public RedSocialResponse updateRedSocial(UUID empresaId, UUID redSocialId, RedSocialRequest request) {
+        Empresa empresa = findEmpresaParaAdministracion(empresaId);
+        RedSocial redSocial = findRedSocialDeEmpresa(empresa, redSocialId);
+        redSocialMapper.updateEntity(request, redSocial);
+        return redSocialMapper.toResponse(redSocialRepository.saveAndFlush(redSocial));
+    }
+
+    @Override
+    @Transactional
+    public void deleteRedSocial(UUID empresaId, UUID redSocialId) {
+        Empresa empresa = findEmpresaParaAdministracion(empresaId);
+        empresa.removeRedSocial(findRedSocialDeEmpresa(empresa, redSocialId));
+        empresaRepository.flush();
+    }
+
+    private Empresa findEmpresaParaAdministracion(UUID empresaId) {
+        return empresaRepository.findById(empresaId)
+                .orElseThrow(() -> new com.isanorte.constructora_api.exception.ModelNotFoundException(
+                        "Empresa no encontrada con ID: " + empresaId));
+    }
+
+    private RedSocial findRedSocialDeEmpresa(Empresa empresa, UUID redSocialId) {
+        RedSocial redSocial = redSocialRepository.findById(redSocialId)
+                .orElseThrow(() -> new com.isanorte.constructora_api.exception.ModelNotFoundException(
+                        "Red social no encontrada con ID: " + redSocialId));
+        if (redSocial.getEmpresa() == null || !Objects.equals(empresa.getId(), redSocial.getEmpresa().getId())) {
+            throw new IllegalArgumentException(
+                    "La red social " + redSocialId + " no pertenece a la empresa " + empresa.getId());
+        }
+        return redSocial;
     }
 
     private void initializeForResponse(Empresa empresa) {

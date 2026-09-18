@@ -24,13 +24,4 @@ public record EmpresaResponse(
     List<RedSocialResponse> redesSociales,
     LocalDateTime fechaCreacion,
     LocalDateTime fechaActualizacion) {
-
-    public record RedSocialResponse(
-        UUID id,
-        String nombre,
-        String url,
-        String icono,
-        Integer orden,
-        Boolean activo) {
-    }
 }
