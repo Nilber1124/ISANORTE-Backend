@@ -3,18 +3,18 @@ info:
   title: ISANORTE / ISADECO API
   version: 0.0.1-SNAPSHOT
   description: |
-    Contrato estático derivado de los Controllers y DTO, actualizado el 2026-09-17.
+    Contrato estático derivado de los Controllers y DTO, actualizado el 2026-09-18.
     No implica integración de Swagger/OpenAPI en Spring Boot. Security/JWT no está implementado;
     `x-access-intent` expresa el acceso previsto y no una protección efectiva.
 x-contract-audit:
   controllers: 10
-  paths: 57
-  operations: 79
+  paths: 59
+  operations: 82
   get: 40
-  post: 13
-  put: 14
+  post: 14
+  put: 15
   patch: 8
-  delete: 4
+  delete: 5
 x-security-status: NOT_IMPLEMENTED
 servers:
   - url: http://localhost:8080
@@ -890,6 +890,65 @@ paths:
         '400': {$ref: '#/components/responses/BadRequest'}
         '404': {$ref: '#/components/responses/NotFound'}
         '409': {$ref: '#/components/responses/Conflict'}
+  /api/proyectos/{proyectoId}/imagenes:
+    post:
+      tags: [Proyectos]
+      operationId: crearImagenProyecto
+      summary: Agrega una imagen URL a un proyecto existente
+      description: No carga archivos. El dominio permite más de una imagen con esPrincipal=true.
+      x-access-intent: ADMINISTRATIVO
+      parameters:
+        - $ref: '#/components/parameters/ProyectoId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ImagenProyectoRequest'}
+      responses:
+        '201':
+          description: Imagen creada y asociada al proyecto
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ImagenProyectoResponse'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
+  /api/proyectos/{proyectoId}/imagenes/{imagenId}:
+    put:
+      tags: [Proyectos]
+      operationId: actualizarImagenProyecto
+      summary: Actualiza una imagen URL perteneciente al proyecto
+      description: Conserva el ID y la FK; no permite mover la imagen a otro proyecto.
+      x-access-intent: ADMINISTRATIVO
+      parameters:
+        - $ref: '#/components/parameters/ProyectoId'
+        - $ref: '#/components/parameters/ImagenId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ImagenProyectoRequest'}
+      responses:
+        '200':
+          description: Imagen actualizada
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ImagenProyectoResponse'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
+    delete:
+      tags: [Proyectos]
+      operationId: eliminarImagenProyecto
+      summary: Elimina una imagen del proyecto mediante orphanRemoval
+      x-access-intent: ADMINISTRATIVO
+      parameters:
+        - $ref: '#/components/parameters/ProyectoId'
+        - $ref: '#/components/parameters/ImagenId'
+      responses:
+        '204': {description: Imagen eliminada}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '404': {$ref: '#/components/responses/NotFound'}
   /api/proyectos/{id}/activo:
     patch:
       tags: [Proyectos]
@@ -1226,6 +1285,11 @@ components:
       schema: {type: string, format: uuid}
     ProductoId:
       name: productoId
+      in: path
+      required: true
+      schema: {type: string, format: uuid}
+    ProyectoId:
+      name: proyectoId
       in: path
       required: true
       schema: {type: string, format: uuid}
@@ -1661,6 +1725,17 @@ components:
         tipo: {$ref: '#/components/schemas/TipoImagenProyecto'}
         esPrincipal: {type: boolean, nullable: true}
         orden: {type: integer, format: int32, nullable: true}
+    ImagenProyectoRequest:
+      type: object
+      description: DTO administrativo por URL; no acepta id, proyectoId, timestamps ni entidades.
+      required: [url, tipo, esPrincipal, orden]
+      properties:
+        url: {type: string, minLength: 1, maxLength: 500}
+        titulo: {type: string, maxLength: 150, nullable: true}
+        descripcion: {type: string, maxLength: 300, nullable: true}
+        tipo: {$ref: '#/components/schemas/TipoImagenProyecto'}
+        esPrincipal: {type: boolean}
+        orden: {type: integer, format: int32}
     SeccionLandingRequest:
       type: object
       required: [configuracionSitioId, tipo]
@@ -2193,10 +2268,10 @@ components:
         imagenes:
           type: array
           nullable: true
-          items: {$ref: '#/components/schemas/ProyectoImagenResponse'}
+          items: {$ref: '#/components/schemas/ImagenProyectoResponse'}
         fechaCreacion: {type: string, format: date-time, nullable: true}
         fechaActualizacion: {type: string, format: date-time, nullable: true}
-    ProyectoImagenResponse:
+    ImagenProyectoResponse:
       type: object
       required: [id, url, titulo, descripcion, tipo, esPrincipal, orden]
       properties:

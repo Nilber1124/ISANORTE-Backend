@@ -6,6 +6,8 @@ import java.util.UUID;
 import com.isanorte.constructora_api.dto.request.ProyectoRequest;
 import com.isanorte.constructora_api.dto.request.ActivoRequest;
 import com.isanorte.constructora_api.dto.request.ProyectoUpdateRequest;
+import com.isanorte.constructora_api.dto.request.ImagenProyectoRequest;
+import com.isanorte.constructora_api.dto.response.ImagenProyectoResponse;
 import com.isanorte.constructora_api.dto.response.ProyectoResponse;
 import com.isanorte.constructora_api.model.Proyecto;
 
@@ -30,4 +32,10 @@ public interface IProyectoService extends IGenericService<Proyecto, UUID> {
     ProyectoResponse update(UUID id, ProyectoUpdateRequest request);
 
     ProyectoResponse updateActivo(UUID id, ActivoRequest request);
+
+    ImagenProyectoResponse createImagen(UUID proyectoId, ImagenProyectoRequest request);
+
+    ImagenProyectoResponse updateImagen(UUID proyectoId, UUID imagenId, ImagenProyectoRequest request);
+
+    void deleteImagen(UUID proyectoId, UUID imagenId);
 }

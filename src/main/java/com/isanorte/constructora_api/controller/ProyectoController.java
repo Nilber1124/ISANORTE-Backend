@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,6 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.isanorte.constructora_api.dto.request.ActivoRequest;
 import com.isanorte.constructora_api.dto.request.ProyectoRequest;
 import com.isanorte.constructora_api.dto.request.ProyectoUpdateRequest;
+import com.isanorte.constructora_api.dto.request.ImagenProyectoRequest;
+import com.isanorte.constructora_api.dto.response.ImagenProyectoResponse;
 import com.isanorte.constructora_api.dto.response.ProyectoResponse;
 import com.isanorte.constructora_api.service.IProyectoService;
 
@@ -70,5 +73,25 @@ public class ProyectoController {
     public ResponseEntity<ProyectoResponse> updateActivo(
             @PathVariable UUID id, @Valid @RequestBody ActivoRequest request) {
         return ResponseEntity.ok(proyectoService.updateActivo(id, request));
+    }
+
+    @PostMapping("/{proyectoId}/imagenes")
+    public ResponseEntity<ImagenProyectoResponse> createImagen(
+            @PathVariable UUID proyectoId, @Valid @RequestBody ImagenProyectoRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(proyectoService.createImagen(proyectoId, request));
+    }
+
+    @PutMapping("/{proyectoId}/imagenes/{imagenId}")
+    public ResponseEntity<ImagenProyectoResponse> updateImagen(
+            @PathVariable UUID proyectoId,
+            @PathVariable UUID imagenId,
+            @Valid @RequestBody ImagenProyectoRequest request) {
+        return ResponseEntity.ok(proyectoService.updateImagen(proyectoId, imagenId, request));
+    }
+
+    @DeleteMapping("/{proyectoId}/imagenes/{imagenId}")
+    public ResponseEntity<Void> deleteImagen(@PathVariable UUID proyectoId, @PathVariable UUID imagenId) {
+        proyectoService.deleteImagen(proyectoId, imagenId);
+        return ResponseEntity.noContent().build();
     }
 }

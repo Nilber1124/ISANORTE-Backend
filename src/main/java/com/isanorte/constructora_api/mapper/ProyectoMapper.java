@@ -7,6 +7,8 @@ import org.mapstruct.ReportingPolicy;
 
 import com.isanorte.constructora_api.dto.request.ProyectoRequest;
 import com.isanorte.constructora_api.dto.request.ProyectoUpdateRequest;
+import com.isanorte.constructora_api.dto.request.ImagenProyectoRequest;
+import com.isanorte.constructora_api.dto.response.ImagenProyectoResponse;
 import com.isanorte.constructora_api.dto.response.ProyectoResponse;
 import com.isanorte.constructora_api.model.ImagenProyecto;
 import com.isanorte.constructora_api.model.Proyecto;
@@ -34,9 +36,19 @@ public interface ProyectoMapper {
     @Mapping(target = "fechaCreacion", ignore = true)
     ImagenProyecto toImagenEntity(ProyectoRequest.ImagenRequest request);
 
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "proyecto", ignore = true)
+    @Mapping(target = "fechaCreacion", ignore = true)
+    ImagenProyecto toImagenEntity(ImagenProyectoRequest request);
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "proyecto", ignore = true)
+    @Mapping(target = "fechaCreacion", ignore = true)
+    void updateImagenEntity(ImagenProyectoRequest request, @MappingTarget ImagenProyecto imagen);
+
     ProyectoResponse toResponse(Proyecto proyecto);
 
     ProyectoResponse.ServicioResumen toServicioResumen(Servicio servicio);
 
-    ProyectoResponse.ImagenResponse toImagenResponse(ImagenProyecto imagen);
+    ImagenProyectoResponse toImagenResponse(ImagenProyecto imagen);
 }
