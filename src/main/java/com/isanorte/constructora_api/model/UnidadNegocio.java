@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -60,9 +61,16 @@ public class UnidadNegocio {
     @Column(length = 500)
     private String imagenUrl;
 
+    @Column(length = 300)
+    private String imagenAlt;
+
     @Builder.Default
     @Column(nullable = false)
     private Boolean activo = true;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private Boolean destacado = false;
 
     @Builder.Default
     @Column(nullable = false)
@@ -76,6 +84,11 @@ public class UnidadNegocio {
     @Builder.Default
     @OneToMany(mappedBy = "unidadNegocio")
     private List<Producto> productos = new ArrayList<>();
+
+    @Setter(AccessLevel.NONE)
+    @Builder.Default
+    @OneToMany(mappedBy = "unidadNegocio", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<RecursoUnidadNegocio> recursos = new ArrayList<>();
 
     @Column(nullable = false)
     private LocalDateTime fechaCreacion;
@@ -107,6 +120,20 @@ public class UnidadNegocio {
         this.productos.remove(producto);
     }
 
+    public void addRecurso(RecursoUnidadNegocio recurso) {
+        Objects.requireNonNull(recurso, "El recurso no puede ser null");
+        if (recurso.getUnidadNegocio() != null && recurso.getUnidadNegocio() != this) {
+            throw new IllegalStateException("El recurso ya pertenece a otra unidad de negocio");
+        }
+        recursos.add(recurso);
+        recurso.setUnidadNegocio(this);
+    }
+
+    public void removeRecurso(RecursoUnidadNegocio recurso) {
+        Objects.requireNonNull(recurso, "El recurso no puede ser null");
+        if (recursos.remove(recurso)) recurso.setUnidadNegocio(null);
+    }
+
     @PrePersist
     protected void onCreate() {
         fechaCreacion = LocalDateTime.now();
@@ -114,6 +141,9 @@ public class UnidadNegocio {
 
         if (activo == null) {
             activo = true;
+        }
+        if (destacado == null) {
+            destacado = false;
         }
         if (orden == null) {
             orden = 0;

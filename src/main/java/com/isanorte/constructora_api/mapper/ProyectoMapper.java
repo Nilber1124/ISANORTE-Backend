@@ -18,6 +18,7 @@ import com.isanorte.constructora_api.model.Servicio;
 public interface ProyectoMapper {
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "orden", ignore = true)
     @Mapping(target = "servicios", ignore = true)
     @Mapping(target = "imagenes", ignore = true)
     @Mapping(target = "fechaCreacion", ignore = true)
@@ -25,6 +26,7 @@ public interface ProyectoMapper {
     Proyecto toEntity(ProyectoRequest request);
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "orden", ignore = true)
     @Mapping(target = "servicios", ignore = true)
     @Mapping(target = "imagenes", ignore = true)
     @Mapping(target = "fechaCreacion", ignore = true)
@@ -32,16 +34,19 @@ public interface ProyectoMapper {
     void updateEntity(ProyectoUpdateRequest request, @MappingTarget Proyecto proyecto);
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "alt", ignore = true)
     @Mapping(target = "proyecto", ignore = true)
     @Mapping(target = "fechaCreacion", ignore = true)
     ImagenProyecto toImagenEntity(ProyectoRequest.ImagenRequest request);
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "alt", ignore = true)
     @Mapping(target = "proyecto", ignore = true)
     @Mapping(target = "fechaCreacion", ignore = true)
     ImagenProyecto toImagenEntity(ImagenProyectoRequest request);
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "alt", ignore = true)
     @Mapping(target = "proyecto", ignore = true)
     @Mapping(target = "fechaCreacion", ignore = true)
     void updateImagenEntity(ImagenProyectoRequest request, @MappingTarget ImagenProyecto imagen);

@@ -20,4 +20,6 @@ public interface UnidadNegocioRepository extends IGenericRepository<UnidadNegoci
     boolean existsBySlugAndIdNot(String slug, UUID id);
 
     boolean existsByNombreAndIdNot(String nombre, UUID id);
+
+    boolean existsByEmpresaIdAndActivoTrueAndDestacadoTrue(UUID empresaId);
 }

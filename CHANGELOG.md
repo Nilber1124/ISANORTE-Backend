@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-09-18
+
+- Se agregaron endpoints administrativos para crear, actualizar y eliminar imágenes URL de proyectos existentes.
+- Se incorporaron DTO dedicados, validación de pertenencia proyecto-imagen y eliminación mediante `orphanRemoval`.
+- Se preservaron la creación anidada de imágenes en POST Proyecto y las imágenes existentes en PUT Proyecto.
+- Se añadieron pruebas de integración JPA/MockMvc y se actualizaron OpenAPI y las guías de API/frontend.
+
 ## 2026-09-17
 
 - Se agregaron endpoints administrativos específicos para crear, actualizar y eliminar variantes, imágenes, especificaciones y documentos de productos existentes.

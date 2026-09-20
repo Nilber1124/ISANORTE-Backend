@@ -102,6 +102,11 @@ public class Empresa {
 
     @Setter(AccessLevel.NONE)
     @Builder.Default
+    @OneToMany(mappedBy = "empresa", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<EstadisticaEmpresa> estadisticas = new ArrayList<>();
+
+    @Setter(AccessLevel.NONE)
+    @Builder.Default
     @OneToMany(mappedBy = "empresa")
     private List<UnidadNegocio> unidadesNegocio = new ArrayList<>();
 
@@ -157,6 +162,22 @@ public class Empresa {
         Objects.requireNonNull(redSocial, "La red social no puede ser null");
         if (this.redesSociales.remove(redSocial)) {
             redSocial.setEmpresa(null);
+        }
+    }
+
+    public void addEstadistica(EstadisticaEmpresa estadistica) {
+        Objects.requireNonNull(estadistica, "La estadística no puede ser null");
+        if (estadistica.getEmpresa() != null && estadistica.getEmpresa() != this) {
+            throw new IllegalStateException("La estadística ya pertenece a otra empresa");
+        }
+        this.estadisticas.add(estadistica);
+        estadistica.setEmpresa(this);
+    }
+
+    public void removeEstadistica(EstadisticaEmpresa estadistica) {
+        Objects.requireNonNull(estadistica, "La estadística no puede ser null");
+        if (this.estadisticas.remove(estadistica)) {
+            estadistica.setEmpresa(null);
         }
     }
 

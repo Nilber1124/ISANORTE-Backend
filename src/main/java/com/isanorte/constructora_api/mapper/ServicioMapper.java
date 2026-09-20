@@ -14,12 +14,18 @@ import com.isanorte.constructora_api.model.Servicio;
 public interface ServicioMapper {
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "etiqueta", ignore = true)
+    @Mapping(target = "imagenAlt", ignore = true)
+    @Mapping(target = "beneficios", ignore = true)
     @Mapping(target = "proyectos", ignore = true)
     @Mapping(target = "fechaCreacion", ignore = true)
     @Mapping(target = "fechaActualizacion", ignore = true)
     Servicio toEntity(ServicioRequest request);
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "etiqueta", ignore = true)
+    @Mapping(target = "imagenAlt", ignore = true)
+    @Mapping(target = "beneficios", ignore = true)
     @Mapping(target = "proyectos", ignore = true)
     @Mapping(target = "fechaCreacion", ignore = true)
     @Mapping(target = "fechaActualizacion", ignore = true)

@@ -14,12 +14,20 @@ import com.isanorte.constructora_api.model.SeccionLanding;
 public interface SeccionLandingMapper {
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "etiqueta", ignore = true)
+    @Mapping(target = "imagenAlt", ignore = true)
+    @Mapping(target = "escenas", ignore = true)
+    @Mapping(target = "acciones", ignore = true)
     @Mapping(target = "configuracionSitio", ignore = true)
     @Mapping(target = "fechaCreacion", ignore = true)
     @Mapping(target = "fechaActualizacion", ignore = true)
     SeccionLanding toEntity(SeccionLandingRequest request);
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "etiqueta", ignore = true)
+    @Mapping(target = "imagenAlt", ignore = true)
+    @Mapping(target = "escenas", ignore = true)
+    @Mapping(target = "acciones", ignore = true)
     @Mapping(target = "configuracionSitio", ignore = true)
     @Mapping(target = "fechaCreacion", ignore = true)
     @Mapping(target = "fechaActualizacion", ignore = true)

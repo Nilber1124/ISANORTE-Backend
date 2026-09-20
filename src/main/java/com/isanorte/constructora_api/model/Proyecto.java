@@ -23,6 +23,7 @@ import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -73,6 +74,11 @@ public class Proyecto {
     @Builder.Default
     @Column(nullable = false)
     private Boolean activo = true;
+
+    @PositiveOrZero
+    @Builder.Default
+    @Column(nullable = false)
+    private Integer orden = 0;
 
     @Setter(AccessLevel.NONE)
     @Builder.Default
@@ -154,6 +160,9 @@ public class Proyecto {
         }
         if (destacado == null) {
             destacado = false;
+        }
+        if (orden == null) {
+            orden = 0;
         }
     }
 

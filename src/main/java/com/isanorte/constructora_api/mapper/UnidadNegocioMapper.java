@@ -15,6 +15,9 @@ import com.isanorte.constructora_api.model.UnidadNegocio;
 public interface UnidadNegocioMapper {
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "destacado", ignore = true)
+    @Mapping(target = "imagenAlt", ignore = true)
+    @Mapping(target = "recursos", ignore = true)
     @Mapping(target = "empresa", ignore = true)
     @Mapping(target = "productos", ignore = true)
     @Mapping(target = "fechaCreacion", ignore = true)
@@ -22,6 +25,9 @@ public interface UnidadNegocioMapper {
     UnidadNegocio toEntity(UnidadNegocioRequest request);
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "destacado", ignore = true)
+    @Mapping(target = "imagenAlt", ignore = true)
+    @Mapping(target = "recursos", ignore = true)
     @Mapping(target = "empresa", ignore = true)
     @Mapping(target = "productos", ignore = true)
     @Mapping(target = "fechaCreacion", ignore = true)

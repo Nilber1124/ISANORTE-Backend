@@ -1,5 +1,6 @@
 package com.isanorte.constructora_api.model;
 
+import java.text.Normalizer;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,6 +43,9 @@ public class ConfiguracionSitio {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Column(nullable = false, unique = true, length = 100)
+    private String clave;
+
     @Column(length = 150)
     private String tituloSitio;
 
@@ -81,6 +85,16 @@ public class ConfiguracionSitio {
     @OneToMany(mappedBy = "configuracionSitio", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SeccionLanding> secciones = new ArrayList<>();
 
+    @Setter(AccessLevel.NONE)
+    @Builder.Default
+    @OneToMany(mappedBy = "configuracionSitio", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ContenidoPagina> contenidosPagina = new ArrayList<>();
+
+    @Setter(AccessLevel.NONE)
+    @Builder.Default
+    @OneToMany(mappedBy = "configuracionSitio", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<SeoPagina> seoPaginas = new ArrayList<>();
+
     @Column(nullable = false)
     private LocalDateTime fechaActualizacion;
 
@@ -114,13 +128,65 @@ public class ConfiguracionSitio {
         }
     }
 
+    public void addContenidoPagina(ContenidoPagina contenidoPagina) {
+        Objects.requireNonNull(contenidoPagina, "El contenido de página no puede ser null");
+        if (contenidoPagina.getConfiguracionSitio() != null
+                && contenidoPagina.getConfiguracionSitio() != this) {
+            throw new IllegalStateException("El contenido ya pertenece a otra configuración de sitio");
+        }
+        this.contenidosPagina.add(contenidoPagina);
+        contenidoPagina.setConfiguracionSitio(this);
+    }
+
+    public void removeContenidoPagina(ContenidoPagina contenidoPagina) {
+        Objects.requireNonNull(contenidoPagina, "El contenido de página no puede ser null");
+        if (this.contenidosPagina.remove(contenidoPagina)) {
+            contenidoPagina.setConfiguracionSitio(null);
+        }
+    }
+
+    public void addSeoPagina(SeoPagina seoPagina) {
+        Objects.requireNonNull(seoPagina, "El SEO de página no puede ser null");
+        if (seoPagina.getConfiguracionSitio() != null && seoPagina.getConfiguracionSitio() != this) {
+            throw new IllegalStateException("El SEO ya pertenece a otra configuración de sitio");
+        }
+        this.seoPaginas.add(seoPagina);
+        seoPagina.setConfiguracionSitio(this);
+    }
+
+    public void removeSeoPagina(SeoPagina seoPagina) {
+        Objects.requireNonNull(seoPagina, "El SEO de página no puede ser null");
+        if (this.seoPaginas.remove(seoPagina)) {
+            seoPagina.setConfiguracionSitio(null);
+        }
+    }
+
     @PrePersist
     protected void onCreate() {
+        normalizeClave();
         fechaActualizacion = LocalDateTime.now();
     }
 
     @PreUpdate
     protected void onUpdate() {
+        normalizeClave();
         fechaActualizacion = LocalDateTime.now();
+    }
+
+    private void normalizeClave() {
+        if (clave == null || clave.isBlank()) {
+            if (empresa == null || empresa.getId() == null) {
+                throw new IllegalStateException("La configuración requiere una clave o una empresa persistida");
+            }
+            clave = "site-" + empresa.getId();
+            return;
+        }
+        clave = Normalizer.normalize(clave.trim().toLowerCase(), Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "")
+                .replaceAll("[^a-z0-9]+", "-")
+                .replaceAll("^-+|-+$", "");
+        if (clave.isBlank()) {
+            throw new IllegalStateException("La clave de sitio no puede quedar vacía tras normalizarse");
+        }
     }
 }
