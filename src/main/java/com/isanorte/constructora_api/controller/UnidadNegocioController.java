@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,6 +20,8 @@ import com.isanorte.constructora_api.dto.request.UnidadNegocioRequest;
 import com.isanorte.constructora_api.dto.request.UnidadNegocioUpdateRequest;
 import com.isanorte.constructora_api.dto.response.UnidadNegocioResponse;
 import com.isanorte.constructora_api.service.IUnidadNegocioService;
+import com.isanorte.constructora_api.dto.request.RecursoUnidadNegocioRequest;
+import com.isanorte.constructora_api.dto.response.RecursoUnidadNegocioResponse;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -71,5 +74,23 @@ public class UnidadNegocioController {
     public ResponseEntity<UnidadNegocioResponse> updateActivo(
             @PathVariable UUID id, @Valid @RequestBody ActivoRequest request) {
         return ResponseEntity.ok(unidadNegocioService.updateActivo(id, request));
+    }
+
+    @PostMapping("/{unidadId}/recursos")
+    public ResponseEntity<RecursoUnidadNegocioResponse> createRecurso(@PathVariable UUID unidadId,
+            @Valid @RequestBody RecursoUnidadNegocioRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(unidadNegocioService.createRecurso(unidadId, request));
+    }
+
+    @PutMapping("/{unidadId}/recursos/{recursoId}")
+    public ResponseEntity<RecursoUnidadNegocioResponse> updateRecurso(@PathVariable UUID unidadId,
+            @PathVariable UUID recursoId, @Valid @RequestBody RecursoUnidadNegocioRequest request) {
+        return ResponseEntity.ok(unidadNegocioService.updateRecurso(unidadId, recursoId, request));
+    }
+
+    @DeleteMapping("/{unidadId}/recursos/{recursoId}")
+    public ResponseEntity<Void> deleteRecurso(@PathVariable UUID unidadId, @PathVariable UUID recursoId) {
+        unidadNegocioService.deleteRecurso(unidadId, recursoId);
+        return ResponseEntity.noContent().build();
     }
 }

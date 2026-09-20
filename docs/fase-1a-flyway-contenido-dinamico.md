@@ -65,12 +65,12 @@ Los checks obligan a que `UNIDAD_NEGOCIO` tenga unidad y a que los tipos estáti
 - Enums persistidos como `VARCHAR` con checks; no se crean tipos enum nativos de PostgreSQL.
 - `alt` permanece nullable donde su obligatoriedad depende del uso informativo de la imagen; esa regla corresponde a la futura capa de aplicación.
 
-## Pendiente para fases siguientes
+## Estado al cierre de Fase 1A (histórico)
 
-- DTO, mappers y endpoints públicos/administrativos para los nuevos datos.
+- Los DTO, mappers y endpoints públicos/administrativos que aquí figuraban como pendientes se implementaron en la Fase 1B; véase [fase-1b-api-contenido-dinamico.md](fase-1b-api-contenido-dinamico.md).
 - Validación de URLs de acciones y reglas condicionales de accesibilidad.
 - Validación de servicio para la unidad destacada, además del constraint de PostgreSQL.
 - Migración única del contenido visual hardcodeado.
 - Admin Angular, consumo público, SSR, TransferState y SEO en Angular.
 
-`docs/openapi.yaml` no cambia en esta fase porque no existen rutas ni contratos REST nuevos.
+En el cierre histórico de 1A, `docs/openapi.yaml` no cambió porque esa fase no publicaba rutas. El contrato vigente sí incorpora Fase 1B.

@@ -2,6 +2,7 @@ package com.isanorte.constructora_api.service.implementation;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.Objects;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +15,12 @@ import com.isanorte.constructora_api.exception.ModelNotFoundException;
 import com.isanorte.constructora_api.mapper.UnidadNegocioMapper;
 import com.isanorte.constructora_api.model.Empresa;
 import com.isanorte.constructora_api.model.UnidadNegocio;
+import com.isanorte.constructora_api.model.RecursoUnidadNegocio;
+import com.isanorte.constructora_api.enums.TipoRecursoUnidadNegocio;
+import com.isanorte.constructora_api.dto.request.RecursoUnidadNegocioRequest;
+import com.isanorte.constructora_api.dto.response.RecursoUnidadNegocioResponse;
+import com.isanorte.constructora_api.mapper.DynamicContentMapper;
+import com.isanorte.constructora_api.repository.RecursoUnidadNegocioRepository;
 import com.isanorte.constructora_api.repository.EmpresaRepository;
 import com.isanorte.constructora_api.repository.IGenericRepository;
 import com.isanorte.constructora_api.repository.UnidadNegocioRepository;
@@ -28,6 +35,8 @@ public class UnidadNegocioService extends GenericService<UnidadNegocio, UUID> im
     private final UnidadNegocioRepository unidadNegocioRepository;
     private final EmpresaRepository empresaRepository;
     private final UnidadNegocioMapper unidadNegocioMapper;
+    private final DynamicContentMapper dynamicContentMapper;
+    private final RecursoUnidadNegocioRepository recursoUnidadNegocioRepository;
 
     @Override
     protected IGenericRepository<UnidadNegocio, UUID> getRepo() {
@@ -58,6 +67,7 @@ public class UnidadNegocioService extends GenericService<UnidadNegocio, UUID> im
         Empresa empresa = empresaRepository.findById(request.empresaId())
                 .orElseThrow(() -> new ModelNotFoundException("Empresa no encontrada con ID: " + request.empresaId()));
         UnidadNegocio unidad = unidadNegocioMapper.toEntity(request);
+        validateFeatured(empresa.getId(), null, unidad.getActivo(), unidad.getDestacado());
         empresa.addUnidadNegocio(unidad);
         return unidadNegocioRepository.save(unidad);
     }
@@ -135,6 +145,7 @@ public class UnidadNegocioService extends GenericService<UnidadNegocio, UUID> im
         if (!unidad.getEmpresa().getId().equals(empresa.getId())) {
             throw new IllegalStateException("No se permite cambiar la empresa de una unidad de negocio existente");
         }
+        validateFeatured(empresa.getId(), id, request.activo(), request.destacado());
         unidadNegocioMapper.updateEntity(request, unidad);
         return unidadNegocioMapper.toResponse(unidadNegocioRepository.saveAndFlush(unidad));
     }
@@ -143,11 +154,74 @@ public class UnidadNegocioService extends GenericService<UnidadNegocio, UUID> im
     @Transactional
     public UnidadNegocioResponse updateActivo(UUID id, ActivoRequest request) {
         UnidadNegocio unidad = super.findById(id);
+        validateFeatured(unidad.getEmpresa().getId(), id, request.activo(), unidad.getDestacado());
         unidad.setActivo(request.activo());
         return unidadNegocioMapper.toResponse(unidadNegocioRepository.saveAndFlush(unidad));
     }
 
+    @Override
+    @Transactional
+    public RecursoUnidadNegocioResponse createRecurso(UUID unidadId, RecursoUnidadNegocioRequest request) {
+        UnidadNegocio unidad = findUnidadAdmin(unidadId);
+        validateResource(request);
+        RecursoUnidadNegocio recurso = dynamicContentMapper.toEntity(request);
+        unidad.addRecurso(recurso);
+        return dynamicContentMapper.toResponse(recursoUnidadNegocioRepository.saveAndFlush(recurso));
+    }
+
+    @Override
+    @Transactional
+    public RecursoUnidadNegocioResponse updateRecurso(
+            UUID unidadId, UUID recursoId, RecursoUnidadNegocioRequest request) {
+        UnidadNegocio unidad = findUnidadAdmin(unidadId);
+        RecursoUnidadNegocio recurso = recursoUnidadNegocioRepository.findById(recursoId)
+                .orElseThrow(() -> new ModelNotFoundException("Recurso no encontrado con ID: " + recursoId));
+        requireResourceOwnership(unidad, recurso);
+        validateResource(request);
+        dynamicContentMapper.update(request, recurso);
+        return dynamicContentMapper.toResponse(recursoUnidadNegocioRepository.saveAndFlush(recurso));
+    }
+
+    @Override
+    @Transactional
+    public void deleteRecurso(UUID unidadId, UUID recursoId) {
+        UnidadNegocio unidad = findUnidadAdmin(unidadId);
+        RecursoUnidadNegocio recurso = recursoUnidadNegocioRepository.findById(recursoId)
+                .orElseThrow(() -> new ModelNotFoundException("Recurso no encontrado con ID: " + recursoId));
+        requireResourceOwnership(unidad, recurso);
+        unidad.removeRecurso(recurso);
+        unidadNegocioRepository.flush();
+    }
+
+    private UnidadNegocio findUnidadAdmin(UUID id) {
+        return unidadNegocioRepository.findById(id)
+                .orElseThrow(() -> new ModelNotFoundException("Unidad de negocio no encontrada con ID: " + id));
+    }
+
+    private void requireResourceOwnership(UnidadNegocio unidad, RecursoUnidadNegocio recurso) {
+        if (recurso.getUnidadNegocio() == null
+                || !Objects.equals(unidad.getId(), recurso.getUnidadNegocio().getId())) {
+            throw new IllegalArgumentException("El recurso no pertenece a la unidad indicada");
+        }
+    }
+
+    private void validateResource(RecursoUnidadNegocioRequest request) {
+        if (request.tipo() == TipoRecursoUnidadNegocio.IMAGEN_EDITORIAL
+                && (request.alt() == null || request.alt().isBlank())) {
+            throw new IllegalArgumentException("alt es obligatorio para una imagen editorial");
+        }
+    }
+
+    private void validateFeatured(UUID empresaId, UUID currentId, Boolean active, Boolean featured) {
+        if (!Boolean.TRUE.equals(active) || !Boolean.TRUE.equals(featured)) return;
+        boolean exists = currentId == null
+                ? unidadNegocioRepository.existsByEmpresaIdAndActivoTrueAndDestacadoTrue(empresaId)
+                : unidadNegocioRepository.existsByEmpresaIdAndActivoTrueAndDestacadoTrueAndIdNot(empresaId, currentId);
+        if (exists) throw new IllegalStateException("La empresa ya tiene una unidad activa y destacada");
+    }
+
     private void initializeForResponse(UnidadNegocio unidad) {
         unidad.getEmpresa().getNombreComercial();
+        unidad.getRecursos().size();
     }
 }

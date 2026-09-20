@@ -9,6 +9,8 @@ import com.isanorte.constructora_api.dto.request.RedSocialRequest;
 import com.isanorte.constructora_api.dto.response.EmpresaResponse;
 import com.isanorte.constructora_api.dto.response.RedSocialResponse;
 import com.isanorte.constructora_api.model.Empresa;
+import com.isanorte.constructora_api.dto.request.EstadisticaEmpresaRequest;
+import com.isanorte.constructora_api.dto.response.EstadisticaEmpresaResponse;
 
 public interface IEmpresaService extends IGenericService<Empresa, UUID> {
 
@@ -27,4 +29,7 @@ public interface IEmpresaService extends IGenericService<Empresa, UUID> {
     RedSocialResponse updateRedSocial(UUID empresaId, UUID redSocialId, RedSocialRequest request);
 
     void deleteRedSocial(UUID empresaId, UUID redSocialId);
+    EstadisticaEmpresaResponse createEstadistica(UUID empresaId, EstadisticaEmpresaRequest request);
+    EstadisticaEmpresaResponse updateEstadistica(UUID empresaId, UUID estadisticaId, EstadisticaEmpresaRequest request);
+    void deleteEstadistica(UUID empresaId, UUID estadisticaId);
 }

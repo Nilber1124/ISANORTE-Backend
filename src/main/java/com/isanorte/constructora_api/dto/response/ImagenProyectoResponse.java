@@ -9,6 +9,7 @@ public record ImagenProyectoResponse(
         String url,
         String titulo,
         String descripcion,
+        String alt,
         TipoImagenProyecto tipo,
         Boolean esPrincipal,
         Integer orden) {

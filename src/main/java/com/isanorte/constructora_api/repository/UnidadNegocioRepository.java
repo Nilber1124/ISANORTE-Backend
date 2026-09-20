@@ -22,4 +22,12 @@ public interface UnidadNegocioRepository extends IGenericRepository<UnidadNegoci
     boolean existsByNombreAndIdNot(String nombre, UUID id);
 
     boolean existsByEmpresaIdAndActivoTrueAndDestacadoTrue(UUID empresaId);
+
+    boolean existsByEmpresaIdAndActivoTrueAndDestacadoTrueAndIdNot(UUID empresaId, UUID id);
+
+    Optional<UnidadNegocio> findByEmpresaIdAndActivoTrueAndDestacadoTrue(UUID empresaId);
+
+    Optional<UnidadNegocio> findByEmpresaIdAndSlugAndActivoTrue(UUID empresaId, String slug);
+
+    List<UnidadNegocio> findByEmpresaIdAndActivoTrueOrderByOrdenAscIdAsc(UUID empresaId);
 }

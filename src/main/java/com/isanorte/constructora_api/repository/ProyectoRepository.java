@@ -15,6 +15,8 @@ public interface ProyectoRepository extends IGenericRepository<Proyecto, UUID> {
 
     List<Proyecto> findByActivoTrue();
 
+    List<Proyecto> findByActivoTrueAndDestacadoTrueOrderByOrdenAscIdAsc();
+
     Optional<Proyecto> findBySlugAndActivoTrue(String slug);
 
     boolean existsBySlug(String slug);

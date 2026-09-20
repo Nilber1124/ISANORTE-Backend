@@ -10,7 +10,8 @@ public record ImagenProyectoRequest(
         @NotBlank @Size(max = 500) String url,
         @Size(max = 150) String titulo,
         @Size(max = 300) String descripcion,
+        @Size(max = 300) String alt,
         @NotNull TipoImagenProyecto tipo,
         @NotNull Boolean esPrincipal,
-        @NotNull Integer orden) {
+        @NotNull @jakarta.validation.constraints.PositiveOrZero Integer orden) {
 }

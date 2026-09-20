@@ -7,9 +7,12 @@ import com.isanorte.constructora_api.enums.TipoSeccionLanding;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 public record ConfiguracionSitioRequest(
     @NotNull UUID empresaId,
+    @Pattern(regexp = "[a-z0-9]+(?:-[a-z0-9]+)*") @Size(max = 100) String clave,
     String tituloSitio,
     String descripcionSitio,
     String logoUrl,
@@ -22,10 +25,12 @@ public record ConfiguracionSitioRequest(
 
     public record SeccionRequest(
         @NotNull TipoSeccionLanding tipo,
+        @Size(max = 180) String etiqueta,
         String titulo,
         String subtitulo,
         String contenido,
         String imagenUrl,
+        @Size(max = 300) String imagenAlt,
         String textoBoton,
         String enlaceBoton,
         Integer orden,

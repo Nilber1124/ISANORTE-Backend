@@ -16,6 +16,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -90,6 +91,7 @@ public class Servicio {
     @Setter(AccessLevel.NONE)
     @Builder.Default
     @OneToMany(mappedBy = "servicio", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("orden ASC, id ASC")
     private List<BeneficioServicio> beneficios = new ArrayList<>();
 
     @Column(nullable = false)

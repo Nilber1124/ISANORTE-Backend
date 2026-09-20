@@ -16,7 +16,6 @@ import com.isanorte.constructora_api.model.SeccionLanding;
 public interface ConfiguracionSitioMapper {
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "clave", ignore = true)
     @Mapping(target = "scriptsHead", ignore = true)
     @Mapping(target = "scriptsBody", ignore = true)
     @Mapping(target = "empresa", ignore = true)
@@ -38,8 +37,6 @@ public interface ConfiguracionSitioMapper {
     void updateEntity(ConfiguracionSitioUpdateRequest request, @MappingTarget ConfiguracionSitio configuracion);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "etiqueta", ignore = true)
-    @Mapping(target = "imagenAlt", ignore = true)
     @Mapping(target = "escenas", ignore = true)
     @Mapping(target = "acciones", ignore = true)
     @Mapping(target = "configuracionSitio", ignore = true)

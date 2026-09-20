@@ -13,6 +13,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
@@ -98,16 +99,19 @@ public class Empresa {
     @Setter(AccessLevel.NONE)
     @Builder.Default
     @OneToMany(mappedBy = "empresa", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("orden ASC, id ASC")
     private List<RedSocial> redesSociales = new ArrayList<>();
 
     @Setter(AccessLevel.NONE)
     @Builder.Default
     @OneToMany(mappedBy = "empresa", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("orden ASC, id ASC")
     private List<EstadisticaEmpresa> estadisticas = new ArrayList<>();
 
     @Setter(AccessLevel.NONE)
     @Builder.Default
     @OneToMany(mappedBy = "empresa")
+    @OrderBy("orden ASC, id ASC")
     private List<UnidadNegocio> unidadesNegocio = new ArrayList<>();
 
     @Column(nullable = false)

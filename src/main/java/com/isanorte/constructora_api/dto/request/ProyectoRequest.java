@@ -9,6 +9,8 @@ import com.isanorte.constructora_api.enums.TipoImagenProyecto;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.Size;
 
 public record ProyectoRequest(
     @NotBlank String nombre,
@@ -19,6 +21,7 @@ public record ProyectoRequest(
     @NotBlank String descripcion,
     Boolean destacado,
     Boolean activo,
+    @PositiveOrZero Integer orden,
     Set<@NotNull UUID> servicioIds,
     List<@Valid ImagenRequest> imagenes) {
 
@@ -26,8 +29,9 @@ public record ProyectoRequest(
         @NotBlank String url,
         String titulo,
         String descripcion,
+        @Size(max = 300) String alt,
         @NotNull TipoImagenProyecto tipo,
         Boolean esPrincipal,
-        Integer orden) {
+        @PositiveOrZero Integer orden) {
     }
 }

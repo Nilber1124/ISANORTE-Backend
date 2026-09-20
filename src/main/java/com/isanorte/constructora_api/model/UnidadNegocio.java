@@ -16,6 +16,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -88,6 +89,7 @@ public class UnidadNegocio {
     @Setter(AccessLevel.NONE)
     @Builder.Default
     @OneToMany(mappedBy = "unidadNegocio", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("orden ASC, id ASC")
     private List<RecursoUnidadNegocio> recursos = new ArrayList<>();
 
     @Column(nullable = false)

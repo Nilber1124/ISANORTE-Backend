@@ -8,6 +8,8 @@ import com.isanorte.constructora_api.dto.request.ActivoRequest;
 import com.isanorte.constructora_api.dto.request.UnidadNegocioUpdateRequest;
 import com.isanorte.constructora_api.dto.response.UnidadNegocioResponse;
 import com.isanorte.constructora_api.model.UnidadNegocio;
+import com.isanorte.constructora_api.dto.request.RecursoUnidadNegocioRequest;
+import com.isanorte.constructora_api.dto.response.RecursoUnidadNegocioResponse;
 
 public interface IUnidadNegocioService extends IGenericService<UnidadNegocio, UUID> {
 
@@ -32,4 +34,7 @@ public interface IUnidadNegocioService extends IGenericService<UnidadNegocio, UU
     UnidadNegocioResponse update(UUID id, UnidadNegocioUpdateRequest request);
 
     UnidadNegocioResponse updateActivo(UUID id, ActivoRequest request);
+    RecursoUnidadNegocioResponse createRecurso(UUID unidadId, RecursoUnidadNegocioRequest request);
+    RecursoUnidadNegocioResponse updateRecurso(UUID unidadId, UUID recursoId, RecursoUnidadNegocioRequest request);
+    void deleteRecurso(UUID unidadId, UUID recursoId);
 }

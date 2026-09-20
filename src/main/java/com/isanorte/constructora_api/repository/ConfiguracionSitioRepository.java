@@ -11,4 +11,8 @@ import com.isanorte.constructora_api.model.ConfiguracionSitio;
 public interface ConfiguracionSitioRepository extends IGenericRepository<ConfiguracionSitio, UUID> {
 
     Optional<ConfiguracionSitio> findByClave(String clave);
+
+    boolean existsByClave(String clave);
+
+    boolean existsByClaveAndIdNot(String clave, UUID id);
 }

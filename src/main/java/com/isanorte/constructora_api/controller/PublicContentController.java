@@ -1,0 +1,59 @@
+package com.isanorte.constructora_api.controller;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.isanorte.constructora_api.dto.request.SolicitudContactoCreateRequest;
+import com.isanorte.constructora_api.dto.response.PublicBusinessUnitResponse;
+import com.isanorte.constructora_api.dto.response.PublicHomeResponse;
+import com.isanorte.constructora_api.dto.response.PublicPageResponse;
+import com.isanorte.constructora_api.dto.response.PublicSiteResponse;
+import com.isanorte.constructora_api.dto.response.SolicitudContactoPublicResponse;
+import com.isanorte.constructora_api.enums.TipoPaginaPublica;
+import com.isanorte.constructora_api.service.IPublicContentService;
+import com.isanorte.constructora_api.service.ISolicitudContactoService;
+
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+
+@RestController
+@RequestMapping("/api/publico")
+@RequiredArgsConstructor
+public class PublicContentController {
+    private final IPublicContentService publicContentService;
+    private final ISolicitudContactoService contactoService;
+
+    @PostMapping("/contacto")
+    public ResponseEntity<SolicitudContactoPublicResponse> createContact(
+            @Valid @RequestBody SolicitudContactoCreateRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(contactoService.createPublic(request));
+    }
+
+    @GetMapping("/sitios/{clave}")
+    public ResponseEntity<PublicSiteResponse> findSite(@PathVariable String clave) {
+        return ResponseEntity.ok(publicContentService.findSite(clave));
+    }
+
+    @GetMapping("/sitios/{clave}/home")
+    public ResponseEntity<PublicHomeResponse> findHome(@PathVariable String clave) {
+        return ResponseEntity.ok(publicContentService.findHome(clave));
+    }
+
+    @GetMapping("/sitios/{clave}/paginas/{pagina}")
+    public ResponseEntity<PublicPageResponse> findPage(@PathVariable String clave,
+            @PathVariable TipoPaginaPublica pagina) {
+        return ResponseEntity.ok(publicContentService.findPage(clave, pagina));
+    }
+
+    @GetMapping("/sitios/{clave}/unidades/{slug}")
+    public ResponseEntity<PublicBusinessUnitResponse> findBusinessUnit(
+            @PathVariable String clave, @PathVariable String slug) {
+        return ResponseEntity.ok(publicContentService.findBusinessUnit(clave, slug));
+    }
+}

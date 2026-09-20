@@ -22,6 +22,7 @@ public record EmpresaResponse(
     String valores,
     String resumenNosotros,
     List<RedSocialResponse> redesSociales,
+    List<EstadisticaEmpresaResponse> estadisticas,
     LocalDateTime fechaCreacion,
     LocalDateTime fechaActualizacion) {
 }

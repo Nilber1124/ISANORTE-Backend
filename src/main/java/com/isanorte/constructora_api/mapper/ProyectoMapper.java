@@ -1,5 +1,8 @@
 package com.isanorte.constructora_api.mapper;
 
+import java.util.Comparator;
+import java.util.List;
+
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -18,7 +21,6 @@ import com.isanorte.constructora_api.model.Servicio;
 public interface ProyectoMapper {
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "orden", ignore = true)
     @Mapping(target = "servicios", ignore = true)
     @Mapping(target = "imagenes", ignore = true)
     @Mapping(target = "fechaCreacion", ignore = true)
@@ -26,7 +28,6 @@ public interface ProyectoMapper {
     Proyecto toEntity(ProyectoRequest request);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "orden", ignore = true)
     @Mapping(target = "servicios", ignore = true)
     @Mapping(target = "imagenes", ignore = true)
     @Mapping(target = "fechaCreacion", ignore = true)
@@ -34,24 +35,29 @@ public interface ProyectoMapper {
     void updateEntity(ProyectoUpdateRequest request, @MappingTarget Proyecto proyecto);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "alt", ignore = true)
     @Mapping(target = "proyecto", ignore = true)
     @Mapping(target = "fechaCreacion", ignore = true)
     ImagenProyecto toImagenEntity(ProyectoRequest.ImagenRequest request);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "alt", ignore = true)
     @Mapping(target = "proyecto", ignore = true)
     @Mapping(target = "fechaCreacion", ignore = true)
     ImagenProyecto toImagenEntity(ImagenProyectoRequest request);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "alt", ignore = true)
     @Mapping(target = "proyecto", ignore = true)
     @Mapping(target = "fechaCreacion", ignore = true)
     void updateImagenEntity(ImagenProyectoRequest request, @MappingTarget ImagenProyecto imagen);
 
+    @Mapping(target = "imagenes", expression = "java(sortedImages(proyecto.getImagenes()))")
     ProyectoResponse toResponse(Proyecto proyecto);
+
+    default List<ImagenProyectoResponse> sortedImages(List<ImagenProyecto> values) {
+        return values.stream().sorted(Comparator.comparing(ImagenProyecto::getOrden)
+                .thenComparing(value -> value.getId().toString()))
+                .map(this::toImagenResponse)
+                .toList();
+    }
 
     ProyectoResponse.ServicioResumen toServicioResumen(Servicio servicio);
 

@@ -8,6 +8,7 @@ import com.isanorte.constructora_api.enums.TipoSeccionLanding;
 
 public record ConfiguracionSitioResponse(
     UUID id,
+    String clave,
     String tituloSitio,
     String descripcionSitio,
     String logoUrl,
@@ -26,10 +27,12 @@ public record ConfiguracionSitioResponse(
     public record SeccionResumen(
         UUID id,
         TipoSeccionLanding tipo,
+        String etiqueta,
         String titulo,
         String subtitulo,
         String contenido,
         String imagenUrl,
+        String imagenAlt,
         String textoBoton,
         String enlaceBoton,
         Integer orden,

@@ -20,6 +20,8 @@ import com.isanorte.constructora_api.dto.request.RedSocialRequest;
 import com.isanorte.constructora_api.dto.response.EmpresaResponse;
 import com.isanorte.constructora_api.dto.response.RedSocialResponse;
 import com.isanorte.constructora_api.service.IEmpresaService;
+import com.isanorte.constructora_api.dto.request.EstadisticaEmpresaRequest;
+import com.isanorte.constructora_api.dto.response.EstadisticaEmpresaResponse;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -70,6 +72,24 @@ public class EmpresaController {
     public ResponseEntity<Void> deleteRedSocial(
             @PathVariable UUID empresaId, @PathVariable UUID redSocialId) {
         empresaService.deleteRedSocial(empresaId, redSocialId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{empresaId}/estadisticas")
+    public ResponseEntity<EstadisticaEmpresaResponse> createEstadistica(@PathVariable UUID empresaId,
+            @Valid @RequestBody EstadisticaEmpresaRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(empresaService.createEstadistica(empresaId, request));
+    }
+
+    @PutMapping("/{empresaId}/estadisticas/{estadisticaId}")
+    public ResponseEntity<EstadisticaEmpresaResponse> updateEstadistica(@PathVariable UUID empresaId,
+            @PathVariable UUID estadisticaId, @Valid @RequestBody EstadisticaEmpresaRequest request) {
+        return ResponseEntity.ok(empresaService.updateEstadistica(empresaId, estadisticaId, request));
+    }
+
+    @DeleteMapping("/{empresaId}/estadisticas/{estadisticaId}")
+    public ResponseEntity<Void> deleteEstadistica(@PathVariable UUID empresaId, @PathVariable UUID estadisticaId) {
+        empresaService.deleteEstadistica(empresaId, estadisticaId);
         return ResponseEntity.noContent().build();
     }
 }

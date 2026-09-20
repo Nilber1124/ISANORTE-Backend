@@ -18,6 +18,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -89,6 +90,7 @@ public class Proyecto {
     @Setter(AccessLevel.NONE)
     @Builder.Default
     @OneToMany(mappedBy = "proyecto", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("orden ASC, id ASC")
     private List<ImagenProyecto> imagenes = new ArrayList<>();
 
     @Column(nullable = false)

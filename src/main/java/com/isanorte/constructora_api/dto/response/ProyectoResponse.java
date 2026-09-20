@@ -15,6 +15,7 @@ public record ProyectoResponse(
     String descripcion,
     Boolean destacado,
     Boolean activo,
+    Integer orden,
     Set<ServicioResumen> servicios,
     List<ImagenProyectoResponse> imagenes,
     LocalDateTime fechaCreacion,

@@ -11,4 +11,6 @@ import com.isanorte.constructora_api.model.SeccionLanding;
 public interface SeccionLandingRepository extends IGenericRepository<SeccionLanding, UUID> {
 
     List<SeccionLanding> findByVisibleTrueOrderByOrdenAsc();
+
+    List<SeccionLanding> findByConfiguracionSitioIdAndVisibleTrueOrderByOrdenAscIdAsc(UUID configuracionSitioId);
 }

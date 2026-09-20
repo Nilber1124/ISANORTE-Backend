@@ -15,6 +15,8 @@ public interface ServicioRepository extends IGenericRepository<Servicio, UUID> {
 
     List<Servicio> findByActivoTrueOrderByOrdenAsc();
 
+    List<Servicio> findByActivoTrueAndDestacadoTrueOrderByOrdenAscIdAsc();
+
     Optional<Servicio> findBySlugAndActivoTrue(String slug);
 
     boolean existsBySlug(String slug);

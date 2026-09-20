@@ -2,6 +2,7 @@ package com.isanorte.constructora_api.service.implementation;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.Objects;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,6 +14,11 @@ import com.isanorte.constructora_api.dto.response.ServicioResponse;
 import com.isanorte.constructora_api.exception.ModelNotFoundException;
 import com.isanorte.constructora_api.mapper.ServicioMapper;
 import com.isanorte.constructora_api.model.Servicio;
+import com.isanorte.constructora_api.model.BeneficioServicio;
+import com.isanorte.constructora_api.dto.request.BeneficioServicioRequest;
+import com.isanorte.constructora_api.dto.response.BeneficioServicioResponse;
+import com.isanorte.constructora_api.mapper.DynamicContentMapper;
+import com.isanorte.constructora_api.repository.BeneficioServicioRepository;
 import com.isanorte.constructora_api.repository.IGenericRepository;
 import com.isanorte.constructora_api.repository.ServicioRepository;
 import com.isanorte.constructora_api.service.IServicioService;
@@ -25,6 +31,8 @@ public class ServicioService extends GenericService<Servicio, UUID> implements I
 
     private final ServicioRepository servicioRepository;
     private final ServicioMapper servicioMapper;
+    private final DynamicContentMapper dynamicContentMapper;
+    private final BeneficioServicioRepository beneficioServicioRepository;
 
     @Override
     protected IGenericRepository<Servicio, UUID> getRepo() {
@@ -104,5 +112,46 @@ public class ServicioService extends GenericService<Servicio, UUID> implements I
         Servicio servicio = super.findById(id);
         servicio.setActivo(request.activo());
         return servicioMapper.toResponse(servicioRepository.saveAndFlush(servicio));
+    }
+
+    @Override
+    @Transactional
+    public BeneficioServicioResponse createBeneficio(UUID servicioId, BeneficioServicioRequest request) {
+        Servicio servicio = findServicioAdmin(servicioId);
+        BeneficioServicio beneficio = dynamicContentMapper.toEntity(request);
+        servicio.addBeneficio(beneficio);
+        return dynamicContentMapper.toResponse(beneficioServicioRepository.saveAndFlush(beneficio));
+    }
+
+    @Override
+    @Transactional
+    public BeneficioServicioResponse updateBeneficio(
+            UUID servicioId, UUID beneficioId, BeneficioServicioRequest request) {
+        Servicio servicio = findServicioAdmin(servicioId);
+        BeneficioServicio beneficio = beneficioServicioRepository.findById(beneficioId)
+                .orElseThrow(() -> new ModelNotFoundException("Beneficio no encontrado con ID: " + beneficioId));
+        if (beneficio.getServicio() == null || !Objects.equals(servicio.getId(), beneficio.getServicio().getId())) {
+            throw new IllegalArgumentException("El beneficio no pertenece al servicio indicado");
+        }
+        dynamicContentMapper.update(request, beneficio);
+        return dynamicContentMapper.toResponse(beneficioServicioRepository.saveAndFlush(beneficio));
+    }
+
+    @Override
+    @Transactional
+    public void deleteBeneficio(UUID servicioId, UUID beneficioId) {
+        Servicio servicio = findServicioAdmin(servicioId);
+        BeneficioServicio beneficio = beneficioServicioRepository.findById(beneficioId)
+                .orElseThrow(() -> new ModelNotFoundException("Beneficio no encontrado con ID: " + beneficioId));
+        if (beneficio.getServicio() == null || !Objects.equals(servicio.getId(), beneficio.getServicio().getId())) {
+            throw new IllegalArgumentException("El beneficio no pertenece al servicio indicado");
+        }
+        servicio.removeBeneficio(beneficio);
+        servicioRepository.flush();
+    }
+
+    private Servicio findServicioAdmin(UUID id) {
+        return servicioRepository.findById(id)
+                .orElseThrow(() -> new ModelNotFoundException("Servicio no encontrado con ID: " + id));
     }
 }

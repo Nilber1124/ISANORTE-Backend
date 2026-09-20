@@ -41,6 +41,9 @@ public class ConfiguracionSitioService extends GenericService<ConfiguracionSitio
         if (empresa.getConfiguracionSitio() != null) {
             throw new IllegalStateException("La empresa ya tiene una configuración de sitio");
         }
+        if (request.clave() != null && configuracionSitioRepository.existsByClave(request.clave())) {
+            throw new IllegalStateException("Ya existe una configuración con clave: " + request.clave());
+        }
         ConfiguracionSitio configuracion = configuracionSitioMapper.toEntity(request);
         if (request.secciones() != null) {
             request.secciones().stream()
@@ -89,7 +92,11 @@ public class ConfiguracionSitioService extends GenericService<ConfiguracionSitio
     @Transactional
     public ConfiguracionSitioResponse update(UUID id, ConfiguracionSitioUpdateRequest request) {
         ConfiguracionSitio configuracion = super.findById(id);
+        if (request.clave() != null && configuracionSitioRepository.existsByClaveAndIdNot(request.clave(), id)) {
+            throw new IllegalStateException("Ya existe una configuración con clave: " + request.clave());
+        }
         configuracionSitioMapper.updateEntity(request, configuracion);
+        if (request.clave() != null) configuracion.setClave(request.clave());
         return configuracionSitioMapper.toResponse(configuracionSitioRepository.saveAndFlush(configuracion));
     }
 

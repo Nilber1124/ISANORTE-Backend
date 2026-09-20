@@ -20,6 +20,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -88,11 +89,13 @@ public class SeccionLanding {
     @Setter(AccessLevel.NONE)
     @Builder.Default
     @OneToMany(mappedBy = "seccionLanding", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("orden ASC, id ASC")
     private List<HeroScene> escenas = new ArrayList<>();
 
     @Setter(AccessLevel.NONE)
     @Builder.Default
     @OneToMany(mappedBy = "seccionLanding", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("orden ASC, id ASC")
     private List<AccionLanding> acciones = new ArrayList<>();
 
     @Column(nullable = false)

@@ -31,6 +31,8 @@ public class EmpresaService extends GenericService<Empresa, UUID> implements IEm
     private final RedSocialRepository redSocialRepository;
     private final EmpresaMapper empresaMapper;
     private final RedSocialMapper redSocialMapper;
+    private final com.isanorte.constructora_api.repository.EstadisticaEmpresaRepository estadisticaEmpresaRepository;
+    private final com.isanorte.constructora_api.mapper.DynamicContentMapper dynamicContentMapper;
 
     @Override
     protected IGenericRepository<Empresa, UUID> getRepo() {
@@ -120,6 +122,45 @@ public class EmpresaService extends GenericService<Empresa, UUID> implements IEm
         empresaRepository.flush();
     }
 
+    @Override
+    @Transactional
+    public com.isanorte.constructora_api.dto.response.EstadisticaEmpresaResponse createEstadistica(
+            UUID empresaId, com.isanorte.constructora_api.dto.request.EstadisticaEmpresaRequest request) {
+        Empresa empresa = findEmpresaParaAdministracion(empresaId);
+        com.isanorte.constructora_api.model.EstadisticaEmpresa estadistica = dynamicContentMapper.toEntity(request);
+        empresa.addEstadistica(estadistica);
+        return dynamicContentMapper.toResponse(estadisticaEmpresaRepository.saveAndFlush(estadistica));
+    }
+
+    @Override
+    @Transactional
+    public com.isanorte.constructora_api.dto.response.EstadisticaEmpresaResponse updateEstadistica(
+            UUID empresaId, UUID estadisticaId,
+            com.isanorte.constructora_api.dto.request.EstadisticaEmpresaRequest request) {
+        Empresa empresa = findEmpresaParaAdministracion(empresaId);
+        com.isanorte.constructora_api.model.EstadisticaEmpresa estadistica = findEstadistica(empresa, estadisticaId);
+        dynamicContentMapper.update(request, estadistica);
+        return dynamicContentMapper.toResponse(estadisticaEmpresaRepository.saveAndFlush(estadistica));
+    }
+
+    @Override
+    @Transactional
+    public void deleteEstadistica(UUID empresaId, UUID estadisticaId) {
+        Empresa empresa = findEmpresaParaAdministracion(empresaId);
+        empresa.removeEstadistica(findEstadistica(empresa, estadisticaId));
+        empresaRepository.flush();
+    }
+
+    private com.isanorte.constructora_api.model.EstadisticaEmpresa findEstadistica(Empresa empresa, UUID id) {
+        com.isanorte.constructora_api.model.EstadisticaEmpresa estadistica = estadisticaEmpresaRepository.findById(id)
+                .orElseThrow(() -> new com.isanorte.constructora_api.exception.ModelNotFoundException(
+                        "Estadística no encontrada con ID: " + id));
+        if (estadistica.getEmpresa() == null || !Objects.equals(empresa.getId(), estadistica.getEmpresa().getId())) {
+            throw new IllegalArgumentException("La estadística no pertenece a la empresa indicada");
+        }
+        return estadistica;
+    }
+
     private Empresa findEmpresaParaAdministracion(UUID empresaId) {
         return empresaRepository.findById(empresaId)
                 .orElseThrow(() -> new com.isanorte.constructora_api.exception.ModelNotFoundException(
@@ -139,5 +180,6 @@ public class EmpresaService extends GenericService<Empresa, UUID> implements IEm
 
     private void initializeForResponse(Empresa empresa) {
         empresa.getRedesSociales().size();
+        empresa.getEstadisticas().size();
     }
 }
