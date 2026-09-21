@@ -11,6 +11,9 @@ import com.isanorte.constructora_api.dto.response.PublicCompanyAboutResponse;
 import com.isanorte.constructora_api.dto.response.PublicCompanyStatisticResponse;
 import com.isanorte.constructora_api.dto.response.PublicHomeResponse;
 import com.isanorte.constructora_api.dto.response.PublicPageResponse;
+import com.isanorte.constructora_api.dto.response.PublicProjectImageResponse;
+import com.isanorte.constructora_api.dto.response.PublicProjectResponse;
+import com.isanorte.constructora_api.dto.response.PublicProjectServiceResponse;
 import com.isanorte.constructora_api.dto.response.PublicServiceBenefitResponse;
 import com.isanorte.constructora_api.dto.response.PublicServiceResponse;
 import com.isanorte.constructora_api.dto.response.PublicSiteResponse;
@@ -51,6 +54,9 @@ public class PublicContentService implements IPublicContentService {
                     .thenComparing(value -> value.getId().toString());
     private static final Comparator<com.isanorte.constructora_api.model.RecursoUnidadNegocio> RESOURCE_ORDER =
             Comparator.comparing(com.isanorte.constructora_api.model.RecursoUnidadNegocio::getOrden)
+                    .thenComparing(value -> value.getId().toString());
+    private static final Comparator<com.isanorte.constructora_api.model.Servicio> PROJECT_SERVICE_ORDER =
+            Comparator.comparing(com.isanorte.constructora_api.model.Servicio::getOrden)
                     .thenComparing(value -> value.getId().toString());
 
     private final ConfiguracionSitioRepository configuracionRepository;
@@ -151,13 +157,16 @@ public class PublicContentService implements IPublicContentService {
                         .map(this::toPublicService)
                         .toList()
                 : null;
+        List<PublicProjectResponse> publicProjects = pagina == TipoPaginaPublica.PROYECTOS
+                ? publicProjects()
+                : null;
         return new PublicPageResponse(
                 new PublicPageResponse.Contenido(content.getPagina(), content.getEyebrow(), content.getTitulo(),
                         content.getIntroduccion(), content.getDescripcion(), content.getImagenUrl(),
                         content.getImagenAlt(), content.getImagenFondoUrl(), List.copyOf(content.getTags())),
                 seo == null ? null : new PublicPageResponse.Seo(
                         seo.getTitle(), seo.getDescription(), seo.getOgImageUrl(), seo.getRobots()),
-                publicCompany, publicServices);
+                publicCompany, publicServices, publicProjects);
     }
 
     @Override @Transactional(readOnly = true)
@@ -190,6 +199,31 @@ public class PublicContentService implements IPublicContentService {
                         .filter(benefit -> Boolean.TRUE.equals(benefit.getActivo()))
                         .sorted(BENEFIT_ORDER)
                         .map(benefit -> new PublicServiceBenefitResponse(benefit.getTexto(), benefit.getOrden()))
+                        .toList());
+    }
+
+    private List<PublicProjectResponse> publicProjects() {
+        List<com.isanorte.constructora_api.model.Proyecto> projects =
+                proyectoRepository.findPublicActiveWithImagesOrderByOrdenAscIdAsc();
+        if (!projects.isEmpty()) {
+            proyectoRepository.findWithServicesByIdIn(projects.stream()
+                    .map(com.isanorte.constructora_api.model.Proyecto::getId)
+                    .toList());
+        }
+        return projects.stream().map(this::toPublicProject).toList();
+    }
+
+    private PublicProjectResponse toPublicProject(com.isanorte.constructora_api.model.Proyecto project) {
+        return new PublicProjectResponse(
+                project.getNombre(), project.getSlug(), project.getDescripcion(), project.getUbicacion(),
+                project.getFechaProyecto(), project.getOrden(), project.getImagenes().stream()
+                        .sorted(IMAGE_ORDER)
+                        .map(image -> new PublicProjectImageResponse(
+                                image.getUrl(), image.getAlt(), image.getEsPrincipal(), image.getOrden()))
+                        .toList(),
+                project.getServicios().stream()
+                        .sorted(PROJECT_SERVICE_ORDER)
+                        .map(service -> new PublicProjectServiceResponse(service.getNombre(), service.getSlug()))
                         .toList());
     }
 }

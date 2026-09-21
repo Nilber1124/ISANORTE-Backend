@@ -7,7 +7,7 @@ import com.isanorte.constructora_api.enums.TipoPaginaPublica;
 
 public record PublicPageResponse(
         Contenido contenido, Seo seo, PublicCompanyAboutResponse empresa,
-        List<PublicServiceResponse> servicios) {
+        List<PublicServiceResponse> servicios, List<PublicProjectResponse> proyectos) {
 
     public record Contenido(
             TipoPaginaPublica pagina, String eyebrow, String titulo, String introduccion,

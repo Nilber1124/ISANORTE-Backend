@@ -2906,6 +2906,10 @@ components:
           type: array
           nullable: true
           items: {$ref: '#/components/schemas/PublicServiceResponse'}
+        proyectos:
+          type: array
+          nullable: true
+          items: {$ref: '#/components/schemas/PublicProjectResponse'}
     PublicContenidoPagina:
       type: object
       properties:
@@ -2959,6 +2963,31 @@ components:
       properties:
         texto: {type: string}
         orden: {type: integer}
+    PublicProjectResponse:
+      description: Proyecto editorial público usado por la página PROYECTOS.
+      properties:
+        nombre: {type: string}
+        slug: {type: string}
+        descripcion: {type: string, nullable: true}
+        ubicacion: {type: string, nullable: true}
+        fechaProyecto: {type: string, nullable: true, description: Texto editorial libre del dominio actual.}
+        orden: {type: integer}
+        imagenes:
+          type: array
+          items: {$ref: '#/components/schemas/PublicProjectImageResponse'}
+        servicios:
+          type: array
+          items: {$ref: '#/components/schemas/PublicProjectServiceResponse'}
+    PublicProjectImageResponse:
+      properties:
+        url: {type: string}
+        alt: {type: string, nullable: true}
+        esPrincipal: {type: boolean}
+        orden: {type: integer}
+    PublicProjectServiceResponse:
+      properties:
+        nombre: {type: string}
+        slug: {type: string}
     PublicBusinessUnitResponse:
       type: object
       description: Unidad activa perteneciente a la empresa del sitio, recursos activos y SEO opcional.

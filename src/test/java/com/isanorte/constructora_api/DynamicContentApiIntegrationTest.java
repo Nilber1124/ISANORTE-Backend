@@ -36,6 +36,7 @@ import com.isanorte.constructora_api.model.ContenidoPagina;
 import com.isanorte.constructora_api.model.Empresa;
 import com.isanorte.constructora_api.model.EstadisticaEmpresa;
 import com.isanorte.constructora_api.model.HeroScene;
+import com.isanorte.constructora_api.model.ImagenProyecto;
 import com.isanorte.constructora_api.model.Proyecto;
 import com.isanorte.constructora_api.model.RedSocial;
 import com.isanorte.constructora_api.model.SeccionLanding;
@@ -420,7 +421,8 @@ class DynamicContentApiIntegrationTest {
         UnidadNegocio inactive = unit(site.getEmpresa(), "inactive-unit", false, false, 1);
         mockMvc.perform(get("/api/publico/sitios/{key}/paginas/NOSOTROS", site.getClave()))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.contenido.titulo").value("Nosotros"))
-                .andExpect(jsonPath("$.seo.title").value("Nosotros SEO"));
+                .andExpect(jsonPath("$.seo.title").value("Nosotros SEO"))
+                .andExpect(jsonPath("$.proyectos").value(nullValue()));
         mockMvc.perform(get("/api/publico/sitios/{key}/unidades/{slug}", site.getClave(), unit.getSlug()))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.seo.title").value("Unidad SEO"));
         mockMvc.perform(get("/api/publico/sitios/{key}/unidades/{slug}", site.getClave(), foreign.getSlug()))
@@ -465,7 +467,8 @@ class DynamicContentApiIntegrationTest {
                 .andExpect(jsonPath("$.empresa.estadisticas[3].etiqueta").value("DISEÑO"))
                 .andExpect(jsonPath("$.empresa.estadisticas[0].id").doesNotExist())
                 .andExpect(jsonPath("$.empresa.estadisticas[0].activo").doesNotExist())
-                .andExpect(jsonPath("$.servicios").value(nullValue()));
+                .andExpect(jsonPath("$.servicios").value(nullValue()))
+                .andExpect(jsonPath("$.proyectos").value(nullValue()));
     }
 
     @Test
@@ -496,6 +499,7 @@ class DynamicContentApiIntegrationTest {
                 .andExpect(jsonPath("$.contenido.titulo").value("Servicios"))
                 .andExpect(jsonPath("$.seo.title").value("Servicios SEO"))
                 .andExpect(jsonPath("$.empresa").value(nullValue()))
+                .andExpect(jsonPath("$.proyectos").value(nullValue()))
                 .andExpect(jsonPath("$.servicios.length()").value(2))
                 .andExpect(jsonPath("$.servicios[0].slug").value(catalogOnly.getSlug()))
                 .andExpect(jsonPath("$.servicios[0].orden").value(0))
@@ -536,22 +540,91 @@ class DynamicContentApiIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.contenido.titulo").value("Servicios vacíos"))
                 .andExpect(jsonPath("$.empresa").value(nullValue()))
+                .andExpect(jsonPath("$.proyectos").value(nullValue()))
                 .andExpect(jsonPath("$.servicios").isArray())
                 .andExpect(jsonPath("$.servicios.length()").value(0));
     }
 
     @Test
+    void paginaProyectosPublicaExponeCatalogoActivoImagenesYServiciosSinCamposAdministrativos() throws Exception {
+        ConfiguracionSitio site = site("projects-public");
+        contenidoRepository.saveAndFlush(ContenidoPagina.builder().pagina(TipoPaginaPublica.PROYECTOS)
+                .titulo("Proyectos").activo(true).configuracionSitio(site).build());
+        seoRepository.saveAndFlush(SeoPagina.builder().tipoPagina(TipoPaginaSeo.PROYECTOS).title("Proyectos SEO")
+                .description("Descripción").configuracionSitio(site).build());
+
+        Servicio filterService = service("service-filter", true, false, 0);
+        Proyecto catalogOnly = project("project-catalog", true, false, 0);
+        catalogOnly.setUbicacion(null);
+        catalogOnly.setFechaProyecto("2025");
+        proyectoRepository.saveAndFlush(catalogOnly);
+        projectService(catalogOnly, filterService);
+        projectImage(catalogOnly, "/second.webp", null, false, 2);
+        projectImage(catalogOnly, "/cover.webp", "Portada pública", true, 0);
+
+        Proyecto noRelations = project("project-no-relations", true, false, 1);
+        Proyecto featured = project("project-featured", true, true, 2);
+        Proyecto inactive = project("project-inactive", false, true, 3);
+
+        mockMvc.perform(get("/api/publico/sitios/{key}/paginas/PROYECTOS", site.getClave()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.contenido.titulo").value("Proyectos"))
+                .andExpect(jsonPath("$.seo.title").value("Proyectos SEO"))
+                .andExpect(jsonPath("$.empresa").value(nullValue()))
+                .andExpect(jsonPath("$.servicios").value(nullValue()))
+                .andExpect(jsonPath("$.proyectos.length()").value(3))
+                .andExpect(jsonPath("$.proyectos[0].slug").value(catalogOnly.getSlug()))
+                .andExpect(jsonPath("$.proyectos[0].orden").value(0))
+                .andExpect(jsonPath("$.proyectos[0].ubicacion").value(nullValue()))
+                .andExpect(jsonPath("$.proyectos[0].fechaProyecto").value("2025"))
+                .andExpect(jsonPath("$.proyectos[0].imagenes.length()").value(2))
+                .andExpect(jsonPath("$.proyectos[0].imagenes[0].url").value("/cover.webp"))
+                .andExpect(jsonPath("$.proyectos[0].imagenes[0].esPrincipal").value(true))
+                .andExpect(jsonPath("$.proyectos[0].imagenes[1].url").value("/second.webp"))
+                .andExpect(jsonPath("$.proyectos[0].servicios[0].slug").value(filterService.getSlug()))
+                .andExpect(jsonPath("$.proyectos[1].slug").value(noRelations.getSlug()))
+                .andExpect(jsonPath("$.proyectos[1].imagenes.length()").value(0))
+                .andExpect(jsonPath("$.proyectos[1].servicios.length()").value(0))
+                .andExpect(jsonPath("$.proyectos[*].slug", not(hasItem(inactive.getSlug()))))
+                .andExpect(jsonPath("$.proyectos[0].id").doesNotExist())
+                .andExpect(jsonPath("$.proyectos[0].activo").doesNotExist())
+                .andExpect(jsonPath("$.proyectos[0].destacado").doesNotExist())
+                .andExpect(jsonPath("$.proyectos[0].fechaCreacion").doesNotExist())
+                .andExpect(jsonPath("$.proyectos[0].imagenes[0].id").doesNotExist())
+                .andExpect(jsonPath("$.proyectos[0].servicios[0].id").doesNotExist());
+
+        mockMvc.perform(get("/api/publico/sitios/{key}/home", site.getClave()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.proyectos.length()").value(1))
+                .andExpect(jsonPath("$.proyectos[0].slug").value(featured.getSlug()))
+                .andExpect(jsonPath("$.proyectos[0].slug").value(org.hamcrest.Matchers.not(catalogOnly.getSlug())));
+    }
+
+    @Test
+    void paginaProyectosPublicaMantieneContenidoCuandoElCatalogoEstaVacio() throws Exception {
+        ConfiguracionSitio site = site("projects-empty");
+        contenidoRepository.saveAndFlush(ContenidoPagina.builder().pagina(TipoPaginaPublica.PROYECTOS)
+                .titulo("Proyectos vacíos").activo(true).configuracionSitio(site).build());
+
+        mockMvc.perform(get("/api/publico/sitios/{key}/paginas/PROYECTOS", site.getClave()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.contenido.titulo").value("Proyectos vacíos"))
+                .andExpect(jsonPath("$.proyectos").isArray())
+                .andExpect(jsonPath("$.proyectos.length()").value(0));
+    }
+
+    @Test
     void otrasPaginasPublicasNoRecibenElAgregadoCorporativoDeNosotros() throws Exception {
         ConfiguracionSitio site = site("page-without-company");
-        for (TipoPaginaPublica page : List.of(
-                TipoPaginaPublica.PROYECTOS, TipoPaginaPublica.CONTACTO)) {
+        for (TipoPaginaPublica page : List.of(TipoPaginaPublica.CONTACTO)) {
             contenidoRepository.saveAndFlush(ContenidoPagina.builder().pagina(page).titulo(page.name())
                     .activo(true).configuracionSitio(site).build());
             mockMvc.perform(get("/api/publico/sitios/{key}/paginas/{page}", site.getClave(), page.name()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.contenido.pagina").value(page.name()))
                     .andExpect(jsonPath("$.empresa").value(nullValue()))
-                    .andExpect(jsonPath("$.servicios").value(nullValue()));
+                    .andExpect(jsonPath("$.servicios").value(nullValue()))
+                    .andExpect(jsonPath("$.proyectos").value(nullValue()));
         }
     }
 
@@ -586,6 +659,16 @@ class DynamicContentApiIntegrationTest {
     private Proyecto project(String seed, boolean active, boolean featured, int order) {
         return proyectoRepository.saveAndFlush(Proyecto.builder().nombre(seed).slug(seed + "-" + random(5))
                 .descripcion("Descripción").activo(active).destacado(featured).orden(order).build());
+    }
+
+    private void projectService(Proyecto project, Servicio service) {
+        project.addServicio(service);
+        proyectoRepository.saveAndFlush(project);
+    }
+
+    private void projectImage(Proyecto project, String url, String alt, boolean principal, int order) {
+        project.addImagen(ImagenProyecto.builder().url(url).alt(alt).esPrincipal(principal).orden(order).build());
+        proyectoRepository.saveAndFlush(project);
     }
 
     private UnidadNegocio unit(Empresa company, String slug, boolean active, boolean featured, int order) {
