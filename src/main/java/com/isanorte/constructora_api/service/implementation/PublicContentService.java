@@ -11,6 +11,8 @@ import com.isanorte.constructora_api.dto.response.PublicCompanyAboutResponse;
 import com.isanorte.constructora_api.dto.response.PublicCompanyStatisticResponse;
 import com.isanorte.constructora_api.dto.response.PublicHomeResponse;
 import com.isanorte.constructora_api.dto.response.PublicPageResponse;
+import com.isanorte.constructora_api.dto.response.PublicServiceBenefitResponse;
+import com.isanorte.constructora_api.dto.response.PublicServiceResponse;
 import com.isanorte.constructora_api.dto.response.PublicSiteResponse;
 import com.isanorte.constructora_api.enums.TipoPaginaPublica;
 import com.isanorte.constructora_api.enums.TipoPaginaSeo;
@@ -144,13 +146,18 @@ public class PublicContentService implements IPublicContentService {
                                         item.getSufijo(), item.getEtiqueta(), item.getOrden()))
                                 .toList())
                 : null;
+        List<PublicServiceResponse> publicServices = pagina == TipoPaginaPublica.SERVICIOS
+                ? servicioRepository.findPublicActiveWithBenefitsOrderByOrdenAscIdAsc().stream()
+                        .map(this::toPublicService)
+                        .toList()
+                : null;
         return new PublicPageResponse(
                 new PublicPageResponse.Contenido(content.getPagina(), content.getEyebrow(), content.getTitulo(),
                         content.getIntroduccion(), content.getDescripcion(), content.getImagenUrl(),
                         content.getImagenAlt(), content.getImagenFondoUrl(), List.copyOf(content.getTags())),
                 seo == null ? null : new PublicPageResponse.Seo(
                         seo.getTitle(), seo.getDescription(), seo.getOgImageUrl(), seo.getRobots()),
-                publicCompany);
+                publicCompany, publicServices);
     }
 
     @Override @Transactional(readOnly = true)
@@ -173,5 +180,16 @@ public class PublicContentService implements IPublicContentService {
     private ConfiguracionSitio findSiteEntity(String key) {
         return configuracionRepository.findByClave(key)
                 .orElseThrow(() -> new ModelNotFoundException("Sitio público no encontrado con clave: " + key));
+    }
+
+    private PublicServiceResponse toPublicService(com.isanorte.constructora_api.model.Servicio service) {
+        return new PublicServiceResponse(
+                service.getNombre(), service.getSlug(), service.getEtiqueta(), service.getResumen(),
+                service.getDescripcion(), service.getImagenUrl(), service.getImagenAlt(), service.getOrden(),
+                service.getBeneficios().stream()
+                        .filter(benefit -> Boolean.TRUE.equals(benefit.getActivo()))
+                        .sorted(BENEFIT_ORDER)
+                        .map(benefit -> new PublicServiceBenefitResponse(benefit.getTexto(), benefit.getOrden()))
+                        .toList());
     }
 }

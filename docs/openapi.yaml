@@ -2902,6 +2902,10 @@ components:
         empresa:
           allOf: [{$ref: '#/components/schemas/PublicEmpresaNosotros'}]
           nullable: true
+        servicios:
+          type: array
+          nullable: true
+          items: {$ref: '#/components/schemas/PublicServiceResponse'}
     PublicContenidoPagina:
       type: object
       properties:
@@ -2936,6 +2940,24 @@ components:
         prefijo: {type: string, nullable: true}
         sufijo: {type: string, nullable: true}
         etiqueta: {type: string}
+        orden: {type: integer}
+    PublicServiceResponse:
+      description: Servicio editorial público usado por la página SERVICIOS.
+      properties:
+        nombre: {type: string}
+        slug: {type: string}
+        etiqueta: {type: string, nullable: true}
+        resumen: {type: string, nullable: true}
+        descripcion: {type: string, nullable: true}
+        imagenUrl: {type: string, nullable: true}
+        imagenAlt: {type: string, nullable: true}
+        orden: {type: integer}
+        beneficios:
+          type: array
+          items: {$ref: '#/components/schemas/PublicServiceBenefitResponse'}
+    PublicServiceBenefitResponse:
+      properties:
+        texto: {type: string}
         orden: {type: integer}
     PublicBusinessUnitResponse:
       type: object

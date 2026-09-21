@@ -5,7 +5,9 @@ import java.util.List;
 import com.isanorte.constructora_api.enums.RobotsSeo;
 import com.isanorte.constructora_api.enums.TipoPaginaPublica;
 
-public record PublicPageResponse(Contenido contenido, Seo seo, PublicCompanyAboutResponse empresa) {
+public record PublicPageResponse(
+        Contenido contenido, Seo seo, PublicCompanyAboutResponse empresa,
+        List<PublicServiceResponse> servicios) {
 
     public record Contenido(
             TipoPaginaPublica pagina, String eyebrow, String titulo, String introduccion,

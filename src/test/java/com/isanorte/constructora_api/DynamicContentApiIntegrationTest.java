@@ -1,6 +1,8 @@
 package com.isanorte.constructora_api;
 
 import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -29,6 +31,7 @@ import com.isanorte.constructora_api.enums.TipoPaginaSeo;
 import com.isanorte.constructora_api.enums.TipoPaginaPublica;
 import com.isanorte.constructora_api.enums.TipoSeccionLanding;
 import com.isanorte.constructora_api.model.ConfiguracionSitio;
+import com.isanorte.constructora_api.model.BeneficioServicio;
 import com.isanorte.constructora_api.model.ContenidoPagina;
 import com.isanorte.constructora_api.model.Empresa;
 import com.isanorte.constructora_api.model.EstadisticaEmpresa;
@@ -461,20 +464,94 @@ class DynamicContentApiIntegrationTest {
                 .andExpect(jsonPath("$.empresa.estadisticas[1].valor").value(15.50))
                 .andExpect(jsonPath("$.empresa.estadisticas[3].etiqueta").value("DISEÑO"))
                 .andExpect(jsonPath("$.empresa.estadisticas[0].id").doesNotExist())
-                .andExpect(jsonPath("$.empresa.estadisticas[0].activo").doesNotExist());
+                .andExpect(jsonPath("$.empresa.estadisticas[0].activo").doesNotExist())
+                .andExpect(jsonPath("$.servicios").value(nullValue()));
+    }
+
+    @Test
+    void paginaServiciosPublicaExponeCatalogoActivoConBeneficiosPublicosYNoDestacados() throws Exception {
+        ConfiguracionSitio site = site("services-public");
+        contenidoRepository.saveAndFlush(ContenidoPagina.builder().pagina(TipoPaginaPublica.SERVICIOS)
+                .titulo("Servicios").activo(true).configuracionSitio(site).build());
+        seoRepository.saveAndFlush(SeoPagina.builder().tipoPagina(TipoPaginaSeo.SERVICIOS).title("Servicios SEO")
+                .description("Descripción").configuracionSitio(site).build());
+
+        Servicio catalogOnly = service("catalog-only", true, false, 0);
+        catalogOnly.setEtiqueta("Etiqueta pública");
+        catalogOnly.setResumen("Resumen público");
+        catalogOnly.setDescripcion("Descripción pública");
+        catalogOnly.setImagenUrl("/catalogo.webp");
+        catalogOnly.setImagenAlt(null);
+        servicioRepository.saveAndFlush(catalogOnly);
+        benefit(catalogOnly, "Segundo activo", 2, true);
+        benefit(catalogOnly, "Primero activo", 0, true);
+        benefit(catalogOnly, "Beneficio oculto", 1, false);
+
+        Servicio featured = service("featured-public", true, true, 2);
+        Servicio inactive = service("inactive-public", false, true, 1);
+        benefit(featured, "Sin orden cero", 0, true);
+
+        mockMvc.perform(get("/api/publico/sitios/{key}/paginas/SERVICIOS", site.getClave()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.contenido.titulo").value("Servicios"))
+                .andExpect(jsonPath("$.seo.title").value("Servicios SEO"))
+                .andExpect(jsonPath("$.empresa").value(nullValue()))
+                .andExpect(jsonPath("$.servicios.length()").value(2))
+                .andExpect(jsonPath("$.servicios[0].slug").value(catalogOnly.getSlug()))
+                .andExpect(jsonPath("$.servicios[0].orden").value(0))
+                .andExpect(jsonPath("$.servicios[0].etiqueta").value("Etiqueta pública"))
+                .andExpect(jsonPath("$.servicios[0].imagenAlt").value(nullValue()))
+                .andExpect(jsonPath("$.servicios[0].beneficios.length()").value(2))
+                .andExpect(jsonPath("$.servicios[0].beneficios[0].texto").value("Primero activo"))
+                .andExpect(jsonPath("$.servicios[0].beneficios[0].orden").value(0))
+                .andExpect(jsonPath("$.servicios[0].beneficios[1].texto").value("Segundo activo"))
+                .andExpect(jsonPath("$.servicios[0].beneficios[*].texto", not(hasItem("Beneficio oculto"))))
+                .andExpect(jsonPath("$.servicios[*].slug", not(hasItem(inactive.getSlug()))))
+                .andExpect(jsonPath("$.servicios[0].id").doesNotExist())
+                .andExpect(jsonPath("$.servicios[0].activo").doesNotExist())
+                .andExpect(jsonPath("$.servicios[0].destacado").doesNotExist())
+                .andExpect(jsonPath("$.servicios[0].fechaCreacion").doesNotExist())
+                .andExpect(jsonPath("$.servicios[0].beneficios[0].id").doesNotExist())
+                .andExpect(jsonPath("$.servicios[0].beneficios[0].activo").doesNotExist());
+
+        mockMvc.perform(get("/api/publico/sitios/{key}/home", site.getClave()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.servicios.length()").value(1))
+                .andExpect(jsonPath("$.servicios[0].slug").value(featured.getSlug()))
+                .andExpect(jsonPath("$.servicios[0].slug").value(org.hamcrest.Matchers.not(catalogOnly.getSlug())));
+
+        mockMvc.perform(get("/api/servicios/activos"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").exists())
+                .andExpect(jsonPath("$[0].fechaCreacion").exists());
+    }
+
+    @Test
+    void paginaServiciosPublicaMantieneContenidoCuandoElCatalogoEstaVacio() throws Exception {
+        ConfiguracionSitio site = site("services-empty");
+        contenidoRepository.saveAndFlush(ContenidoPagina.builder().pagina(TipoPaginaPublica.SERVICIOS)
+                .titulo("Servicios vacíos").activo(true).configuracionSitio(site).build());
+
+        mockMvc.perform(get("/api/publico/sitios/{key}/paginas/SERVICIOS", site.getClave()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.contenido.titulo").value("Servicios vacíos"))
+                .andExpect(jsonPath("$.empresa").value(nullValue()))
+                .andExpect(jsonPath("$.servicios").isArray())
+                .andExpect(jsonPath("$.servicios.length()").value(0));
     }
 
     @Test
     void otrasPaginasPublicasNoRecibenElAgregadoCorporativoDeNosotros() throws Exception {
         ConfiguracionSitio site = site("page-without-company");
         for (TipoPaginaPublica page : List.of(
-                TipoPaginaPublica.SERVICIOS, TipoPaginaPublica.PROYECTOS, TipoPaginaPublica.CONTACTO)) {
+                TipoPaginaPublica.PROYECTOS, TipoPaginaPublica.CONTACTO)) {
             contenidoRepository.saveAndFlush(ContenidoPagina.builder().pagina(page).titulo(page.name())
                     .activo(true).configuracionSitio(site).build());
             mockMvc.perform(get("/api/publico/sitios/{key}/paginas/{page}", site.getClave(), page.name()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.contenido.pagina").value(page.name()))
-                    .andExpect(jsonPath("$.empresa").value(nullValue()));
+                    .andExpect(jsonPath("$.empresa").value(nullValue()))
+                    .andExpect(jsonPath("$.servicios").value(nullValue()));
         }
     }
 
@@ -499,6 +576,11 @@ class DynamicContentApiIntegrationTest {
     private Servicio service(String seed, boolean active, boolean featured, int order) {
         return servicioRepository.saveAndFlush(Servicio.builder().nombre(seed).slug(seed + "-" + random(5))
                 .descripcion("Descripción").activo(active).destacado(featured).orden(order).build());
+    }
+
+    private void benefit(Servicio service, String text, int order, boolean active) {
+        service.addBeneficio(BeneficioServicio.builder().texto(text).orden(order).activo(active).build());
+        servicioRepository.saveAndFlush(service);
     }
 
     private Proyecto project(String seed, boolean active, boolean featured, int order) {
