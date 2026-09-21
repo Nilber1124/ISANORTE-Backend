@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.isanorte.constructora_api.dto.response.PublicBusinessUnitResponse;
+import com.isanorte.constructora_api.dto.response.PublicCompanyAboutResponse;
+import com.isanorte.constructora_api.dto.response.PublicCompanyStatisticResponse;
 import com.isanorte.constructora_api.dto.response.PublicHomeResponse;
 import com.isanorte.constructora_api.dto.response.PublicPageResponse;
 import com.isanorte.constructora_api.dto.response.PublicSiteResponse;
@@ -19,6 +21,7 @@ import com.isanorte.constructora_api.model.SeoPagina;
 import com.isanorte.constructora_api.model.UnidadNegocio;
 import com.isanorte.constructora_api.repository.ConfiguracionSitioRepository;
 import com.isanorte.constructora_api.repository.ContenidoPaginaRepository;
+import com.isanorte.constructora_api.repository.EstadisticaEmpresaRepository;
 import com.isanorte.constructora_api.repository.ProyectoRepository;
 import com.isanorte.constructora_api.repository.RedSocialRepository;
 import com.isanorte.constructora_api.repository.SeccionLandingRepository;
@@ -54,6 +57,7 @@ public class PublicContentService implements IPublicContentService {
     private final ProyectoRepository proyectoRepository;
     private final UnidadNegocioRepository unidadRepository;
     private final ContenidoPaginaRepository contenidoRepository;
+    private final EstadisticaEmpresaRepository estadisticaEmpresaRepository;
     private final SeoPaginaRepository seoRepository;
     private final RedSocialRepository redSocialRepository;
 
@@ -131,12 +135,22 @@ public class PublicContentService implements IPublicContentService {
                 .orElseThrow(() -> new ModelNotFoundException("Contenido público activo no encontrado para " + pagina));
         SeoPagina seo = seoRepository.findByConfiguracionSitioIdAndTipoPaginaAndUnidadNegocioIsNull(
                 site.getId(), TipoPaginaSeo.valueOf(pagina.name())).orElse(null);
+        PublicCompanyAboutResponse publicCompany = pagina == TipoPaginaPublica.NOSOTROS
+                ? new PublicCompanyAboutResponse(
+                        site.getEmpresa().getMision(), site.getEmpresa().getVision(), site.getEmpresa().getValores(),
+                        estadisticaEmpresaRepository.findByEmpresaIdAndActivoTrueOrderByOrdenAscIdAsc(
+                                site.getEmpresa().getId()).stream()
+                                .map(item -> new PublicCompanyStatisticResponse(item.getValor(), item.getPrefijo(),
+                                        item.getSufijo(), item.getEtiqueta(), item.getOrden()))
+                                .toList())
+                : null;
         return new PublicPageResponse(
                 new PublicPageResponse.Contenido(content.getPagina(), content.getEyebrow(), content.getTitulo(),
                         content.getIntroduccion(), content.getDescripcion(), content.getImagenUrl(),
                         content.getImagenAlt(), content.getImagenFondoUrl(), List.copyOf(content.getTags())),
                 seo == null ? null : new PublicPageResponse.Seo(
-                        seo.getTitle(), seo.getDescription(), seo.getOgImageUrl(), seo.getRobots()));
+                        seo.getTitle(), seo.getDescription(), seo.getOgImageUrl(), seo.getRobots()),
+                publicCompany);
     }
 
     @Override @Transactional(readOnly = true)

@@ -1,5 +1,6 @@
 package com.isanorte.constructora_api;
 
+import static org.hamcrest.Matchers.nullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -8,6 +9,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.math.BigDecimal;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,10 +26,12 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.isanorte.constructora_api.enums.TipoPaginaSeo;
+import com.isanorte.constructora_api.enums.TipoPaginaPublica;
 import com.isanorte.constructora_api.enums.TipoSeccionLanding;
 import com.isanorte.constructora_api.model.ConfiguracionSitio;
 import com.isanorte.constructora_api.model.ContenidoPagina;
 import com.isanorte.constructora_api.model.Empresa;
+import com.isanorte.constructora_api.model.EstadisticaEmpresa;
 import com.isanorte.constructora_api.model.HeroScene;
 import com.isanorte.constructora_api.model.Proyecto;
 import com.isanorte.constructora_api.model.RedSocial;
@@ -38,6 +42,7 @@ import com.isanorte.constructora_api.model.UnidadNegocio;
 import com.isanorte.constructora_api.repository.ConfiguracionSitioRepository;
 import com.isanorte.constructora_api.repository.ContenidoPaginaRepository;
 import com.isanorte.constructora_api.repository.EmpresaRepository;
+import com.isanorte.constructora_api.repository.EstadisticaEmpresaRepository;
 import com.isanorte.constructora_api.repository.ProyectoRepository;
 import com.isanorte.constructora_api.repository.RedSocialRepository;
 import com.isanorte.constructora_api.repository.SeccionLandingRepository;
@@ -56,6 +61,7 @@ class DynamicContentApiIntegrationTest {
     @Autowired private MockMvc mockMvc;
     @Autowired private ObjectMapper objectMapper;
     @Autowired private EmpresaRepository empresaRepository;
+    @Autowired private EstadisticaEmpresaRepository estadisticaEmpresaRepository;
     @Autowired private ConfiguracionSitioRepository configuracionRepository;
     @Autowired private SeccionLandingRepository seccionRepository;
     @Autowired private ServicioRepository servicioRepository;
@@ -350,6 +356,7 @@ class DynamicContentApiIntegrationTest {
                 .andExpect(jsonPath("$.unidades.length()").value(2))
                 .andExpect(jsonPath("$.unidades[0].slug").value("unit-active"))
                 .andExpect(jsonPath("$.empresa.ruc").doesNotExist())
+                .andExpect(jsonPath("$.empresa.mision").doesNotExist())
                 .andExpect(jsonPath("$.scriptsHead").doesNotExist());
         mockMvc.perform(get("/api/publico/sitios/no-existe")).andExpect(status().isNotFound());
     }
@@ -422,6 +429,55 @@ class DynamicContentApiIntegrationTest {
                 .andExpect(status().isNotFound());
     }
 
+    @Test
+    void paginaNosotrosPublicaExponeEmpresaDelSitioYEstadisticasActivasOrdenadas() throws Exception {
+        ConfiguracionSitio site = site("about-company");
+        ConfiguracionSitio other = site("about-company-other");
+        Empresa company = site.getEmpresa();
+        company.setMision("Misión pública");
+        company.setVision("Visión pública");
+        company.setValores("Valores públicos");
+        empresaRepository.saveAndFlush(company);
+        contenidoRepository.saveAndFlush(ContenidoPagina.builder().pagina(TipoPaginaPublica.NOSOTROS)
+                .titulo("Nosotros").activo(true).configuracionSitio(site).build());
+        statistic(company, BigDecimal.ZERO, null, null, "CERO", 0, true);
+        statistic(company, new BigDecimal("15.50"), "+", "años", "EXPERIENCIA", 1, true);
+        statistic(company, new BigDecimal("98"), null, "%", "SATISFACCIÓN", 2, true);
+        statistic(company, new BigDecimal("100"), null, "%", "DISEÑO", 3, true);
+        statistic(company, new BigDecimal("999"), null, null, "INACTIVA", 0, false);
+        statistic(other.getEmpresa(), new BigDecimal("777"), null, null, "AJENA", 0, true);
+
+        mockMvc.perform(get("/api/publico/sitios/{key}/paginas/NOSOTROS", site.getClave()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.empresa.mision").value("Misión pública"))
+                .andExpect(jsonPath("$.empresa.vision").value("Visión pública"))
+                .andExpect(jsonPath("$.empresa.valores").value("Valores públicos"))
+                .andExpect(jsonPath("$.empresa.estadisticas.length()").value(4))
+                .andExpect(jsonPath("$.empresa.estadisticas[0].valor").value(0))
+                .andExpect(jsonPath("$.empresa.estadisticas[0].prefijo").value(nullValue()))
+                .andExpect(jsonPath("$.empresa.estadisticas[0].sufijo").value(nullValue()))
+                .andExpect(jsonPath("$.empresa.estadisticas[0].etiqueta").value("CERO"))
+                .andExpect(jsonPath("$.empresa.estadisticas[0].orden").value(0))
+                .andExpect(jsonPath("$.empresa.estadisticas[1].valor").value(15.50))
+                .andExpect(jsonPath("$.empresa.estadisticas[3].etiqueta").value("DISEÑO"))
+                .andExpect(jsonPath("$.empresa.estadisticas[0].id").doesNotExist())
+                .andExpect(jsonPath("$.empresa.estadisticas[0].activo").doesNotExist());
+    }
+
+    @Test
+    void otrasPaginasPublicasNoRecibenElAgregadoCorporativoDeNosotros() throws Exception {
+        ConfiguracionSitio site = site("page-without-company");
+        for (TipoPaginaPublica page : List.of(
+                TipoPaginaPublica.SERVICIOS, TipoPaginaPublica.PROYECTOS, TipoPaginaPublica.CONTACTO)) {
+            contenidoRepository.saveAndFlush(ContenidoPagina.builder().pagina(page).titulo(page.name())
+                    .activo(true).configuracionSitio(site).build());
+            mockMvc.perform(get("/api/publico/sitios/{key}/paginas/{page}", site.getClave(), page.name()))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.contenido.pagina").value(page.name()))
+                    .andExpect(jsonPath("$.empresa").value(nullValue()));
+        }
+    }
+
     private Empresa company(String seed) {
         return empresaRepository.saveAndFlush(Empresa.builder().razonSocial("Razón " + seed)
                 .nombreComercial("Comercial " + seed).ruc("R" + random(19)).build());
@@ -458,6 +514,12 @@ class DynamicContentApiIntegrationTest {
     private void social(Empresa company, String name, boolean active, int order) {
         redSocialRepository.saveAndFlush(RedSocial.builder().nombre(name).url("https://example.com/" + random(5))
                 .empresa(company).activo(active).orden(order).build());
+    }
+
+    private void statistic(Empresa company, BigDecimal value, String prefix, String suffix, String label,
+            int order, boolean active) {
+        estadisticaEmpresaRepository.saveAndFlush(EstadisticaEmpresa.builder().empresa(company).valor(value)
+                .prefijo(prefix).sufijo(suffix).etiqueta(label).orden(order).activo(active).build());
     }
 
     private Map<String, Object> seoBody(UUID siteId, String type, UUID unitId) {
