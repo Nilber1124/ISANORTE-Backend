@@ -1604,6 +1604,27 @@ paths:
         - {name: clave, in: path, required: true, schema: {type: string}}
         - {name: slug, in: path, required: true, schema: {type: string}}
       responses: {'200': {description: Unidad activa, content: {application/json: {schema: {$ref: '#/components/schemas/PublicBusinessUnitResponse'}}}}, '404': {$ref: '#/components/responses/NotFound'}}
+  /api/publico/sitios/{clave}/unidades/{unidadSlug}/catalogo:
+    get:
+      tags: [Público]
+      operationId: obtenerCatalogoPublicoPorUnidad
+      x-access-intent: PUBLICO
+      description: Catálogo web del dominio Producto, limitado a una unidad activa del sitio. No representa un recurso PDF de unidad.
+      parameters:
+        - {name: clave, in: path, required: true, schema: {type: string}}
+        - {name: unidadSlug, in: path, required: true, schema: {type: string}}
+      responses: {'200': {description: Catálogo de productos públicos de la unidad, posiblemente vacío, content: {application/json: {schema: {$ref: '#/components/schemas/PublicProductCatalogResponse'}}}}, '404': {$ref: '#/components/responses/NotFound'}}
+  /api/publico/sitios/{clave}/unidades/{unidadSlug}/productos/{productoSlug}:
+    get:
+      tags: [Público]
+      operationId: obtenerProductoPublicoPorUnidad
+      x-access-intent: PUBLICO
+      description: Detalle de un producto publicado cuya unidad activa pertenece al sitio solicitado.
+      parameters:
+        - {name: clave, in: path, required: true, schema: {type: string}}
+        - {name: unidadSlug, in: path, required: true, schema: {type: string}}
+        - {name: productoSlug, in: path, required: true, schema: {type: string}}
+      responses: {'200': {description: Producto público de la unidad, content: {application/json: {schema: {$ref: '#/components/schemas/PublicProductDetailResponse'}}}}, '404': {$ref: '#/components/responses/NotFound'}}
 
 components:
   parameters:
@@ -3002,6 +3023,126 @@ components:
         seo:
           allOf: [{$ref: '#/components/schemas/PublicSeo'}]
           nullable: true
+    PublicProductCatalogResponse:
+      type: object
+      description: Catálogo web del dominio Producto de una unidad activa; no es el recurso PDF CATALOGO.
+      required: [unidad, categorias, productos]
+      properties:
+        unidad: {$ref: '#/components/schemas/PublicProductCatalogUnitResponse'}
+        categorias:
+          type: array
+          items: {$ref: '#/components/schemas/PublicProductCategoryResponse'}
+        productos:
+          type: array
+          items: {$ref: '#/components/schemas/PublicProductCardResponse'}
+    PublicProductCatalogUnitResponse:
+      type: object
+      required: [nombre, slug]
+      properties:
+        nombre: {type: string}
+        slug: {type: string}
+    PublicProductCardResponse:
+      type: object
+      required: [nombre, sku, slug, descripcion, disponibilidad, categorias]
+      properties:
+        nombre: {type: string}
+        sku: {type: string}
+        slug: {type: string}
+        resumen: {type: string, nullable: true}
+        descripcion: {type: string}
+        precioBase: {type: number, format: decimal, nullable: true}
+        precioAnterior: {type: number, format: decimal, nullable: true}
+        descuentoPorcentaje: {type: number, format: decimal, nullable: true}
+        disponibilidad: {$ref: '#/components/schemas/EstadoDisponibilidad'}
+        imagen:
+          allOf: [{$ref: '#/components/schemas/PublicProductImageResponse'}]
+          nullable: true
+        categorias:
+          type: array
+          items: {$ref: '#/components/schemas/PublicProductCategoryResponse'}
+    PublicProductDetailResponse:
+      type: object
+      required: [nombre, sku, slug, descripcion, disponibilidad, categorias, imagenes, variantes, especificaciones, documentos]
+      properties:
+        nombre: {type: string}
+        sku: {type: string}
+        slug: {type: string}
+        resumen: {type: string, nullable: true}
+        descripcion: {type: string}
+        precioBase: {type: number, format: decimal, nullable: true}
+        precioAnterior: {type: number, format: decimal, nullable: true}
+        descuentoPorcentaje: {type: number, format: decimal, nullable: true}
+        disponibilidad: {$ref: '#/components/schemas/EstadoDisponibilidad'}
+        categorias:
+          type: array
+          items: {$ref: '#/components/schemas/PublicProductCategoryResponse'}
+        imagenes:
+          type: array
+          items: {$ref: '#/components/schemas/PublicProductImageResponse'}
+        variantes:
+          type: array
+          items: {$ref: '#/components/schemas/PublicProductVariantResponse'}
+        especificaciones:
+          type: array
+          items: {$ref: '#/components/schemas/PublicProductSpecificationResponse'}
+        documentos:
+          type: array
+          items: {$ref: '#/components/schemas/PublicProductDocumentResponse'}
+        configuracionCalculo:
+          allOf: [{$ref: '#/components/schemas/PublicProductCalculationResponse'}]
+          nullable: true
+    PublicProductCategoryResponse:
+      type: object
+      required: [nombre, slug]
+      properties:
+        nombre: {type: string}
+        slug: {type: string}
+    PublicProductImageResponse:
+      type: object
+      required: [url, esPrincipal, orden]
+      properties:
+        url: {type: string}
+        alt: {type: string, nullable: true}
+        esPrincipal: {type: boolean}
+        orden: {type: integer, format: int32}
+    PublicProductVariantResponse:
+      type: object
+      required: [sku, nombre, disponible, orden]
+      properties:
+        sku: {type: string}
+        nombre: {type: string}
+        descripcion: {type: string, nullable: true}
+        precio: {type: number, format: decimal, nullable: true}
+        disponible: {type: boolean}
+        imagenUrl: {type: string, nullable: true}
+        orden: {type: integer, format: int32}
+    PublicProductSpecificationResponse:
+      type: object
+      required: [clave, valor, orden]
+      properties:
+        clave: {type: string}
+        valor: {type: string}
+        grupo: {type: string, nullable: true}
+        orden: {type: integer, format: int32}
+    PublicProductDocumentResponse:
+      type: object
+      required: [titulo, url, tipo]
+      properties:
+        titulo: {type: string}
+        url: {type: string}
+        tipo: {$ref: '#/components/schemas/TipoDocumentoProducto'}
+        formato: {type: string, nullable: true}
+        tamanoBytes: {type: integer, format: int64, nullable: true}
+    PublicProductCalculationResponse:
+      type: object
+      required: [habilitada, coberturaPorUnidad]
+      properties:
+        habilitada: {type: boolean}
+        etiquetaEntrada: {type: string, nullable: true}
+        unidadEntrada: {type: string, nullable: true}
+        coberturaPorUnidad: {type: number, format: decimal}
+        unidadVenta: {type: string, nullable: true}
+        textoAyuda: {type: string, nullable: true}
 
     ProyectoResponse:
       type: object

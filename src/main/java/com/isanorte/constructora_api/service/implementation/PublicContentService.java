@@ -11,23 +11,40 @@ import com.isanorte.constructora_api.dto.response.PublicCompanyAboutResponse;
 import com.isanorte.constructora_api.dto.response.PublicCompanyStatisticResponse;
 import com.isanorte.constructora_api.dto.response.PublicHomeResponse;
 import com.isanorte.constructora_api.dto.response.PublicPageResponse;
+import com.isanorte.constructora_api.dto.response.PublicProductCardResponse;
+import com.isanorte.constructora_api.dto.response.PublicProductCatalogResponse;
+import com.isanorte.constructora_api.dto.response.PublicProductCategoryResponse;
+import com.isanorte.constructora_api.dto.response.PublicProductDetailResponse;
+import com.isanorte.constructora_api.dto.response.PublicProductDocumentResponse;
+import com.isanorte.constructora_api.dto.response.PublicProductImageResponse;
+import com.isanorte.constructora_api.dto.response.PublicProductSpecificationResponse;
+import com.isanorte.constructora_api.dto.response.PublicProductVariantResponse;
 import com.isanorte.constructora_api.dto.response.PublicProjectImageResponse;
 import com.isanorte.constructora_api.dto.response.PublicProjectResponse;
 import com.isanorte.constructora_api.dto.response.PublicProjectServiceResponse;
 import com.isanorte.constructora_api.dto.response.PublicServiceBenefitResponse;
 import com.isanorte.constructora_api.dto.response.PublicServiceResponse;
 import com.isanorte.constructora_api.dto.response.PublicSiteResponse;
+import com.isanorte.constructora_api.enums.EstadoPublicacion;
 import com.isanorte.constructora_api.enums.TipoPaginaPublica;
 import com.isanorte.constructora_api.enums.TipoPaginaSeo;
 import com.isanorte.constructora_api.exception.ModelNotFoundException;
 import com.isanorte.constructora_api.model.ConfiguracionSitio;
 import com.isanorte.constructora_api.model.ContenidoPagina;
+import com.isanorte.constructora_api.model.CategoriaProducto;
+import com.isanorte.constructora_api.model.DocumentoProducto;
+import com.isanorte.constructora_api.model.EspecificacionProducto;
+import com.isanorte.constructora_api.model.ImagenProducto;
+import com.isanorte.constructora_api.model.Producto;
 import com.isanorte.constructora_api.model.SeoPagina;
 import com.isanorte.constructora_api.model.UnidadNegocio;
+import com.isanorte.constructora_api.model.VarianteProducto;
+import com.isanorte.constructora_api.mapper.PublicProductMapper;
 import com.isanorte.constructora_api.repository.ConfiguracionSitioRepository;
 import com.isanorte.constructora_api.repository.ContenidoPaginaRepository;
 import com.isanorte.constructora_api.repository.EstadisticaEmpresaRepository;
 import com.isanorte.constructora_api.repository.ProyectoRepository;
+import com.isanorte.constructora_api.repository.ProductoRepository;
 import com.isanorte.constructora_api.repository.RedSocialRepository;
 import com.isanorte.constructora_api.repository.SeccionLandingRepository;
 import com.isanorte.constructora_api.repository.SeoPaginaRepository;
@@ -58,16 +75,34 @@ public class PublicContentService implements IPublicContentService {
     private static final Comparator<com.isanorte.constructora_api.model.Servicio> PROJECT_SERVICE_ORDER =
             Comparator.comparing(com.isanorte.constructora_api.model.Servicio::getOrden)
                     .thenComparing(value -> value.getId().toString());
+    private static final Comparator<ImagenProducto> PRODUCT_IMAGE_ORDER =
+            Comparator.comparing((ImagenProducto value) -> Boolean.TRUE.equals(value.getEsPrincipal()) ? 0 : 1)
+                    .thenComparing(ImagenProducto::getOrden)
+                    .thenComparing(value -> value.getId().toString());
+    private static final Comparator<CategoriaProducto> PRODUCT_CATEGORY_ORDER =
+            Comparator.comparing(CategoriaProducto::getOrden)
+                    .thenComparing(value -> value.getId().toString());
+    private static final Comparator<VarianteProducto> PRODUCT_VARIANT_ORDER =
+            Comparator.comparing(VarianteProducto::getOrden)
+                    .thenComparing(value -> value.getId().toString());
+    private static final Comparator<EspecificacionProducto> PRODUCT_SPECIFICATION_ORDER =
+            Comparator.comparing(EspecificacionProducto::getOrden)
+                    .thenComparing(value -> value.getId().toString());
+    private static final Comparator<DocumentoProducto> PRODUCT_DOCUMENT_ORDER =
+            Comparator.comparing(DocumentoProducto::getTitulo)
+                    .thenComparing(value -> value.getId().toString());
 
     private final ConfiguracionSitioRepository configuracionRepository;
     private final SeccionLandingRepository seccionRepository;
     private final ServicioRepository servicioRepository;
     private final ProyectoRepository proyectoRepository;
+    private final ProductoRepository productoRepository;
     private final UnidadNegocioRepository unidadRepository;
     private final ContenidoPaginaRepository contenidoRepository;
     private final EstadisticaEmpresaRepository estadisticaEmpresaRepository;
     private final SeoPaginaRepository seoRepository;
     private final RedSocialRepository redSocialRepository;
+    private final PublicProductMapper publicProductMapper;
 
     @Override @Transactional(readOnly = true)
     public PublicSiteResponse findSite(String clave) {
@@ -172,8 +207,7 @@ public class PublicContentService implements IPublicContentService {
     @Override @Transactional(readOnly = true)
     public PublicBusinessUnitResponse findBusinessUnit(String clave, String slug) {
         ConfiguracionSitio site = findSiteEntity(clave);
-        UnidadNegocio unit = unidadRepository.findByEmpresaIdAndSlugAndActivoTrue(site.getEmpresa().getId(), slug)
-                .orElseThrow(() -> new ModelNotFoundException("Unidad pública activa no encontrada con slug: " + slug));
+        UnidadNegocio unit = findPublicBusinessUnit(site, slug);
         SeoPagina seo = seoRepository.findByConfiguracionSitioIdAndTipoPaginaAndUnidadNegocioId(
                 site.getId(), TipoPaginaSeo.UNIDAD_NEGOCIO, unit.getId()).orElse(null);
         return new PublicBusinessUnitResponse(unit.getNombre(), unit.getSlug(), unit.getDescripcion(), unit.getIcono(),
@@ -186,9 +220,76 @@ public class PublicContentService implements IPublicContentService {
                         seo.getTitle(), seo.getDescription(), seo.getOgImageUrl(), seo.getRobots()));
     }
 
+    @Override @Transactional(readOnly = true)
+    public PublicProductCatalogResponse findProductCatalog(String clave, String unidadSlug) {
+        ConfiguracionSitio site = findSiteEntity(clave);
+        UnidadNegocio unit = findPublicBusinessUnit(site, unidadSlug);
+        List<Producto> products = productoRepository.findByUnidadNegocioIdAndEstadoOrderByNombreAscIdAsc(
+                unit.getId(), EstadoPublicacion.PUBLICADO);
+        List<PublicProductCategoryResponse> categories = products.stream()
+                .flatMap(product -> publicCategories(product, unit).stream())
+                .distinct()
+                .sorted(PRODUCT_CATEGORY_ORDER)
+                .map(publicProductMapper::toCategory)
+                .toList();
+        List<PublicProductCardResponse> cards = products.stream()
+                .map(product -> publicProductMapper.toCard(
+                        product,
+                        primaryImage(product),
+                        publicCategories(product, unit).stream().map(publicProductMapper::toCategory).toList()))
+                .toList();
+        return new PublicProductCatalogResponse(
+                new PublicProductCatalogResponse.Unidad(unit.getNombre(), unit.getSlug()), categories, cards);
+    }
+
+    @Override @Transactional(readOnly = true)
+    public PublicProductDetailResponse findPublicProduct(String clave, String unidadSlug, String productoSlug) {
+        ConfiguracionSitio site = findSiteEntity(clave);
+        UnidadNegocio unit = findPublicBusinessUnit(site, unidadSlug);
+        Producto product = productoRepository.findByUnidadNegocioIdAndSlugAndEstado(
+                        unit.getId(), productoSlug, EstadoPublicacion.PUBLICADO)
+                .orElseThrow(() -> new ModelNotFoundException("Producto público no encontrado con slug: " + productoSlug));
+
+        // These independent collections are initialized deliberately instead of joining multiple bags.
+        product.getImagenes().size();
+        product.getVariantes().size();
+        product.getEspecificaciones().size();
+        product.getDocumentos().size();
+        if (product.getConfiguracionCalculo() != null) {
+            product.getConfiguracionCalculo().getHabilitada();
+        }
+
+        return publicProductMapper.toDetail(
+                product,
+                publicCategories(product, unit).stream().map(publicProductMapper::toCategory).toList(),
+                product.getImagenes().stream().sorted(PRODUCT_IMAGE_ORDER).map(publicProductMapper::toImage).toList(),
+                product.getVariantes().stream().sorted(PRODUCT_VARIANT_ORDER).map(publicProductMapper::toVariant).toList(),
+                product.getEspecificaciones().stream().sorted(PRODUCT_SPECIFICATION_ORDER)
+                        .map(publicProductMapper::toSpecification).toList(),
+                product.getDocumentos().stream().sorted(PRODUCT_DOCUMENT_ORDER).map(publicProductMapper::toDocument).toList());
+    }
+
     private ConfiguracionSitio findSiteEntity(String key) {
         return configuracionRepository.findByClave(key)
                 .orElseThrow(() -> new ModelNotFoundException("Sitio público no encontrado con clave: " + key));
+    }
+
+    private UnidadNegocio findPublicBusinessUnit(ConfiguracionSitio site, String slug) {
+        return unidadRepository.findByEmpresaIdAndSlugAndActivoTrue(site.getEmpresa().getId(), slug)
+                .orElseThrow(() -> new ModelNotFoundException("Unidad pública activa no encontrada con slug: " + slug));
+    }
+
+    private List<CategoriaProducto> publicCategories(Producto product, UnidadNegocio unit) {
+        return product.getCategorias().stream()
+                .filter(category -> Boolean.TRUE.equals(category.getActivo()))
+                .filter(category -> category.getUnidadNegocio() == null
+                        || unit.getId().equals(category.getUnidadNegocio().getId()))
+                .sorted(PRODUCT_CATEGORY_ORDER)
+                .toList();
+    }
+
+    private ImagenProducto primaryImage(Producto product) {
+        return product.getImagenes().stream().sorted(PRODUCT_IMAGE_ORDER).findFirst().orElse(null);
     }
 
     private PublicServiceResponse toPublicService(com.isanorte.constructora_api.model.Servicio service) {

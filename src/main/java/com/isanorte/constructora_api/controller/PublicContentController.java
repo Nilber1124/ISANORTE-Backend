@@ -13,6 +13,8 @@ import com.isanorte.constructora_api.dto.request.SolicitudContactoCreateRequest;
 import com.isanorte.constructora_api.dto.response.PublicBusinessUnitResponse;
 import com.isanorte.constructora_api.dto.response.PublicHomeResponse;
 import com.isanorte.constructora_api.dto.response.PublicPageResponse;
+import com.isanorte.constructora_api.dto.response.PublicProductCatalogResponse;
+import com.isanorte.constructora_api.dto.response.PublicProductDetailResponse;
 import com.isanorte.constructora_api.dto.response.PublicSiteResponse;
 import com.isanorte.constructora_api.dto.response.SolicitudContactoPublicResponse;
 import com.isanorte.constructora_api.enums.TipoPaginaPublica;
@@ -55,5 +57,17 @@ public class PublicContentController {
     public ResponseEntity<PublicBusinessUnitResponse> findBusinessUnit(
             @PathVariable String clave, @PathVariable String slug) {
         return ResponseEntity.ok(publicContentService.findBusinessUnit(clave, slug));
+    }
+
+    @GetMapping("/sitios/{clave}/unidades/{unidadSlug}/catalogo")
+    public ResponseEntity<PublicProductCatalogResponse> findProductCatalog(
+            @PathVariable String clave, @PathVariable String unidadSlug) {
+        return ResponseEntity.ok(publicContentService.findProductCatalog(clave, unidadSlug));
+    }
+
+    @GetMapping("/sitios/{clave}/unidades/{unidadSlug}/productos/{productoSlug}")
+    public ResponseEntity<PublicProductDetailResponse> findPublicProduct(
+            @PathVariable String clave, @PathVariable String unidadSlug, @PathVariable String productoSlug) {
+        return ResponseEntity.ok(publicContentService.findPublicProduct(clave, unidadSlug, productoSlug));
     }
 }
