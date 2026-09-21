@@ -28,6 +28,8 @@ public interface ProductoRepository extends IGenericRepository<Producto, UUID> {
     Optional<Producto> findByUnidadNegocioIdAndSlugAndEstado(
             UUID unidadNegocioId, String slug, EstadoPublicacion estado);
 
+    boolean existsByCategorias_IdAndUnidadNegocio_IdNot(UUID categoriaId, UUID unidadNegocioId);
+
     Optional<Producto> findBySkuAndEstado(String sku, EstadoPublicacion estado);
 
     boolean existsBySlug(String slug);

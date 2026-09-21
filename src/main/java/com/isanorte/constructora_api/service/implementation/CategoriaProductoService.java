@@ -16,6 +16,7 @@ import com.isanorte.constructora_api.model.CategoriaProducto;
 import com.isanorte.constructora_api.model.UnidadNegocio;
 import com.isanorte.constructora_api.repository.CategoriaProductoRepository;
 import com.isanorte.constructora_api.repository.IGenericRepository;
+import com.isanorte.constructora_api.repository.ProductoRepository;
 import com.isanorte.constructora_api.repository.UnidadNegocioRepository;
 import com.isanorte.constructora_api.service.ICategoriaProductoService;
 
@@ -27,6 +28,7 @@ public class CategoriaProductoService extends GenericService<CategoriaProducto, 
 
     private final CategoriaProductoRepository categoriaProductoRepository;
     private final UnidadNegocioRepository unidadNegocioRepository;
+    private final ProductoRepository productoRepository;
     private final CategoriaProductoMapper categoriaProductoMapper;
 
     @Override
@@ -135,6 +137,7 @@ public class CategoriaProductoService extends GenericService<CategoriaProducto, 
                 : unidadNegocioRepository.findById(request.unidadNegocioId())
                         .orElseThrow(() -> new ModelNotFoundException(
                                 "Unidad de negocio no encontrada con ID: " + request.unidadNegocioId()));
+        validateScopeChange(categoria, unidad);
         categoriaProductoMapper.updateEntity(request, categoria);
         categoria.setUnidadNegocio(unidad);
         return categoriaProductoMapper.toResponse(categoriaProductoRepository.saveAndFlush(categoria));
@@ -151,6 +154,18 @@ public class CategoriaProductoService extends GenericService<CategoriaProducto, 
     private void initializeForResponse(CategoriaProducto categoria) {
         if (categoria.getUnidadNegocio() != null) {
             categoria.getUnidadNegocio().getNombre();
+        }
+    }
+
+    private void validateScopeChange(CategoriaProducto categoria, UnidadNegocio targetUnit) {
+        UUID currentUnitId = categoria.getUnidadNegocio() == null ? null : categoria.getUnidadNegocio().getId();
+        UUID targetUnitId = targetUnit == null ? null : targetUnit.getId();
+        if (java.util.Objects.equals(currentUnitId, targetUnitId) || targetUnitId == null) {
+            return;
+        }
+        if (productoRepository.existsByCategorias_IdAndUnidadNegocio_IdNot(categoria.getId(), targetUnitId)) {
+            throw new IllegalStateException(
+                    "No se puede cambiar la unidad de la categoría porque dejaría productos incompatibles.");
         }
     }
 }

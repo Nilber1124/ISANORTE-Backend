@@ -120,14 +120,8 @@ public class ProductoService extends GenericService<Producto, UUID> implements I
             producto.setConfiguracionCalculo(
                     productoMapper.toConfiguracionCalculoEntity(request.configuracionCalculo()));
         }
-        if (request.categoriaIds() != null) {
-            for (UUID categoriaId : request.categoriaIds()) {
-                CategoriaProducto categoria = categoriaProductoRepository.findById(categoriaId)
-                        .orElseThrow(() -> new ModelNotFoundException(
-                                "Categoría de producto no encontrada con ID: " + categoriaId));
-                producto.addCategoria(categoria);
-            }
-        }
+        Set<CategoriaProducto> categorias = findCompatibleCategories(request.categoriaIds(), unidad);
+        categorias.forEach(producto::addCategoria);
         return productoRepository.save(producto);
     }
 
@@ -218,12 +212,7 @@ public class ProductoService extends GenericService<Producto, UUID> implements I
         UnidadNegocio unidad = unidadNegocioRepository.findById(request.unidadNegocioId())
                 .orElseThrow(() -> new ModelNotFoundException(
                         "Unidad de negocio no encontrada con ID: " + request.unidadNegocioId()));
-        Set<CategoriaProducto> categorias = new HashSet<>();
-        for (UUID categoriaId : request.categoriaIds()) {
-            categorias.add(categoriaProductoRepository.findById(categoriaId)
-                    .orElseThrow(() -> new ModelNotFoundException(
-                            "Categoría de producto no encontrada con ID: " + categoriaId)));
-        }
+        Set<CategoriaProducto> categorias = findCompatibleCategories(request.categoriaIds(), unidad);
 
         productoMapper.updateEntity(request, producto);
         if (!producto.getUnidadNegocio().getId().equals(unidad.getId())) {
@@ -390,6 +379,29 @@ public class ProductoService extends GenericService<Producto, UUID> implements I
     private Producto findProductoParaAdministracion(UUID productoId) {
         return productoRepository.findById(productoId)
                 .orElseThrow(() -> new ModelNotFoundException("Producto no encontrado con ID: " + productoId));
+    }
+
+    private Set<CategoriaProducto> findCompatibleCategories(Set<UUID> categoryIds, UnidadNegocio unit) {
+        Set<CategoriaProducto> categories = new HashSet<>();
+        if (categoryIds == null) {
+            return categories;
+        }
+        for (UUID categoryId : categoryIds) {
+            CategoriaProducto category = categoriaProductoRepository.findById(categoryId)
+                    .orElseThrow(() -> new ModelNotFoundException(
+                            "Categoría de producto no encontrada con ID: " + categoryId));
+            validateCategoryCompatibility(category, unit);
+            categories.add(category);
+        }
+        return categories;
+    }
+
+    private void validateCategoryCompatibility(CategoriaProducto category, UnidadNegocio unit) {
+        UnidadNegocio categoryUnit = category.getUnidadNegocio();
+        if (categoryUnit != null && !categoryUnit.getId().equals(unit.getId())) {
+            throw new IllegalStateException(
+                    "La categoría seleccionada no pertenece a la unidad de negocio del producto.");
+        }
     }
 
     private void validarSkuVarianteDisponible(String sku, UUID varianteId) {
