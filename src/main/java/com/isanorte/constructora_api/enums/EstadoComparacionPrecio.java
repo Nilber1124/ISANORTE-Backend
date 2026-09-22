@@ -1,0 +1,7 @@
+package com.isanorte.constructora_api.enums;
+
+public enum EstadoComparacionPrecio {
+    SUCCESS, INVALID_URL, BLOCKED_URL, SITE_UNREACHABLE, UNSUPPORTED_CONTENT,
+    PRICE_NOT_FOUND, CURRENCY_UNKNOWN, CURRENCY_MISMATCH, NOT_COMPARABLE
+}
+
