@@ -1,7 +1,7 @@
 package com.isanorte.constructora_api.service.implementation;
 
-import java.util.List;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -9,20 +9,16 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.isanorte.constructora_api.dto.request.ProyectoRequest;
 import com.isanorte.constructora_api.dto.request.ActivoRequest;
+import com.isanorte.constructora_api.dto.request.ProyectoRequest;
 import com.isanorte.constructora_api.dto.request.ProyectoUpdateRequest;
-import com.isanorte.constructora_api.dto.request.ImagenProyectoRequest;
-import com.isanorte.constructora_api.dto.response.ImagenProyectoResponse;
 import com.isanorte.constructora_api.dto.response.ProyectoResponse;
 import com.isanorte.constructora_api.exception.ModelNotFoundException;
 import com.isanorte.constructora_api.mapper.ProyectoMapper;
 import com.isanorte.constructora_api.model.Proyecto;
-import com.isanorte.constructora_api.model.ImagenProyecto;
 import com.isanorte.constructora_api.model.Servicio;
 import com.isanorte.constructora_api.repository.IGenericRepository;
 import com.isanorte.constructora_api.repository.ProyectoRepository;
-import com.isanorte.constructora_api.repository.ImagenProyectoRepository;
 import com.isanorte.constructora_api.repository.ServicioRepository;
 import com.isanorte.constructora_api.service.IProyectoService;
 
@@ -33,7 +29,6 @@ import lombok.RequiredArgsConstructor;
 public class ProyectoService extends GenericService<Proyecto, UUID> implements IProyectoService {
 
     private final ProyectoRepository proyectoRepository;
-    private final ImagenProyectoRepository imagenProyectoRepository;
     private final ServicioRepository servicioRepository;
     private final ProyectoMapper proyectoMapper;
 
@@ -57,11 +52,6 @@ public class ProyectoService extends GenericService<Proyecto, UUID> implements I
             throw new IllegalStateException("Ya existe un proyecto con slug: " + request.slug());
         }
         Proyecto proyecto = proyectoMapper.toEntity(request);
-        if (request.imagenes() != null) {
-            request.imagenes().stream()
-                    .map(proyectoMapper::toImagenEntity)
-                    .forEach(proyecto::addImagen);
-        }
         if (request.servicioIds() != null) {
             for (UUID servicioId : request.servicioIds()) {
                 Servicio servicio = servicioRepository.findById(servicioId)
@@ -97,15 +87,13 @@ public class ProyectoService extends GenericService<Proyecto, UUID> implements I
     @Override
     @Transactional(readOnly = true)
     public ProyectoResponse findByIdResponse(UUID id) {
-        return proyectoMapper.toResponse(super.findById(id));
+        return proyectoMapper.toResponse(findById(id));
     }
 
     @Override
     @Transactional(readOnly = true)
     public ProyectoResponse findBySlugResponse(String slug) {
-        Proyecto proyecto = proyectoRepository.findBySlug(slug)
-                .orElseThrow(() -> new ModelNotFoundException("Proyecto no encontrado con slug: " + slug));
-        return proyectoMapper.toResponse(proyecto);
+        return proyectoMapper.toResponse(findBySlug(slug));
     }
 
     @Override
@@ -118,7 +106,8 @@ public class ProyectoService extends GenericService<Proyecto, UUID> implements I
     @Transactional(readOnly = true)
     public ProyectoResponse findActiveBySlugResponse(String slug) {
         Proyecto proyecto = proyectoRepository.findBySlugAndActivoTrue(slug)
-                .orElseThrow(() -> new ModelNotFoundException("Proyecto activo no encontrado con slug: " + slug));
+                .orElseThrow(() -> new ModelNotFoundException("Proyecto no encontrado o inactivo con slug: " + slug));
+        initializeForResponse(proyecto);
         return proyectoMapper.toResponse(proyecto);
     }
 
@@ -131,9 +120,9 @@ public class ProyectoService extends GenericService<Proyecto, UUID> implements I
     @Override
     @Transactional
     public ProyectoResponse update(UUID id, ProyectoUpdateRequest request) {
-        Proyecto proyecto = super.findById(id);
+        Proyecto proyecto = findProyectoParaAdministracion(id);
         if (proyectoRepository.existsBySlugAndIdNot(request.slug(), id)) {
-            throw new IllegalStateException("Ya existe un proyecto con slug: " + request.slug());
+            throw new IllegalStateException("Ya existe otro proyecto con slug: " + request.slug());
         }
 
         Set<Servicio> servicios = new HashSet<>();
@@ -167,52 +156,12 @@ public class ProyectoService extends GenericService<Proyecto, UUID> implements I
         return proyectoMapper.toResponse(proyectoRepository.saveAndFlush(proyecto));
     }
 
-    @Override
-    @Transactional
-    public ImagenProyectoResponse createImagen(UUID proyectoId, ImagenProyectoRequest request) {
-        Proyecto proyecto = findProyectoParaAdministracion(proyectoId);
-        ImagenProyecto imagen = proyectoMapper.toImagenEntity(request);
-        proyecto.addImagen(imagen);
-        imagenProyectoRepository.saveAndFlush(imagen);
-        return proyectoMapper.toImagenResponse(imagen);
-    }
-
-    @Override
-    @Transactional
-    public ImagenProyectoResponse updateImagen(
-            UUID proyectoId, UUID imagenId, ImagenProyectoRequest request) {
-        Proyecto proyecto = findProyectoParaAdministracion(proyectoId);
-        ImagenProyecto imagen = findImagenDelProyecto(proyecto, imagenId);
-        proyectoMapper.updateImagenEntity(request, imagen);
-        imagenProyectoRepository.saveAndFlush(imagen);
-        return proyectoMapper.toImagenResponse(imagen);
-    }
-
-    @Override
-    @Transactional
-    public void deleteImagen(UUID proyectoId, UUID imagenId) {
-        Proyecto proyecto = findProyectoParaAdministracion(proyectoId);
-        proyecto.removeImagen(findImagenDelProyecto(proyecto, imagenId));
-        proyectoRepository.flush();
-    }
-
     private Proyecto findProyectoParaAdministracion(UUID proyectoId) {
         return proyectoRepository.findById(proyectoId)
                 .orElseThrow(() -> new ModelNotFoundException("Proyecto no encontrado con ID: " + proyectoId));
     }
 
-    private ImagenProyecto findImagenDelProyecto(Proyecto proyecto, UUID imagenId) {
-        ImagenProyecto imagen = imagenProyectoRepository.findById(imagenId)
-                .orElseThrow(() -> new ModelNotFoundException("Imagen no encontrada con ID: " + imagenId));
-        if (imagen.getProyecto() == null || !Objects.equals(proyecto.getId(), imagen.getProyecto().getId())) {
-            throw new IllegalArgumentException(
-                    "La imagen " + imagenId + " no pertenece al proyecto " + proyecto.getId());
-        }
-        return imagen;
-    }
-
     private void initializeForResponse(Proyecto proyecto) {
         proyecto.getServicios().size();
-        proyecto.getImagenes().size();
     }
 }

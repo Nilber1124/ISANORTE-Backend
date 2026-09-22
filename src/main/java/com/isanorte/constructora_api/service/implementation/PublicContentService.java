@@ -66,9 +66,7 @@ public class PublicContentService implements IPublicContentService {
     private static final Comparator<com.isanorte.constructora_api.model.BeneficioServicio> BENEFIT_ORDER =
             Comparator.comparing(com.isanorte.constructora_api.model.BeneficioServicio::getOrden)
                     .thenComparing(value -> value.getId().toString());
-    private static final Comparator<com.isanorte.constructora_api.model.ImagenProyecto> IMAGE_ORDER =
-            Comparator.comparing(com.isanorte.constructora_api.model.ImagenProyecto::getOrden)
-                    .thenComparing(value -> value.getId().toString());
+
     private static final Comparator<com.isanorte.constructora_api.model.RecursoUnidadNegocio> RESOURCE_ORDER =
             Comparator.comparing(com.isanorte.constructora_api.model.RecursoUnidadNegocio::getOrden)
                     .thenComparing(value -> value.getId().toString());
@@ -144,7 +142,7 @@ public class PublicContentService implements IPublicContentService {
                 .toList();
         var services = servicioRepository.findByActivoTrueAndDestacadoTrueOrderByOrdenAscIdAsc().stream()
                 .map(item -> new PublicHomeResponse.Servicio(
-                        item.getNombre(), item.getSlug(), item.getResumen(), item.getDescripcion(), item.getIcono(),
+                        item.getNombre(), item.getSlug(), item.getResumen(), item.getDescripcion(),
                         item.getImagenUrl(), item.getImagenAlt(), item.getEtiqueta(), item.getOrden(),
                         item.getBeneficios().stream().filter(value -> Boolean.TRUE.equals(value.getActivo()))
                                 .sorted(BENEFIT_ORDER)
@@ -152,11 +150,10 @@ public class PublicContentService implements IPublicContentService {
         var projects = proyectoRepository.findByActivoTrueAndDestacadoTrueOrderByOrdenAscIdAsc().stream()
                 .map(item -> new PublicHomeResponse.Proyecto(
                         item.getNombre(), item.getSlug(), item.getUbicacion(), item.getFechaProyecto(),
-                        item.getDescripcion(), item.getOrden(), item.getImagenes().stream()
-                                .sorted(IMAGE_ORDER)
-                                .map(image -> new PublicHomeResponse.Imagen(
-                                        image.getUrl(), image.getAlt(), image.getEsPrincipal(), image.getOrden()))
-                                .toList())).toList();
+                        item.getDescripcion(), item.getOrden(),
+                        item.getImagenUrl() != null
+                                ? List.of(new PublicHomeResponse.Imagen(item.getImagenUrl(), item.getImagenAlt(), true, 0))
+                                : List.of())).toList();
         PublicHomeResponse.UnidadDestacada highlighted = unidadRepository
                 .findByEmpresaIdAndActivoTrueAndDestacadoTrue(site.getEmpresa().getId())
                 .map(item -> new PublicHomeResponse.UnidadDestacada(
@@ -317,11 +314,10 @@ public class PublicContentService implements IPublicContentService {
     private PublicProjectResponse toPublicProject(com.isanorte.constructora_api.model.Proyecto project) {
         return new PublicProjectResponse(
                 project.getNombre(), project.getSlug(), project.getDescripcion(), project.getUbicacion(),
-                project.getFechaProyecto(), project.getOrden(), project.getImagenes().stream()
-                        .sorted(IMAGE_ORDER)
-                        .map(image -> new PublicProjectImageResponse(
-                                image.getUrl(), image.getAlt(), image.getEsPrincipal(), image.getOrden()))
-                        .toList(),
+                project.getFechaProyecto(), project.getOrden(),
+                project.getImagenUrl() != null
+                        ? List.of(new PublicProjectImageResponse(project.getImagenUrl(), project.getImagenAlt(), true, 0))
+                        : List.of(),
                 project.getServicios().stream()
                         .sorted(PROJECT_SERVICE_ORDER)
                         .map(service -> new PublicProjectServiceResponse(service.getNombre(), service.getSlug()))

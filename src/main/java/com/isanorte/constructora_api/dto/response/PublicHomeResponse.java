@@ -22,7 +22,7 @@ public record PublicHomeResponse(
     }
 
     public record Servicio(
-            String nombre, String slug, String resumen, String descripcion, String icono,
+            String nombre, String slug, String resumen, String descripcion,
             String imagenUrl, String imagenAlt, String etiqueta, Integer orden,
             List<String> beneficios) {
     }

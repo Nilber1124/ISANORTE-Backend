@@ -1,14 +1,11 @@
 package com.isanorte.constructora_api.model;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -17,8 +14,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OrderBy;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -68,6 +63,12 @@ public class Proyecto {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String descripcion;
 
+    @Column(length = 500)
+    private String imagenUrl;
+
+    @Column(length = 300)
+    private String imagenAlt;
+
     @Builder.Default
     @Column(nullable = false)
     private Boolean destacado = false;
@@ -86,12 +87,6 @@ public class Proyecto {
     @ManyToMany
     @JoinTable(name = "proyecto_servicio", joinColumns = @JoinColumn(name = "proyecto_id"), inverseJoinColumns = @JoinColumn(name = "servicio_id"))
     private Set<Servicio> servicios = new HashSet<>();
-
-    @Setter(AccessLevel.NONE)
-    @Builder.Default
-    @OneToMany(mappedBy = "proyecto", cascade = CascadeType.ALL, orphanRemoval = true)
-    @OrderBy("orden ASC, id ASC")
-    private List<ImagenProyecto> imagenes = new ArrayList<>();
 
     @Column(nullable = false)
     private LocalDateTime fechaCreacion;
@@ -121,34 +116,6 @@ public class Proyecto {
         Objects.requireNonNull(servicio, "El servicio no puede ser null");
         if (this.servicios.remove(servicio)) {
             servicio.getProyectos().remove(this);
-        }
-    }
-
-    /**
-     * Agrega una imagen a la galería del proyecto y establece la referencia bidireccional correspondiente.
-     *
-     * @param imagen la imagen de proyecto a asociar (no nula)
-     * @throws NullPointerException si {@code imagen} es {@code null}
-     */
-    public void addImagen(ImagenProyecto imagen) {
-        Objects.requireNonNull(imagen, "La imagen del proyecto no puede ser null");
-        if (imagen.getProyecto() != null && imagen.getProyecto() != this) {
-            throw new IllegalStateException("La imagen ya pertenece a otro proyecto");
-        }
-        this.imagenes.add(imagen);
-        imagen.setProyecto(this);
-    }
-
-    /**
-     * Remueve una imagen de la galería del proyecto y desvincula la referencia bidireccional.
-     *
-     * @param imagen la imagen a remover (no nula)
-     * @throws NullPointerException si {@code imagen} es {@code null}
-     */
-    public void removeImagen(ImagenProyecto imagen) {
-        Objects.requireNonNull(imagen, "La imagen del proyecto no puede ser null");
-        if (this.imagenes.remove(imagen)) {
-            imagen.setProyecto(null);
         }
     }
 

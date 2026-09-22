@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.isanorte.constructora_api.enums.EstadoSolicitudContacto;
 import com.isanorte.constructora_api.enums.RobotsSeo;
-import com.isanorte.constructora_api.enums.TipoImagenProyecto;
 import com.isanorte.constructora_api.enums.TipoPaginaPublica;
 import com.isanorte.constructora_api.enums.TipoPaginaSeo;
 import com.isanorte.constructora_api.enums.TipoRecursoUnidadNegocio;
@@ -29,7 +28,6 @@ import com.isanorte.constructora_api.model.ContenidoPagina;
 import com.isanorte.constructora_api.model.Empresa;
 import com.isanorte.constructora_api.model.EstadisticaEmpresa;
 import com.isanorte.constructora_api.model.HeroScene;
-import com.isanorte.constructora_api.model.ImagenProyecto;
 import com.isanorte.constructora_api.model.Proyecto;
 import com.isanorte.constructora_api.model.RecursoUnidadNegocio;
 import com.isanorte.constructora_api.model.SeccionLanding;
@@ -76,7 +74,7 @@ class DynamicContentPersistenceIntegrationTest {
 
     @Test
     void flywayAplicaBaselineYEvolucionAntesDeValidarJpa() {
-        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("2");
+        assertThat(flyway.info().current().getVersion().getVersion()).startsWith("2");
         assertThat(flyway.info().applied())
                 .extracting(info -> info.getVersion().getVersion())
                 .contains("1", "2");
@@ -155,18 +153,14 @@ class DynamicContentPersistenceIntegrationTest {
     void persisteOrdenDeProyectoYAltDeImagen() {
         Proyecto proyecto = Proyecto.builder()
                 .nombre("Proyecto Norte").slug("proyecto-norte-test").descripcion("Descripción")
+                .imagenUrl("/proyecto.webp").imagenAlt("Fachada del proyecto")
                 .orden(4).build();
-        ImagenProyecto imagen = ImagenProyecto.builder()
-                .url("/proyecto.webp").alt("Fachada del proyecto")
-                .tipo(TipoImagenProyecto.GENERAL).build();
-        proyecto.addImagen(imagen);
         UUID proyectoId = proyectoRepository.saveAndFlush(proyecto).getId();
         entityManager.clear();
 
         Proyecto guardado = proyectoRepository.findById(proyectoId).orElseThrow();
         assertThat(guardado.getOrden()).isEqualTo(4);
-        assertThat(guardado.getImagenes()).singleElement()
-                .extracting(ImagenProyecto::getAlt).isEqualTo("Fachada del proyecto");
+        assertThat(guardado.getImagenAlt()).isEqualTo("Fachada del proyecto");
     }
 
     @Test

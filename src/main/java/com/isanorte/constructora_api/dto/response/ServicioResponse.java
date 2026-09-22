@@ -10,7 +10,6 @@ public record ServicioResponse(
     String slug,
     String resumen,
     String descripcion,
-    String icono,
     String imagenUrl,
     String etiqueta,
     String imagenAlt,

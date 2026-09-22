@@ -9,7 +9,6 @@ public record ServicioRequest(
     @NotBlank String slug,
     String resumen,
     @NotBlank String descripcion,
-    String icono,
     String imagenUrl,
     @Size(max = 180) String etiqueta,
     @Size(max = 300) String imagenAlt,

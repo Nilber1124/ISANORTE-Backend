@@ -36,7 +36,6 @@ import com.isanorte.constructora_api.model.ContenidoPagina;
 import com.isanorte.constructora_api.model.Empresa;
 import com.isanorte.constructora_api.model.EstadisticaEmpresa;
 import com.isanorte.constructora_api.model.HeroScene;
-import com.isanorte.constructora_api.model.ImagenProyecto;
 import com.isanorte.constructora_api.model.Proyecto;
 import com.isanorte.constructora_api.model.RedSocial;
 import com.isanorte.constructora_api.model.SeccionLanding;
@@ -559,7 +558,6 @@ class DynamicContentApiIntegrationTest {
         catalogOnly.setFechaProyecto("2025");
         proyectoRepository.saveAndFlush(catalogOnly);
         projectService(catalogOnly, filterService);
-        projectImage(catalogOnly, "/second.webp", null, false, 2);
         projectImage(catalogOnly, "/cover.webp", "Portada pública", true, 0);
 
         Proyecto noRelations = project("project-no-relations", true, false, 1);
@@ -577,10 +575,9 @@ class DynamicContentApiIntegrationTest {
                 .andExpect(jsonPath("$.proyectos[0].orden").value(0))
                 .andExpect(jsonPath("$.proyectos[0].ubicacion").value(nullValue()))
                 .andExpect(jsonPath("$.proyectos[0].fechaProyecto").value("2025"))
-                .andExpect(jsonPath("$.proyectos[0].imagenes.length()").value(2))
+                .andExpect(jsonPath("$.proyectos[0].imagenes.length()").value(1))
                 .andExpect(jsonPath("$.proyectos[0].imagenes[0].url").value("/cover.webp"))
                 .andExpect(jsonPath("$.proyectos[0].imagenes[0].esPrincipal").value(true))
-                .andExpect(jsonPath("$.proyectos[0].imagenes[1].url").value("/second.webp"))
                 .andExpect(jsonPath("$.proyectos[0].servicios[0].slug").value(filterService.getSlug()))
                 .andExpect(jsonPath("$.proyectos[1].slug").value(noRelations.getSlug()))
                 .andExpect(jsonPath("$.proyectos[1].imagenes.length()").value(0))
@@ -667,7 +664,8 @@ class DynamicContentApiIntegrationTest {
     }
 
     private void projectImage(Proyecto project, String url, String alt, boolean principal, int order) {
-        project.addImagen(ImagenProyecto.builder().url(url).alt(alt).esPrincipal(principal).orden(order).build());
+        project.setImagenUrl(url);
+        project.setImagenAlt(alt);
         proyectoRepository.saveAndFlush(project);
     }
 

@@ -17,8 +17,7 @@ public interface ProyectoRepository extends IGenericRepository<Proyecto, UUID> {
 
     List<Proyecto> findByActivoTrue();
 
-    @Query("select distinct proyecto from Proyecto proyecto left join fetch proyecto.imagenes "
-            + "where proyecto.activo = true order by proyecto.orden asc, proyecto.id asc")
+    @Query("select distinct proyecto from Proyecto proyecto where proyecto.activo = true order by proyecto.orden asc, proyecto.id asc")
     List<Proyecto> findPublicActiveWithImagesOrderByOrdenAscIdAsc();
 
     @Query("select distinct proyecto from Proyecto proyecto left join fetch proyecto.servicios "

@@ -59,8 +59,6 @@ public class Servicio {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String descripcion;
 
-    @Column(length = 100)
-    private String icono;
 
     @Column(length = 500)
     private String imagenUrl;
