@@ -20,8 +20,10 @@ import com.isanorte.constructora_api.dto.response.SolicitudContactoPublicRespons
 import com.isanorte.constructora_api.enums.TipoPaginaPublica;
 import com.isanorte.constructora_api.service.IPublicContentService;
 import com.isanorte.constructora_api.service.IComparacionPrecioService;
+import com.isanorte.constructora_api.service.IComparacionCompetidoresService;
 import com.isanorte.constructora_api.dto.request.ComparacionPrecioRequest;
 import com.isanorte.constructora_api.dto.response.ComparacionPrecioResponse;
+import com.isanorte.constructora_api.dto.response.ComparacionCompetidoresResponse;
 import com.isanorte.constructora_api.service.ISolicitudContactoService;
 
 import jakarta.validation.Valid;
@@ -34,6 +36,14 @@ public class PublicContentController {
     private final IPublicContentService publicContentService;
     private final ISolicitudContactoService contactoService;
     private final IComparacionPrecioService comparacionPrecioService;
+    private final IComparacionCompetidoresService comparacionCompetidoresService;
+
+    @GetMapping("/sitios/{clave}/unidades/{unidadSlug}/productos/{productoSlug}/comparacion-competidores")
+    public ResponseEntity<ComparacionCompetidoresResponse> compararCompetidores(
+            @PathVariable String clave, @PathVariable String unidadSlug, @PathVariable String productoSlug) {
+        return ResponseEntity.ok().cacheControl(org.springframework.http.CacheControl.noStore())
+                .body(comparacionCompetidoresService.comparar(clave, unidadSlug, productoSlug));
+    }
 
     @PostMapping("/sitios/{clave}/unidades/{unidadSlug}/productos/{productoSlug}/comparar-precio")
     public ResponseEntity<ComparacionPrecioResponse> compararPrecio(
