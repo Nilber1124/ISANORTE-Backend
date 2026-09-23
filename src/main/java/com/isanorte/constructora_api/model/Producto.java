@@ -100,6 +100,10 @@ public class Producto {
     @Column(nullable = false)
     private Boolean destacado = false;
 
+    @Builder.Default
+    @Column(name = "retiro_en_tienda")
+    private Boolean retiroEnTienda = false;
+
     @NotNull
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
@@ -338,6 +342,10 @@ public class Producto {
 
         if (destacado == null) {
             destacado = false;
+        }
+
+        if (retiroEnTienda == null) {
+            retiroEnTienda = false;
         }
 
         if (estado == null) {

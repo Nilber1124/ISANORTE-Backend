@@ -9,6 +9,9 @@ import com.isanorte.constructora_api.dto.response.CotizacionResponse;
 import com.isanorte.constructora_api.enums.EstadoCotizacion;
 import com.isanorte.constructora_api.model.Cotizacion;
 
+import com.isanorte.constructora_api.dto.request.PublicCotizacionRequest;
+import com.isanorte.constructora_api.dto.response.PublicCotizacionResponse;
+
 public interface ICotizacionService extends IGenericService<Cotizacion, UUID> {
 
     Cotizacion findByCodigo(String codigo);
@@ -26,6 +29,8 @@ public interface ICotizacionService extends IGenericService<Cotizacion, UUID> {
     List<CotizacionResponse> findByEstadoResponse(EstadoCotizacion estado);
 
     CotizacionResponse createResponse(CotizacionRequest request);
+
+    PublicCotizacionResponse createPublic(String siteKey, String unitSlug, PublicCotizacionRequest request);
 
     CotizacionResponse updateEstado(UUID id, EstadoCotizacionRequest request);
 }

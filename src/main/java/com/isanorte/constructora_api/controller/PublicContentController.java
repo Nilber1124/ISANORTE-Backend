@@ -21,9 +21,12 @@ import com.isanorte.constructora_api.enums.TipoPaginaPublica;
 import com.isanorte.constructora_api.service.IPublicContentService;
 import com.isanorte.constructora_api.service.IComparacionPrecioService;
 import com.isanorte.constructora_api.service.IComparacionCompetidoresService;
+import com.isanorte.constructora_api.service.ICotizacionService;
 import com.isanorte.constructora_api.dto.request.ComparacionPrecioRequest;
+import com.isanorte.constructora_api.dto.request.PublicCotizacionRequest;
 import com.isanorte.constructora_api.dto.response.ComparacionPrecioResponse;
 import com.isanorte.constructora_api.dto.response.ComparacionCompetidoresResponse;
+import com.isanorte.constructora_api.dto.response.PublicCotizacionResponse;
 import com.isanorte.constructora_api.service.ISolicitudContactoService;
 
 import jakarta.validation.Valid;
@@ -37,6 +40,7 @@ public class PublicContentController {
     private final ISolicitudContactoService contactoService;
     private final IComparacionPrecioService comparacionPrecioService;
     private final IComparacionCompetidoresService comparacionCompetidoresService;
+    private final ICotizacionService cotizacionService;
 
     @GetMapping("/sitios/{clave}/unidades/{unidadSlug}/productos/{productoSlug}/comparacion-competidores")
     public ResponseEntity<ComparacionCompetidoresResponse> compararCompetidores(
@@ -91,5 +95,14 @@ public class PublicContentController {
     public ResponseEntity<PublicProductDetailResponse> findPublicProduct(
             @PathVariable String clave, @PathVariable String unidadSlug, @PathVariable String productoSlug) {
         return ResponseEntity.ok(publicContentService.findPublicProduct(clave, unidadSlug, productoSlug));
+    }
+
+    @PostMapping("/sitios/{siteKey}/unidades/{unitSlug}/cotizaciones")
+    public ResponseEntity<PublicCotizacionResponse> createPublicCotizacion(
+            @PathVariable String siteKey,
+            @PathVariable String unitSlug,
+            @Valid @RequestBody PublicCotizacionRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(cotizacionService.createPublic(siteKey, unitSlug, request));
     }
 }

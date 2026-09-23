@@ -9,6 +9,6 @@ import com.isanorte.constructora_api.enums.EstadoDisponibilidad;
 public record PublicProductCardResponse(
         String nombre, String sku, String slug, String resumen, String descripcion,
         BigDecimal precioBase, BigDecimal precioAnterior, BigDecimal descuentoPorcentaje,
-        EstadoDisponibilidad disponibilidad, PublicProductImageResponse imagen,
+        EstadoDisponibilidad disponibilidad, Boolean retiroEnTienda, PublicProductImageResponse imagen,
         List<PublicProductCategoryResponse> categorias) {
 }

@@ -10,18 +10,26 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.isanorte.constructora_api.dto.request.CotizacionRequest;
 import com.isanorte.constructora_api.dto.request.EstadoCotizacionRequest;
+import com.isanorte.constructora_api.dto.request.PublicCotizacionRequest;
 import com.isanorte.constructora_api.dto.response.CotizacionResponse;
+import com.isanorte.constructora_api.dto.response.PublicCotizacionResponse;
+import com.isanorte.constructora_api.enums.CanalCotizacion;
 import com.isanorte.constructora_api.enums.EstadoCotizacion;
+import com.isanorte.constructora_api.enums.EstadoPublicacion;
 import com.isanorte.constructora_api.exception.ModelNotFoundException;
 import com.isanorte.constructora_api.mapper.CotizacionMapper;
+import com.isanorte.constructora_api.model.ConfiguracionSitio;
 import com.isanorte.constructora_api.model.Cotizacion;
 import com.isanorte.constructora_api.model.DetalleCotizacion;
 import com.isanorte.constructora_api.model.Producto;
 import com.isanorte.constructora_api.model.SeguimientoCotizacion;
+import com.isanorte.constructora_api.model.UnidadNegocio;
 import com.isanorte.constructora_api.model.VarianteProducto;
+import com.isanorte.constructora_api.repository.ConfiguracionSitioRepository;
 import com.isanorte.constructora_api.repository.CotizacionRepository;
 import com.isanorte.constructora_api.repository.IGenericRepository;
 import com.isanorte.constructora_api.repository.ProductoRepository;
+import com.isanorte.constructora_api.repository.UnidadNegocioRepository;
 import com.isanorte.constructora_api.service.ICotizacionService;
 
 import lombok.RequiredArgsConstructor;
@@ -32,6 +40,8 @@ public class CotizacionService extends GenericService<Cotizacion, UUID> implemen
 
     private final CotizacionRepository cotizacionRepository;
     private final ProductoRepository productoRepository;
+    private final ConfiguracionSitioRepository configuracionRepository;
+    private final UnidadNegocioRepository unidadRepository;
     private final CotizacionMapper cotizacionMapper;
 
     @Override
@@ -157,6 +167,67 @@ public class CotizacionService extends GenericService<Cotizacion, UUID> implemen
             cotizacionRepository.saveAndFlush(cotizacion);
         }
         return cotizacionMapper.toResponse(cotizacion);
+    }
+
+    @Override
+    @Transactional
+    public PublicCotizacionResponse createPublic(String siteKey, String unitSlug, PublicCotizacionRequest request) {
+        ConfiguracionSitio site = configuracionRepository.findByClave(siteKey)
+                .orElseThrow(() -> new ModelNotFoundException("Sitio público no encontrado con clave: " + siteKey));
+
+        UnidadNegocio unit = unidadRepository.findByEmpresaIdAndSlugAndActivoTrue(site.getEmpresa().getId(), unitSlug)
+                .orElseThrow(() -> new ModelNotFoundException("Unidad pública activa no encontrada con slug: " + unitSlug));
+
+        List<PublicCotizacionRequest.DetallePublicoRequest> items = request.detalles();
+        if (items == null || items.isEmpty()) {
+            if (request.productoSlug() != null && !request.productoSlug().isBlank()) {
+                items = List.of(new PublicCotizacionRequest.DetallePublicoRequest(
+                        request.productoSlug().trim(),
+                        request.varianteSku(),
+                        request.cantidad() != null && request.cantidad() > 0 ? request.cantidad() : 1,
+                        request.notas()));
+            } else {
+                throw new IllegalArgumentException("Debe indicar al menos un producto para la cotización");
+            }
+        }
+
+        List<CotizacionRequest.DetalleRequest> internalDetalles = items.stream().map(item -> {
+            if (item.productoSlug() == null || item.productoSlug().isBlank()) {
+                throw new IllegalArgumentException("El slug del producto no puede estar vacío");
+            }
+            Producto producto = productoRepository.findByUnidadNegocioIdAndSlugAndEstado(
+                    unit.getId(), item.productoSlug().trim(), EstadoPublicacion.PUBLICADO)
+                    .orElseThrow(() -> new ModelNotFoundException(
+                            "Producto público no encontrado con slug: " + item.productoSlug().trim()
+                                    + " en la unidad " + unitSlug));
+
+            UUID varianteId = null;
+            if (item.varianteSku() != null && !item.varianteSku().isBlank()) {
+                String skuToFind = item.varianteSku().trim();
+                VarianteProducto variante = producto.getVariantes().stream()
+                        .filter(v -> v.getSku() != null && v.getSku().equalsIgnoreCase(skuToFind))
+                        .findFirst()
+                        .orElseThrow(() -> new IllegalArgumentException(
+                                "La variante con SKU '" + item.varianteSku() + "' no pertenece al producto " + producto.getNombre()));
+                varianteId = variante.getId();
+            }
+
+            int cantidad = item.cantidad() != null && item.cantidad() > 0 ? item.cantidad() : 1;
+            return new CotizacionRequest.DetalleRequest(producto.getId(), varianteId, cantidad, item.notas());
+        }).toList();
+
+        CotizacionRequest internalRequest = new CotizacionRequest(
+                request.nombreCliente(),
+                request.emailCliente(),
+                request.telefonoCliente(),
+                request.empresaCliente(),
+                request.ciudad(),
+                request.mensaje(),
+                request.canal() != null ? request.canal() : CanalCotizacion.FORMULARIO,
+                internalDetalles);
+
+        Cotizacion cotizacion = create(internalRequest);
+        return cotizacionMapper.toPublicResponse(cotizacion);
     }
 
     private VarianteProducto resolveVariante(Producto producto, UUID varianteId) {

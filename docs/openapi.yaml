@@ -2034,9 +2034,8 @@ components:
         nombre: {type: string, minLength: 1}
         url: {type: string, minLength: 1}
         icono: {type: string, nullable: true}
-        orden: {type: integer, format: int32, nullable: true}
-        activo: {type: boolean, nullable: true}
         orden: {type: integer, minimum: 0, nullable: true}
+        activo: {type: boolean, nullable: true}
     ProductoRequest:
       type: object
       required: [sku, nombre, slug, descripcion, disponibilidad, estado, unidadNegocioId]
@@ -2051,6 +2050,7 @@ components:
         descuentoPorcentaje: {type: number, minimum: 0, maximum: 100, nullable: true}
         disponibilidad: {$ref: '#/components/schemas/EstadoDisponibilidad'}
         destacado: {type: boolean, nullable: true}
+        retiroEnTienda: {type: boolean, nullable: true}
         estado: {$ref: '#/components/schemas/EstadoPublicacion'}
         tituloSeo: {type: string, nullable: true}
         descripcionSeo: {type: string, nullable: true}
@@ -2333,6 +2333,7 @@ components:
         descuentoPorcentaje: {type: number, minimum: 0, maximum: 100, nullable: true}
         disponibilidad: {$ref: '#/components/schemas/EstadoDisponibilidad'}
         destacado: {type: boolean}
+        retiroEnTienda: {type: boolean, nullable: true}
         estado: {$ref: '#/components/schemas/EstadoPublicacion'}
         tituloSeo: {type: string, nullable: true}
         descripcionSeo: {type: string, nullable: true}
@@ -2667,6 +2668,7 @@ components:
         descuentoPorcentaje: {type: number, nullable: true}
         disponibilidad: {$ref: '#/components/schemas/EstadoDisponibilidad'}
         destacado: {type: boolean, nullable: true}
+        retiroEnTienda: {type: boolean, nullable: true}
         estado: {$ref: '#/components/schemas/EstadoPublicacion'}
         tituloSeo: {type: string, nullable: true}
         descripcionSeo: {type: string, nullable: true}
@@ -3177,6 +3179,7 @@ components:
         precioAnterior: {type: number, format: decimal, nullable: true}
         descuentoPorcentaje: {type: number, format: decimal, nullable: true}
         disponibilidad: {$ref: '#/components/schemas/EstadoDisponibilidad'}
+        retiroEnTienda: {type: boolean, nullable: true}
         imagen:
           allOf: [{$ref: '#/components/schemas/PublicProductImageResponse'}]
           nullable: true
@@ -3192,10 +3195,13 @@ components:
         slug: {type: string}
         resumen: {type: string, nullable: true}
         descripcion: {type: string}
+        tituloSeo: {type: string, nullable: true}
+        descripcionSeo: {type: string, nullable: true}
         precioBase: {type: number, format: decimal, nullable: true}
         precioAnterior: {type: number, format: decimal, nullable: true}
         descuentoPorcentaje: {type: number, format: decimal, nullable: true}
         disponibilidad: {$ref: '#/components/schemas/EstadoDisponibilidad'}
+        retiroEnTienda: {type: boolean, nullable: true}
         categorias:
           type: array
           items: {$ref: '#/components/schemas/PublicProductCategoryResponse'}

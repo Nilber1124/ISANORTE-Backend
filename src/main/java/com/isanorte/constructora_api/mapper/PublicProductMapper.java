@@ -31,7 +31,8 @@ public class PublicProductMapper {
         return new PublicProductCardResponse(
                 product.getNombre(), product.getSku(), product.getSlug(), product.getResumen(),
                 product.getDescripcion(), product.getPrecioBase(), product.getPrecioAnterior(),
-                product.getDescuentoPorcentaje(), product.getDisponibilidad(), toImage(primaryImage), categories);
+                product.getDescuentoPorcentaje(), product.getDisponibilidad(), product.getRetiroEnTienda(),
+                toImage(primaryImage), categories);
     }
 
     public PublicProductDetailResponse toDetail(
@@ -43,9 +44,11 @@ public class PublicProductMapper {
             List<PublicProductDocumentResponse> documents) {
         return new PublicProductDetailResponse(
                 product.getNombre(), product.getSku(), product.getSlug(), product.getResumen(),
-                product.getDescripcion(), product.getPrecioBase(), product.getPrecioAnterior(),
-                product.getDescuentoPorcentaje(), product.getDisponibilidad(), categories, images, variants,
-                specifications, documents, toCalculation(product.getConfiguracionCalculo()));
+                product.getDescripcion(), product.getTituloSeo(), product.getDescripcionSeo(),
+                product.getPrecioBase(), product.getPrecioAnterior(),
+                product.getDescuentoPorcentaje(), product.getDisponibilidad(), product.getRetiroEnTienda(),
+                categories, images, variants, specifications, documents,
+                toCalculation(product.getConfiguracionCalculo()));
     }
 
     public PublicProductCategoryResponse toCategory(CategoriaProducto category) {
