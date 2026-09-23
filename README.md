@@ -25,7 +25,7 @@ Abre la consola de PostgreSQL (`psql`) o utiliza un cliente como pgAdmin/DBeaver
 CREATE DATABASE isanorte_db;
 
 -- 2. Crear el usuario con su respectiva contraseña
-CREATE USER isanorte_user WITH PASSWORD 'Nil71232516';
+CREATE USER isanorte_user WITH PASSWORD 'Contraseña';
 
 -- 3. Otorgar privilegios al usuario sobre la base de datos
 GRANT ALL PRIVILEGES ON DATABASE isanorte_db TO isanorte_user;
