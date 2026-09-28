@@ -29,9 +29,9 @@ class ComparacionPrecioServiceTest {
 
     void internal(String price) {
         when(content.findPublicProduct("isanorte", "isadecor", "mesa")).thenReturn(
-                new PublicProductDetailResponse("Mesa", "SKU", "mesa", null, "Mesa",
+                new PublicProductDetailResponse("Mesa", "SKU", "mesa", null, "Mesa", null, null,
                         price == null ? null : new BigDecimal(price), null, null, null,
-                        null, null, null, null, null, null));
+                        false, null, null, null, null, null, null));
     }
     void external(String price, String currency) {
         when(scraping.extraer(request.urlExterna())).thenReturn(new IScrapingPrecioService.PrecioExterno(

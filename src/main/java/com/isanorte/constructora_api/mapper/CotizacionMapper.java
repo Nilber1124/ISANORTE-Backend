@@ -6,6 +6,7 @@ import org.mapstruct.ReportingPolicy;
 
 import com.isanorte.constructora_api.dto.request.CotizacionRequest;
 import com.isanorte.constructora_api.dto.response.CotizacionResponse;
+import com.isanorte.constructora_api.dto.response.PublicCotizacionResponse;
 import com.isanorte.constructora_api.model.Cotizacion;
 import com.isanorte.constructora_api.model.DetalleCotizacion;
 import com.isanorte.constructora_api.model.SeguimientoCotizacion;
@@ -32,4 +33,11 @@ public interface CotizacionMapper {
     @Mapping(target = "administradorId", source = "administrador.id")
     @Mapping(target = "administradorNombre", source = "administrador.nombre")
     CotizacionResponse.SeguimientoResponse toSeguimientoResponse(SeguimientoCotizacion seguimiento);
+
+    PublicCotizacionResponse toPublicResponse(Cotizacion cotizacion);
+
+    @Mapping(target = "productoSlug", source = "producto.slug")
+    @Mapping(target = "varianteSku", source = "variante.sku")
+    PublicCotizacionResponse.DetallePublicoResponse toDetallePublicoResponse(DetalleCotizacion detalle);
 }
+

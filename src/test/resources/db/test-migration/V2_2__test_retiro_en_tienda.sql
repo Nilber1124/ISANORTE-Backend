@@ -1,0 +1,1 @@
+ALTER TABLE productos ADD COLUMN retiro_en_tienda BOOLEAN DEFAULT FALSE;

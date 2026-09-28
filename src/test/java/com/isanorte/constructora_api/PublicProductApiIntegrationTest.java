@@ -117,6 +117,9 @@ class PublicProductApiIntegrationTest {
         UnidadNegocio unitA = unit(site.getEmpresa(), "detail-a", true);
         UnidadNegocio unitB = unit(site.getEmpresa(), "detail-b", true);
         Producto productA = product(unitA, "detail-alpha", EstadoPublicacion.PUBLICADO);
+        productA.setTituloSeo("Wall Panel SEO | ISADECOR");
+        productA.setDescripcionSeo("Descripción SEO para Wall Panel");
+        productA.setRetiroEnTienda(true);
         CategoriaProducto global = category("detail-global", null, true, 0);
         productA.addCategoria(global);
         productA.addImagen(ImagenProducto.builder().url("/secondary.webp").altText(null)
@@ -142,6 +145,9 @@ class PublicProductApiIntegrationTest {
                 site.getClave(), unitA.getSlug(), productA.getSlug()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.slug").value(productA.getSlug()))
+                .andExpect(jsonPath("$.tituloSeo").value("Wall Panel SEO | ISADECOR"))
+                .andExpect(jsonPath("$.descripcionSeo").value("Descripción SEO para Wall Panel"))
+                .andExpect(jsonPath("$.retiroEnTienda").value(true))
                 .andExpect(jsonPath("$.imagenes[0].url").value("/principal.webp"))
                 .andExpect(jsonPath("$.imagenes[1].url").value("/secondary.webp"))
                 .andExpect(jsonPath("$.variantes[0].orden").value(0))

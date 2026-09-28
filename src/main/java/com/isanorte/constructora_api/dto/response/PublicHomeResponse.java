@@ -2,12 +2,13 @@ package com.isanorte.constructora_api.dto.response;
 
 import java.util.List;
 
+import com.isanorte.constructora_api.enums.RobotsSeo;
 import com.isanorte.constructora_api.enums.TipoRecursoUnidadNegocio;
 import com.isanorte.constructora_api.enums.TipoSeccionLanding;
 
 public record PublicHomeResponse(
         List<Seccion> secciones, List<Servicio> servicios, List<Proyecto> proyectos,
-        UnidadDestacada unidadDestacada) {
+        UnidadDestacada unidadDestacada, Seo seo) {
 
     public record Seccion(
             TipoSeccionLanding tipo, String etiqueta, String titulo, String subtitulo,
@@ -42,5 +43,8 @@ public record PublicHomeResponse(
 
     public record Recurso(
             TipoRecursoUnidadNegocio tipo, String url, String alt, String etiqueta, Integer orden) {
+    }
+
+    public record Seo(String title, String description, String ogImageUrl, RobotsSeo robots) {
     }
 }

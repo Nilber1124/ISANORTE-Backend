@@ -164,7 +164,11 @@ public class PublicContentService implements IPublicContentService {
                                 .map(resource -> new PublicHomeResponse.Recurso(resource.getTipo(), resource.getUrl(),
                                         resource.getAlt(), resource.getEtiqueta(), resource.getOrden())).toList()))
                 .orElse(null);
-        return new PublicHomeResponse(sections, services, projects, highlighted);
+        SeoPagina seo = seoRepository.findByConfiguracionSitioIdAndTipoPaginaAndUnidadNegocioIsNull(
+                site.getId(), TipoPaginaSeo.HOME).orElse(null);
+        PublicHomeResponse.Seo publicSeo = seo == null ? null : new PublicHomeResponse.Seo(
+                seo.getTitle(), seo.getDescription(), seo.getOgImageUrl(), seo.getRobots());
+        return new PublicHomeResponse(sections, services, projects, highlighted, publicSeo);
     }
 
     @Override @Transactional(readOnly = true)

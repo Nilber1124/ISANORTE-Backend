@@ -393,6 +393,8 @@ class DynamicContentApiIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON).content(json(Map.of(
                         "tipo", "IMAGEN_FONDO", "url", "/hidden.webp", "orden", 1, "activo", false))))
                 .andExpect(status().isCreated());
+        seoRepository.saveAndFlush(SeoPagina.builder().tipoPagina(TipoPaginaSeo.HOME).title("Home SEO")
+                .description("Descripción Home SEO").ogImageUrl("/home-og.webp").configuracionSitio(site).build());
         mockMvc.perform(get("/api/publico/sitios/{key}/home", site.getClave()))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.secciones.length()").value(1))
                 .andExpect(jsonPath("$.secciones[0].orden").value(0))
@@ -401,7 +403,11 @@ class DynamicContentApiIntegrationTest {
                 .andExpect(jsonPath("$.servicios.length()").value(1))
                 .andExpect(jsonPath("$.proyectos.length()").value(1))
                 .andExpect(jsonPath("$.unidadDestacada.slug").value("highlighted"))
-                .andExpect(jsonPath("$.unidadDestacada.recursos.length()").value(1));
+                .andExpect(jsonPath("$.unidadDestacada.recursos.length()").value(1))
+                .andExpect(jsonPath("$.seo.title").value("Home SEO"))
+                .andExpect(jsonPath("$.seo.description").value("Descripción Home SEO"))
+                .andExpect(jsonPath("$.seo.ogImageUrl").value("/home-og.webp"))
+                .andExpect(jsonPath("$.seo.robots").value("INDEX_FOLLOW"));
     }
 
     @Test
