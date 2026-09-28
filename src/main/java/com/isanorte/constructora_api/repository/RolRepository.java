@@ -11,4 +11,6 @@ import com.isanorte.constructora_api.model.Rol;
 public interface RolRepository extends IGenericRepository<Rol, UUID> {
 
     Optional<Rol> findByNombre(String nombre);
+
+    Optional<Rol> findByNombreIgnoreCase(String nombre);
 }
