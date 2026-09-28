@@ -19,6 +19,12 @@ import jakarta.servlet.http.HttpServletRequest;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(CredencialesInvalidasException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidCredentials(
+            CredencialesInvalidasException exception, HttpServletRequest request) {
+        return build(HttpStatus.UNAUTHORIZED, exception.getMessage(), request);
+    }
+
     @ExceptionHandler(ModelNotFoundException.class)
     public ResponseEntity<ApiErrorResponse> handleNotFound(
             ModelNotFoundException exception, HttpServletRequest request) {
