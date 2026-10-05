@@ -18,14 +18,15 @@ public class CorsConfig implements WebMvcConfigurer {
     @Value("${cors.allowed-origins:http://localhost:4200,http://localhost:3000,https://*.vercel.app}")
     private String allowedOrigins;
 
-    // Bean explícito requerido por Spring Security cors(Customizer.withDefaults())
     @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration config = new CorsConfiguration();
-        List<String> origins = Arrays.stream(allowedOrigins.split(","))
+    public CorsConfigurationSource corsConfigurationSource(
+            @Value("${cors.allowed-origins:http://localhost:4200,http://localhost:3000,https://*.vercel.app,https://isanorte-frontend.vercel.app}") String allowedOriginsValue) {
+        List<String> origins = Arrays.stream(allowedOriginsValue.split(","))
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())
                 .toList();
+
+        CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOriginPatterns(origins);
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
