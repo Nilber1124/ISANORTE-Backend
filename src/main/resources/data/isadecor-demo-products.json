@@ -1,0 +1,375 @@
+{
+  "businessUnitSlug": "isadecor",
+  "imageSets": {
+    "wood-light": [
+      { "url": "/images/isadecor-top.jpg", "label": "ambiente interior en madera clara", "primary": true, "order": 0 },
+      { "url": "/images/isadecor-left-1.jpg", "label": "detalle de aplicación interior", "primary": false, "order": 1 },
+      { "url": "/images/recorrido-sala.jpg", "label": "referencia de sala terminada", "primary": false, "order": 2 }
+    ],
+    "wood-dark": [
+      { "url": "/images/isadecor-left-2.jpg", "label": "ambiente interior en madera oscura", "primary": true, "order": 0 },
+      { "url": "/images/proyectos-penthouse-abisal.jpg", "label": "referencia de interior premium", "primary": false, "order": 1 },
+      { "url": "/images/recorrido-dormitorio.jpg", "label": "aplicación en dormitorio", "primary": false, "order": 2 }
+    ],
+    "stone-light": [
+      { "url": "/images/isadecor-catalog-hero.jpg", "label": "ambiente de catálogo en tonos claros", "primary": true, "order": 0 },
+      { "url": "/images/recorrido-bano.jpg", "label": "aplicación en baño contemporáneo", "primary": false, "order": 1 },
+      { "url": "/images/servicios-acabados.jpg", "label": "detalle de acabados arquitectónicos", "primary": false, "order": 2 }
+    ],
+    "stone-dark": [
+      { "url": "/images/isadecor-fondo.jpg", "label": "ambiente arquitectónico de contraste", "primary": true, "order": 0 },
+      { "url": "/images/proyectos-oficinas-nexus.jpg", "label": "referencia corporativa contemporánea", "primary": false, "order": 1 },
+      { "url": "/images/recorrido-cocina.jpg", "label": "aplicación en cocina moderna", "primary": false, "order": 2 }
+    ],
+    "textured": [
+      { "url": "/images/proyectos-showroom-isadecor.jpg", "label": "exhibición en showroom ISADECOR", "primary": true, "order": 0 },
+      { "url": "/images/servicios-decoracion.jpg", "label": "composición decorativa interior", "primary": false, "order": 1 },
+      { "url": "/images/isadecor-hero.jpg", "label": "ambiente interior de inspiración", "primary": false, "order": 2 }
+    ],
+    "flooring": [
+      { "url": "/images/residencia-aura.jpg", "label": "piso instalado en residencia", "primary": true, "order": 0 },
+      { "url": "/images/casa-lujo.jpg", "label": "referencia de ambiente residencial", "primary": false, "order": 1 },
+      { "url": "/images/proyectos-villa-lomas-alta.jpg", "label": "acabado de proyecto residencial", "primary": false, "order": 2 }
+    ]
+  },
+  "products": [
+    {
+      "sku": "ISA-WP-RN-290", "name": "Wall Panel Roble Natural", "slug": "wall-panel-roble-natural",
+      "summary": "Panel mural de veta roble natural para interiores cálidos y contemporáneos.",
+      "description": "Revestimiento mural decorativo con textura de roble natural y modulación vertical. Su formato liviano permite renovar salas, dormitorios y espacios comerciales con una instalación limpia y rápida.",
+      "price": 89.00, "previousPrice": 109.00, "discountPercentage": 18.35, "availability": "DISPONIBLE", "featured": true, "storePickup": true,
+      "seoTitle": "Wall Panel Roble Natural | ISADECOR", "seoDescription": "Panel mural acabado roble natural en formatos de 2.44 m y 2.90 m para proyectos residenciales y comerciales.",
+      "categorySlugs": ["wall-panels"], "imageSet": "wood-light", "material": "WPC con lámina decorativa", "finish": "Madera natural mate", "color": "Roble natural", "dimensions": "16 cm de ancho; largos de 2.44 m y 2.90 m", "thickness": "22 mm", "recommendedUse": "Muros interiores, salas, dormitorios y recepción", "moistureResistance": "Media; evitar contacto directo con agua", "installation": "Adhesivo de montaje y fijación mecánica oculta",
+      "variants": [
+        { "sku": "ISA-WP-RN-244", "name": "Roble Natural 2.44 m", "description": "Panel de 16 × 244 cm.", "price": 79.00, "available": true, "imageUrl": "/images/isadecor-top.jpg", "order": 0 },
+        { "sku": "ISA-WP-RN-290-V", "name": "Roble Natural 2.90 m", "description": "Panel de 16 × 290 cm.", "price": 89.00, "available": true, "imageUrl": "/images/isadecor-top.jpg", "order": 1 }
+      ],
+      "calculation": { "inputLabel": "Ancho total del muro", "inputUnit": "m", "coveragePerUnit": 0.16, "salesUnit": "paneles", "helpText": "Ingresa el ancho lineal del muro; el cálculo redondea al panel completo superior." }
+    },
+    {
+      "sku": "ISA-WP-NO-290", "name": "Wall Panel Nogal Oscuro", "slug": "wall-panel-nogal-oscuro",
+      "summary": "Wall panel nogal profundo para ambientes elegantes y de alto contraste.",
+      "description": "Panel mural acanalado en tono nogal oscuro, ideal para cabeceras, salas de TV y áreas ejecutivas. Combina una presencia sofisticada con montaje modular y bajo mantenimiento.",
+      "price": 94.00, "previousPrice": null, "discountPercentage": null, "availability": "DISPONIBLE", "featured": true, "storePickup": true,
+      "seoTitle": "Wall Panel Nogal Oscuro | ISADECOR", "seoDescription": "Wall panel acanalado color nogal oscuro, disponible en largos de 2.44 m y 2.90 m.",
+      "categorySlugs": ["wall-panels"], "imageSet": "wood-dark", "material": "WPC con lámina decorativa", "finish": "Madera satinada", "color": "Nogal oscuro", "dimensions": "16 cm de ancho; largos de 2.44 m y 2.90 m", "thickness": "22 mm", "recommendedUse": "Muros interiores, cabeceras y oficinas", "moistureResistance": "Media; limpieza con paño húmedo", "installation": "Adhesivo de montaje y fijación mecánica oculta",
+      "variants": [
+        { "sku": "ISA-WP-NO-244", "name": "Nogal Oscuro 2.44 m", "description": "Panel de 16 × 244 cm.", "price": 84.00, "available": true, "imageUrl": "/images/isadecor-left-2.jpg", "order": 0 },
+        { "sku": "ISA-WP-NO-290-V", "name": "Nogal Oscuro 2.90 m", "description": "Panel de 16 × 290 cm.", "price": 94.00, "available": true, "imageUrl": "/images/isadecor-left-2.jpg", "order": 1 }
+      ],
+      "calculation": { "inputLabel": "Ancho total del muro", "inputUnit": "m", "coveragePerUnit": 0.16, "salesUnit": "paneles", "helpText": "Ingresa el ancho lineal del muro; considera recortes adicionales según el proyecto." }
+    },
+    {
+      "sku": "ISA-WP-MC-280", "name": "Wall Panel Mármol Carrara", "slug": "wall-panel-marmol-carrara",
+      "summary": "Lámina mural de gran formato inspirada en mármol Carrara de veta suave.",
+      "description": "Panel de gran formato con apariencia de mármol blanco Carrara. Reduce juntas visibles y ofrece una superficie luminosa para recibidores, salas, baños secos y locales comerciales.",
+      "price": 119.00, "previousPrice": 139.00, "discountPercentage": 14.39, "availability": "DISPONIBLE", "featured": true, "storePickup": false,
+      "seoTitle": "Wall Panel Mármol Carrara | ISADECOR", "seoDescription": "Panel mural gran formato efecto mármol Carrara, acabado brillante y rápida instalación.",
+      "categorySlugs": ["wall-panels"], "imageSet": "stone-light", "material": "PVC marmolizado de alta densidad", "finish": "Brillante pulido", "color": "Blanco con veta gris", "dimensions": "1.22 × 2.80 m", "thickness": "3 mm", "recommendedUse": "Muros interiores, recibidores y baños secos", "moistureResistance": "Alta", "installation": "Adhesivo de contacto sobre superficie nivelada",
+      "variants": [
+        { "sku": "ISA-WP-MC-S", "name": "Carrara Veta Suave", "description": "Veta gris fina y homogénea.", "price": 119.00, "available": true, "imageUrl": "/images/isadecor-catalog-hero.jpg", "order": 0 },
+        { "sku": "ISA-WP-MC-I", "name": "Carrara Veta Intensa", "description": "Veta gris marcada de mayor contraste.", "price": 124.00, "available": true, "imageUrl": "/images/recorrido-bano.jpg", "order": 1 }
+      ],
+      "calculation": { "inputLabel": "Área del muro", "inputUnit": "m²", "coveragePerUnit": 3.416, "salesUnit": "paneles", "helpText": "Cada panel cubre 3.416 m² antes de recortes y desperdicio." }
+    },
+    {
+      "sku": "ISA-WP-MN-280", "name": "Wall Panel Mármol Negro", "slug": "wall-panel-marmol-negro",
+      "summary": "Panel negro marmolizado con vetas claras para muros de acento.",
+      "description": "Superficie mural de gran formato con fondo negro y veta mineral contrastante. Pensada para barras, recepciones y muros protagonistas de estética contemporánea.",
+      "price": 129.00, "previousPrice": null, "discountPercentage": null, "availability": "BAJO_PEDIDO", "featured": true, "storePickup": false,
+      "seoTitle": "Wall Panel Mármol Negro | ISADECOR", "seoDescription": "Panel decorativo de gran formato efecto mármol negro para muros de acento premium.",
+      "categorySlugs": ["wall-panels"], "imageSet": "stone-dark", "material": "PVC marmolizado de alta densidad", "finish": "Brillante pulido", "color": "Negro con veta blanca", "dimensions": "1.22 × 2.80 m", "thickness": "3 mm", "recommendedUse": "Barras, recepciones y muros interiores de acento", "moistureResistance": "Alta", "installation": "Adhesivo de contacto sobre superficie nivelada",
+      "variants": [
+        { "sku": "ISA-WP-MN-OR", "name": "Negro Veta Oro", "description": "Fondo negro con veta cálida dorada.", "price": 139.00, "available": true, "imageUrl": "/images/isadecor-fondo.jpg", "order": 0 },
+        { "sku": "ISA-WP-MN-BL", "name": "Negro Veta Blanca", "description": "Fondo negro con veta blanca definida.", "price": 129.00, "available": true, "imageUrl": "/images/proyectos-oficinas-nexus.jpg", "order": 1 }
+      ],
+      "calculation": { "inputLabel": "Área del muro", "inputUnit": "m²", "coveragePerUnit": 3.416, "salesUnit": "paneles", "helpText": "Cada panel cubre 3.416 m²; agrega margen para casar las vetas." }
+    },
+    {
+      "sku": "ISA-WP-PC-280", "name": "Wall Panel Piedra Caliza", "slug": "wall-panel-piedra-caliza",
+      "summary": "Panel mineral claro con textura visual de piedra caliza contemporánea.",
+      "description": "Revestimiento mural de gran formato inspirado en piedra caliza. Su tono neutro aporta serenidad a espacios residenciales, clínicas, tiendas y áreas de atención.",
+      "price": 114.00, "previousPrice": null, "discountPercentage": null, "availability": "DISPONIBLE", "featured": false, "storePickup": false,
+      "seoTitle": "Wall Panel Piedra Caliza | ISADECOR", "seoDescription": "Panel mural de gran formato con apariencia de piedra caliza clara y acabado mate.",
+      "categorySlugs": ["wall-panels"], "imageSet": "stone-light", "material": "Compuesto mineral flexible", "finish": "Piedra mate", "color": "Caliza crema", "dimensions": "1.20 × 2.80 m", "thickness": "4 mm", "recommendedUse": "Muros interiores residenciales y comerciales", "moistureResistance": "Alta con sellado de juntas", "installation": "Adhesivo flexible sobre superficie firme",
+      "variants": [
+        { "sku": "ISA-WP-PC-CR", "name": "Caliza Crema", "description": "Tono crema uniforme.", "price": 114.00, "available": true, "imageUrl": "/images/servicios-acabados.jpg", "order": 0 },
+        { "sku": "ISA-WP-PC-AR", "name": "Caliza Arena", "description": "Tono arena de veta suave.", "price": 116.00, "available": true, "imageUrl": "/images/isadecor-catalog-hero.jpg", "order": 1 }
+      ],
+      "calculation": { "inputLabel": "Área del muro", "inputUnit": "m²", "coveragePerUnit": 3.36, "salesUnit": "paneles", "helpText": "Cada panel cubre hasta 3.36 m² antes de cortes." }
+    },
+    {
+      "sku": "ISA-WP-BM-280", "name": "Wall Panel Blanco Mate", "slug": "wall-panel-blanco-mate",
+      "summary": "Panel liso blanco mate para interiores luminosos y minimalistas.",
+      "description": "Solución mural limpia y continua para proyectos minimalistas. El blanco mate suaviza reflejos y funciona como fondo neutro en hogares, consultorios y retail.",
+      "price": 98.00, "previousPrice": null, "discountPercentage": null, "availability": "DISPONIBLE", "featured": false, "storePickup": true,
+      "seoTitle": "Wall Panel Blanco Mate | ISADECOR", "seoDescription": "Panel mural blanco mate de gran formato para interiores minimalistas y comerciales.",
+      "categorySlugs": ["wall-panels"], "imageSet": "stone-light", "material": "PVC de alta densidad", "finish": "Mate antihuellas", "color": "Blanco cálido", "dimensions": "1.22 × 2.80 m", "thickness": "3 mm", "recommendedUse": "Muros interiores, consultorios y retail", "moistureResistance": "Alta", "installation": "Adhesivo de contacto sobre superficie nivelada",
+      "variants": [
+        { "sku": "ISA-WP-BM-C", "name": "Blanco Cálido", "description": "Blanco suave para iluminación cálida.", "price": 98.00, "available": true, "imageUrl": "/images/isadecor-catalog-hero.jpg", "order": 0 },
+        { "sku": "ISA-WP-BM-N", "name": "Blanco Neutro", "description": "Blanco equilibrado para espacios comerciales.", "price": 98.00, "available": true, "imageUrl": "/images/recorrido-bano.jpg", "order": 1 }
+      ],
+      "calculation": { "inputLabel": "Área del muro", "inputUnit": "m²", "coveragePerUnit": 3.416, "salesUnit": "paneles", "helpText": "Calcula paneles completos; verifica vanos y recortes con tu instalador." }
+    },
+    {
+      "sku": "ISA-WP-GT-290", "name": "Wall Panel Grafito Textil", "slug": "wall-panel-grafito-textil",
+      "summary": "Panel mural grafito con trama textil para espacios sobrios y acústicamente confortables.",
+      "description": "Panel decorativo con apariencia textil y tono grafito, desarrollado para oficinas, salas multimedia y dormitorios. Aporta profundidad visual y una sensación más acogedora.",
+      "price": 107.00, "previousPrice": null, "discountPercentage": null, "availability": "AGOTADO", "featured": false, "storePickup": false,
+      "seoTitle": "Wall Panel Grafito Textil | ISADECOR", "seoDescription": "Panel mural grafito con textura textil para oficinas, dormitorios y salas multimedia.",
+      "categorySlugs": ["wall-panels"], "imageSet": "stone-dark", "material": "WPC revestido", "finish": "Textil mate", "color": "Grafito", "dimensions": "20 cm de ancho × 2.90 m", "thickness": "18 mm", "recommendedUse": "Oficinas, salas multimedia y dormitorios", "moistureResistance": "Baja; uso interior seco", "installation": "Adhesivo de montaje y clips ocultos",
+      "variants": [
+        { "sku": "ISA-WP-GT-244", "name": "Grafito Textil 2.44 m", "description": "Panel de 20 × 244 cm.", "price": 96.00, "available": false, "imageUrl": "/images/isadecor-fondo.jpg", "order": 0 },
+        { "sku": "ISA-WP-GT-290-V", "name": "Grafito Textil 2.90 m", "description": "Panel de 20 × 290 cm.", "price": 107.00, "available": false, "imageUrl": "/images/isadecor-fondo.jpg", "order": 1 }
+      ],
+      "calculation": { "inputLabel": "Ancho total del muro", "inputUnit": "m", "coveragePerUnit": 0.20, "salesUnit": "paneles", "helpText": "La estimación considera el ancho útil de 20 cm por panel." }
+    },
+    {
+      "sku": "ISA-PL-RB-290", "name": "Panel Listonado Roble", "slug": "panel-listonado-roble",
+      "summary": "Listones verticales de roble sobre fondo negro para muros con ritmo y calidez.",
+      "description": "Panel listonado decorativo de líneas verticales y acabado roble. Es una solución versátil para muros de TV, recibidores y áreas comerciales con estética natural.",
+      "price": 99.00, "previousPrice": 119.00, "discountPercentage": 16.81, "availability": "DISPONIBLE", "featured": true, "storePickup": true,
+      "seoTitle": "Panel Listonado Roble | ISADECOR", "seoDescription": "Panel listonado acabado roble, en 2.44 m y 2.90 m, para muros interiores decorativos.",
+      "categorySlugs": ["paneles-decorativos"], "imageSet": "wood-light", "material": "MDF hidrófugo y fieltro PET", "finish": "Chapa de roble mate", "color": "Roble sobre fondo negro", "dimensions": "60 cm de ancho; largos de 2.44 m y 2.90 m", "thickness": "21 mm", "recommendedUse": "Muros de TV, recibidores y locales", "moistureResistance": "Media", "installation": "Tornillos ocultos entre listones o adhesivo",
+      "variants": [
+        { "sku": "ISA-PL-RB-244", "name": "Listonado Roble 2.44 m", "description": "Panel de 60 × 244 cm.", "price": 89.00, "available": true, "imageUrl": "/images/isadecor-top.jpg", "order": 0 },
+        { "sku": "ISA-PL-RB-290-V", "name": "Listonado Roble 2.90 m", "description": "Panel de 60 × 290 cm.", "price": 99.00, "available": true, "imageUrl": "/images/isadecor-top.jpg", "order": 1 }
+      ],
+      "calculation": { "inputLabel": "Ancho total del muro", "inputUnit": "m", "coveragePerUnit": 0.60, "salesUnit": "paneles", "helpText": "Cada panel aporta 60 cm de ancho útil." }
+    },
+    {
+      "sku": "ISA-PL-NG-290", "name": "Panel Listonado Nogal", "slug": "panel-listonado-nogal",
+      "summary": "Panel listonado nogal de contraste elegante para interiores residenciales y ejecutivos.",
+      "description": "Composición de listones tono nogal sobre base acústica negra. Proporciona un fondo arquitectónico elegante en dormitorios, salas, estudios y salas de reuniones.",
+      "price": 105.00, "previousPrice": null, "discountPercentage": null, "availability": "DISPONIBLE", "featured": true, "storePickup": true,
+      "seoTitle": "Panel Listonado Nogal | ISADECOR", "seoDescription": "Panel listonado nogal sobre fieltro negro para decoración de muros y acondicionamiento interior.",
+      "categorySlugs": ["paneles-decorativos"], "imageSet": "wood-dark", "material": "MDF hidrófugo y fieltro PET", "finish": "Chapa nogal satinada", "color": "Nogal sobre fondo negro", "dimensions": "60 cm de ancho; largos de 2.44 m y 2.90 m", "thickness": "21 mm", "recommendedUse": "Dormitorios, estudios y salas de reuniones", "moistureResistance": "Media", "installation": "Tornillos ocultos entre listones o adhesivo",
+      "variants": [
+        { "sku": "ISA-PL-NG-244", "name": "Listonado Nogal 2.44 m", "description": "Panel de 60 × 244 cm.", "price": 95.00, "available": true, "imageUrl": "/images/isadecor-left-2.jpg", "order": 0 },
+        { "sku": "ISA-PL-NG-290-V", "name": "Listonado Nogal 2.90 m", "description": "Panel de 60 × 290 cm.", "price": 105.00, "available": true, "imageUrl": "/images/isadecor-left-2.jpg", "order": 1 }
+      ],
+      "calculation": { "inputLabel": "Ancho total del muro", "inputUnit": "m", "coveragePerUnit": 0.60, "salesUnit": "paneles", "helpText": "Cada panel aporta 60 cm de ancho útil." }
+    },
+    {
+      "sku": "ISA-PL-FR-290", "name": "Panel Listonado Fresno", "slug": "panel-listonado-fresno",
+      "summary": "Listonado claro de veta fresno para interiores luminosos de inspiración nórdica.",
+      "description": "Panel decorativo con listones de apariencia fresno y base acústica gris. Su tonalidad clara amplía visualmente los ambientes y combina con paletas neutras.",
+      "price": 102.00, "previousPrice": null, "discountPercentage": null, "availability": "BAJO_PEDIDO", "featured": false, "storePickup": false,
+      "seoTitle": "Panel Listonado Fresno | ISADECOR", "seoDescription": "Panel listonado fresno claro para muros interiores residenciales y espacios comerciales.",
+      "categorySlugs": ["paneles-decorativos"], "imageSet": "wood-light", "material": "MDF y fieltro PET reciclado", "finish": "Fresno mate", "color": "Fresno claro sobre gris", "dimensions": "60 cm de ancho; largos de 2.44 m y 2.90 m", "thickness": "21 mm", "recommendedUse": "Salas, dormitorios y oficinas creativas", "moistureResistance": "Media", "installation": "Tornillos ocultos entre listones o adhesivo",
+      "variants": [
+        { "sku": "ISA-PL-FR-244", "name": "Listonado Fresno 2.44 m", "description": "Panel de 60 × 244 cm.", "price": 92.00, "available": true, "imageUrl": "/images/isadecor-left-1.jpg", "order": 0 },
+        { "sku": "ISA-PL-FR-290-V", "name": "Listonado Fresno 2.90 m", "description": "Panel de 60 × 290 cm.", "price": 102.00, "available": true, "imageUrl": "/images/isadecor-left-1.jpg", "order": 1 }
+      ],
+      "calculation": { "inputLabel": "Ancho total del muro", "inputUnit": "m", "coveragePerUnit": 0.60, "salesUnit": "paneles", "helpText": "Redondea siempre hacia arriba para conservar listones completos." }
+    },
+    {
+      "sku": "ISA-PA-CA-240", "name": "Panel Acústico Carbón", "slug": "panel-acustico-carbon",
+      "summary": "Panel fonoabsorbente carbón con diseño lineal para oficinas y entretenimiento.",
+      "description": "Panel decorativo con fieltro PET y listones carbón, diseñado para mejorar el confort acústico percibido mientras crea una superficie sobria y moderna.",
+      "price": 128.00, "previousPrice": null, "discountPercentage": null, "availability": "DISPONIBLE", "featured": false, "storePickup": false,
+      "seoTitle": "Panel Acústico Carbón | ISADECOR", "seoDescription": "Panel acústico decorativo color carbón para oficinas, estudios y salas multimedia.",
+      "categorySlugs": ["paneles-decorativos"], "imageSet": "stone-dark", "material": "Fieltro PET y listones MDF", "finish": "Texturizado mate", "color": "Carbón", "dimensions": "60 × 240 cm", "thickness": "22 mm", "recommendedUse": "Estudios, oficinas y salas multimedia", "moistureResistance": "Baja; uso interior seco", "installation": "Fijación mecánica directa al muro",
+      "variants": [
+        { "sku": "ISA-PA-CA-N", "name": "Carbón Fondo Negro", "description": "Listón carbón sobre fieltro negro.", "price": 128.00, "available": true, "imageUrl": "/images/proyectos-oficinas-nexus.jpg", "order": 0 },
+        { "sku": "ISA-PA-CA-G", "name": "Carbón Fondo Gris", "description": "Listón carbón sobre fieltro gris.", "price": 128.00, "available": true, "imageUrl": "/images/isadecor-fondo.jpg", "order": 1 }
+      ],
+      "calculation": { "inputLabel": "Área del muro", "inputUnit": "m²", "coveragePerUnit": 1.44, "salesUnit": "paneles", "helpText": "Cada panel cubre 1.44 m²; considera la orientación del listón." }
+    },
+    {
+      "sku": "ISA-PG-AR-060", "name": "Panel Geométrico Arena", "slug": "panel-geometrico-arena",
+      "summary": "Panel modular 3D color arena para composiciones murales personalizadas.",
+      "description": "Módulo decorativo tridimensional de geometría suave. Permite crear patrones continuos o paños de acento en recibidores, restaurantes y dormitorios.",
+      "price": 42.00, "previousPrice": null, "discountPercentage": null, "availability": "DISPONIBLE", "featured": false, "storePickup": true,
+      "seoTitle": "Panel Geométrico Arena 3D | ISADECOR", "seoDescription": "Panel decorativo modular 3D color arena para crear muros de acento personalizados.",
+      "categorySlugs": ["paneles-decorativos"], "imageSet": "textured", "material": "Fibra vegetal prensada", "finish": "Mineral mate", "color": "Arena", "dimensions": "60 × 60 cm", "thickness": "18 mm", "recommendedUse": "Recibidores, restaurantes y dormitorios", "moistureResistance": "Baja; uso interior seco", "installation": "Adhesivo de montaje sobre muro nivelado",
+      "variants": [
+        { "sku": "ISA-PG-AR-D", "name": "Geometría Diagonal", "description": "Relieve diagonal combinable.", "price": 42.00, "available": true, "imageUrl": "/images/proyectos-showroom-isadecor.jpg", "order": 0 },
+        { "sku": "ISA-PG-AR-O", "name": "Geometría Ondular", "description": "Relieve de onda continua.", "price": 45.00, "available": true, "imageUrl": "/images/servicios-decoracion.jpg", "order": 1 }
+      ],
+      "calculation": { "inputLabel": "Área del muro", "inputUnit": "m²", "coveragePerUnit": 0.36, "salesUnit": "paneles", "helpText": "Cada módulo cubre 0.36 m²; compra unidades extra para cortes perimetrales." }
+    },
+    {
+      "sku": "ISA-PO-BL-280", "name": "Panel Ondulado Blanco", "slug": "panel-ondulado-blanco",
+      "summary": "Panel blanco con relieve ondulado vertical para muros escultóricos.",
+      "description": "Panel decorativo de relieve continuo y acabado blanco mate. La luz rasante destaca sus ondas y aporta movimiento a recepciones, pasillos y muros de TV.",
+      "price": 76.00, "previousPrice": null, "discountPercentage": null, "availability": "DISPONIBLE", "featured": false, "storePickup": true,
+      "seoTitle": "Panel Ondulado Blanco | ISADECOR", "seoDescription": "Panel decorativo blanco mate con relieve ondulado vertical para interiores modernos.",
+      "categorySlugs": ["paneles-decorativos"], "imageSet": "textured", "material": "Poliestireno de alta densidad", "finish": "Blanco mate pintable", "color": "Blanco", "dimensions": "50 × 280 cm", "thickness": "20 mm", "recommendedUse": "Recepciones, pasillos y muros de TV", "moistureResistance": "Media", "installation": "Adhesivo de montaje; juntas selladas",
+      "variants": [
+        { "sku": "ISA-PO-BL-F", "name": "Onda Fina", "description": "Relieve fino de ritmo cerrado.", "price": 76.00, "available": true, "imageUrl": "/images/isadecor-hero.jpg", "order": 0 },
+        { "sku": "ISA-PO-BL-A", "name": "Onda Amplia", "description": "Relieve amplio de mayor profundidad.", "price": 82.00, "available": true, "imageUrl": "/images/proyectos-showroom-isadecor.jpg", "order": 1 }
+      ],
+      "calculation": { "inputLabel": "Ancho total del muro", "inputUnit": "m", "coveragePerUnit": 0.50, "salesUnit": "paneles", "helpText": "Cada panel aporta 50 cm de ancho útil." }
+    },
+    {
+      "sku": "ISA-RV-TB-280", "name": "Revestimiento Travertino Beige", "slug": "revestimiento-travertino-beige",
+      "summary": "Revestimiento mineral beige inspirado en travertino de corte longitudinal.",
+      "description": "Lámina decorativa de gran formato con textura visual travertino. Su paleta beige combina con madera, fibras naturales y metales cálidos.",
+      "price": 129.00, "previousPrice": 149.00, "discountPercentage": 13.42, "availability": "DISPONIBLE", "featured": true, "storePickup": false,
+      "seoTitle": "Revestimiento Travertino Beige | ISADECOR", "seoDescription": "Revestimiento de gran formato efecto travertino beige para interiores residenciales y comerciales.",
+      "categorySlugs": ["revestimientos"], "imageSet": "stone-light", "material": "Compuesto mineral flexible", "finish": "Travertino mate", "color": "Beige", "dimensions": "1.22 × 2.80 m", "thickness": "4 mm", "recommendedUse": "Salas, lobbies, restaurantes y baños secos", "moistureResistance": "Alta con sellado de juntas", "installation": "Adhesivo flexible y sellador perimetral",
+      "variants": [
+        { "sku": "ISA-RV-TB-L", "name": "Travertino Lineal", "description": "Veta horizontal de corte longitudinal.", "price": 129.00, "available": true, "imageUrl": "/images/servicios-acabados.jpg", "order": 0 },
+        { "sku": "ISA-RV-TB-N", "name": "Travertino Nube", "description": "Movimiento mineral suave y difuso.", "price": 132.00, "available": true, "imageUrl": "/images/isadecor-catalog-hero.jpg", "order": 1 }
+      ],
+      "calculation": { "inputLabel": "Área a revestir", "inputUnit": "m²", "coveragePerUnit": 3.416, "salesUnit": "láminas", "helpText": "Cada lámina cubre 3.416 m² antes de recortes." }
+    },
+    {
+      "sku": "ISA-RV-CG-280", "name": "Revestimiento Cemento Gris", "slug": "revestimiento-cemento-gris",
+      "summary": "Acabado cemento gris de gran formato para espacios urbanos y minimalistas.",
+      "description": "Revestimiento mural de apariencia cementicia sin las cargas de una placa de concreto. Ideal para locales, oficinas y residencias de lenguaje industrial.",
+      "price": 112.00, "previousPrice": null, "discountPercentage": null, "availability": "DISPONIBLE", "featured": true, "storePickup": false,
+      "seoTitle": "Revestimiento Cemento Gris | ISADECOR", "seoDescription": "Revestimiento mural efecto cemento gris, liviano y de rápida instalación para interiores.",
+      "categorySlugs": ["revestimientos"], "imageSet": "stone-dark", "material": "Compuesto mineral flexible", "finish": "Cemento mate", "color": "Gris medio", "dimensions": "1.20 × 2.80 m", "thickness": "4 mm", "recommendedUse": "Locales, oficinas y salas contemporáneas", "moistureResistance": "Alta con sellado", "installation": "Adhesivo flexible sobre base firme",
+      "variants": [
+        { "sku": "ISA-RV-CG-N", "name": "Cemento Gris Nube", "description": "Nube suave de bajo contraste.", "price": 112.00, "available": true, "imageUrl": "/images/proyectos-oficinas-nexus.jpg", "order": 0 },
+        { "sku": "ISA-RV-CG-I", "name": "Cemento Gris Industrial", "description": "Textura marcada de estética industrial.", "price": 118.00, "available": true, "imageUrl": "/images/isadecor-fondo.jpg", "order": 1 }
+      ],
+      "calculation": { "inputLabel": "Área a revestir", "inputUnit": "m²", "coveragePerUnit": 3.36, "salesUnit": "láminas", "helpText": "Cada lámina cubre hasta 3.36 m² antes de recortes." }
+    },
+    {
+      "sku": "ISA-RV-CB-280", "name": "Revestimiento Cuarzo Blanco", "slug": "revestimiento-cuarzo-blanco",
+      "summary": "Superficie blanca de grano fino para interiores limpios y luminosos.",
+      "description": "Revestimiento de apariencia cuarzo con partículas visuales sutiles. Aporta luminosidad sin el reflejo intenso de una superficie pulida.",
+      "price": 121.00, "previousPrice": null, "discountPercentage": null, "availability": "BAJO_PEDIDO", "featured": false, "storePickup": false,
+      "seoTitle": "Revestimiento Cuarzo Blanco | ISADECOR", "seoDescription": "Revestimiento mural blanco efecto cuarzo de grano fino para interiores luminosos.",
+      "categorySlugs": ["revestimientos"], "imageSet": "stone-light", "material": "PVC mineralizado", "finish": "Satinado de grano fino", "color": "Blanco cuarzo", "dimensions": "1.22 × 2.80 m", "thickness": "3 mm", "recommendedUse": "Cocinas secas, retail y consultorios", "moistureResistance": "Alta", "installation": "Adhesivo de contacto sobre superficie nivelada",
+      "variants": [
+        { "sku": "ISA-RV-CB-F", "name": "Cuarzo Blanco Frío", "description": "Blanco frío de matiz limpio.", "price": 121.00, "available": true, "imageUrl": "/images/recorrido-bano.jpg", "order": 0 },
+        { "sku": "ISA-RV-CB-C", "name": "Cuarzo Blanco Cálido", "description": "Blanco cálido de grano beige sutil.", "price": 124.00, "available": true, "imageUrl": "/images/isadecor-catalog-hero.jpg", "order": 1 }
+      ],
+      "calculation": { "inputLabel": "Área a revestir", "inputUnit": "m²", "coveragePerUnit": 3.416, "salesUnit": "láminas", "helpText": "La cantidad se redondea a láminas completas." }
+    },
+    {
+      "sku": "ISA-RV-OA-280", "name": "Revestimiento Ónix Ámbar", "slug": "revestimiento-onix-ambar",
+      "summary": "Revestimiento traslúcido visual efecto ónix en tonos miel y ámbar.",
+      "description": "Panel decorativo inspirado en ónix natural, con vetas cálidas y movimiento expresivo. Diseñado para barras, recepciones y muros focales de alta presencia.",
+      "price": 154.00, "previousPrice": null, "discountPercentage": null, "availability": "BAJO_PEDIDO", "featured": true, "storePickup": false,
+      "seoTitle": "Revestimiento Ónix Ámbar | ISADECOR", "seoDescription": "Panel decorativo efecto ónix ámbar para barras, recepciones y muros focales premium.",
+      "categorySlugs": ["revestimientos"], "imageSet": "textured", "material": "Resina decorativa mineral", "finish": "Alto brillo", "color": "Ámbar y miel", "dimensions": "1.22 × 2.80 m", "thickness": "4 mm", "recommendedUse": "Barras, recepciones y muros focales", "moistureResistance": "Alta", "installation": "Adhesivo transparente sobre base uniforme",
+      "variants": [
+        { "sku": "ISA-RV-OA-M", "name": "Ónix Miel", "description": "Veta suave de tonos miel.", "price": 154.00, "available": true, "imageUrl": "/images/proyectos-showroom-isadecor.jpg", "order": 0 },
+        { "sku": "ISA-RV-OA-F", "name": "Ónix Fuego", "description": "Veta intensa ámbar y cobriza.", "price": 162.00, "available": true, "imageUrl": "/images/servicios-decoracion.jpg", "order": 1 }
+      ],
+      "calculation": { "inputLabel": "Área a revestir", "inputUnit": "m²", "coveragePerUnit": 3.416, "salesUnit": "láminas", "helpText": "Considera láminas adicionales si el diseño requiere continuidad de veta." }
+    },
+    {
+      "sku": "ISA-RV-LT-100", "name": "Revestimiento Ladrillo Terracota", "slug": "revestimiento-ladrillo-terracota",
+      "summary": "Panel flexible efecto ladrillo terracota para interiores cálidos e informales.",
+      "description": "Revestimiento modular liviano que recrea la textura del ladrillo artesanal. Funciona en cafeterías, terrazas techadas y muros de acento residenciales.",
+      "price": 58.00, "previousPrice": null, "discountPercentage": null, "availability": "DISPONIBLE", "featured": false, "storePickup": true,
+      "seoTitle": "Revestimiento Ladrillo Terracota | ISADECOR", "seoDescription": "Panel flexible efecto ladrillo terracota para cafeterías, terrazas techadas y hogares.",
+      "categorySlugs": ["revestimientos"], "imageSet": "textured", "material": "Compuesto mineral flexible", "finish": "Ladrillo rústico", "color": "Terracota", "dimensions": "50 × 100 cm", "thickness": "5 mm", "recommendedUse": "Cafeterías, terrazas techadas y muros de acento", "moistureResistance": "Media con sellador", "installation": "Adhesivo cementicio flexible y emboquillado",
+      "variants": [
+        { "sku": "ISA-RV-LT-R", "name": "Terracota Roja", "description": "Mezcla de ladrillo rojo cálido.", "price": 58.00, "available": true, "imageUrl": "/images/servicios-decoracion.jpg", "order": 0 },
+        { "sku": "ISA-RV-LT-E", "name": "Terracota Envejecida", "description": "Mezcla con matices arena envejecidos.", "price": 61.00, "available": true, "imageUrl": "/images/isadecor-hero.jpg", "order": 1 }
+      ],
+      "calculation": { "inputLabel": "Área a revestir", "inputUnit": "m²", "coveragePerUnit": 0.50, "salesUnit": "paneles", "helpText": "Cada panel cubre 0.50 m²; considera un margen para trabar las juntas." }
+    },
+    {
+      "sku": "ISA-RV-PN-120", "name": "Revestimiento Pizarra Negra", "slug": "revestimiento-pizarra-negra",
+      "summary": "Revestimiento modular con relieve de pizarra negra para acentos minerales.",
+      "description": "Panel de textura estratificada inspirado en pizarra natural. Aporta contraste a chimeneas decorativas, salas y espacios comerciales sin el peso de la piedra maciza.",
+      "price": 84.00, "previousPrice": null, "discountPercentage": null, "availability": "AGOTADO", "featured": false, "storePickup": false,
+      "seoTitle": "Revestimiento Pizarra Negra | ISADECOR", "seoDescription": "Panel decorativo de relieve pizarra negra para muros interiores y espacios comerciales.",
+      "categorySlugs": ["revestimientos"], "imageSet": "stone-dark", "material": "Poliuretano de alta densidad", "finish": "Pizarra estratificada mate", "color": "Negro mineral", "dimensions": "60 × 120 cm", "thickness": "25 mm", "recommendedUse": "Chimeneas decorativas, salas y retail", "moistureResistance": "Alta", "installation": "Adhesivo de montaje y fijación puntual",
+      "variants": [
+        { "sku": "ISA-RV-PN-M", "name": "Pizarra Negro Mate", "description": "Negro uniforme de bajo brillo.", "price": 84.00, "available": false, "imageUrl": "/images/isadecor-fondo.jpg", "order": 0 },
+        { "sku": "ISA-RV-PN-O", "name": "Pizarra Óxido", "description": "Negro con matices óxido sutiles.", "price": 88.00, "available": false, "imageUrl": "/images/proyectos-oficinas-nexus.jpg", "order": 1 }
+      ],
+      "calculation": { "inputLabel": "Área a revestir", "inputUnit": "m²", "coveragePerUnit": 0.72, "salesUnit": "paneles", "helpText": "Cada panel cubre 0.72 m²; redondea a paneles completos." }
+    },
+    {
+      "sku": "ISA-PISO-RN-220", "name": "Piso Roble Nórdico", "slug": "piso-roble-nordico",
+      "summary": "Piso SPC roble claro de veta serena para interiores de inspiración nórdica.",
+      "description": "Piso vinílico SPC de tono roble claro, estable y fácil de mantener. Su sistema clic permite una instalación flotante rápida en hogares y comercio ligero.",
+      "price": 139.90, "previousPrice": 159.90, "discountPercentage": 12.51, "availability": "DISPONIBLE", "featured": true, "storePickup": true,
+      "seoTitle": "Piso Roble Nórdico SPC | ISADECOR", "seoDescription": "Piso SPC roble claro con sistema clic, caja de 2.20 m² y alta resistencia a humedad.",
+      "categorySlugs": ["pisos"], "imageSet": "flooring", "material": "SPC multicapa", "finish": "Madera mate con veta sincronizada", "color": "Roble nórdico", "dimensions": "18 × 122 cm por tabla; caja de 2.20 m²", "thickness": "5.5 mm con manta", "recommendedUse": "Salas, dormitorios y comercio ligero", "moistureResistance": "Alta", "installation": "Flotante con sistema clic sobre base nivelada",
+      "variants": [
+        { "sku": "ISA-PISO-RN-4", "name": "Roble Nórdico 4 mm", "description": "Caja de 2.20 m² sin manta integrada.", "price": 124.90, "available": true, "imageUrl": "/images/residencia-aura.jpg", "order": 0 },
+        { "sku": "ISA-PISO-RN-55", "name": "Roble Nórdico 5.5 mm", "description": "Caja de 2.20 m² con manta integrada.", "price": 139.90, "available": true, "imageUrl": "/images/casa-lujo.jpg", "order": 1 }
+      ],
+      "calculation": { "inputLabel": "Área del piso", "inputUnit": "m²", "coveragePerUnit": 2.20, "salesUnit": "cajas", "helpText": "Cada caja cubre 2.20 m²; añade entre 5 % y 10 % por cortes según el patrón." }
+    },
+    {
+      "sku": "ISA-PISO-NP-220", "name": "Piso Nogal Premium", "slug": "piso-nogal-premium",
+      "summary": "Piso SPC nogal de veta profunda y acabado premium para espacios elegantes.",
+      "description": "Piso vinílico de núcleo rígido en tono nogal, pensado para salas, dormitorios y oficinas ejecutivas. Ofrece estabilidad dimensional y mantenimiento sencillo.",
+      "price": 169.90, "previousPrice": 199.90, "discountPercentage": 15.01, "availability": "DISPONIBLE", "featured": true, "storePickup": true,
+      "seoTitle": "Piso Nogal Premium SPC | ISADECOR", "seoDescription": "Piso SPC nogal premium con sistema clic, manta integrada y caja de 2.20 m².",
+      "categorySlugs": ["pisos"], "imageSet": "flooring", "material": "SPC premium multicapa", "finish": "Madera satinada con veta sincronizada", "color": "Nogal profundo", "dimensions": "18 × 122 cm por tabla; caja de 2.20 m²", "thickness": "6 mm con manta", "recommendedUse": "Salas, dormitorios y oficinas ejecutivas", "moistureResistance": "Alta", "installation": "Flotante con sistema clic sobre base nivelada",
+      "variants": [
+        { "sku": "ISA-PISO-NP-55", "name": "Nogal Premium 5.5 mm", "description": "Caja de 2.20 m² con manta EVA.", "price": 159.90, "available": true, "imageUrl": "/images/casa-lujo.jpg", "order": 0 },
+        { "sku": "ISA-PISO-NP-60", "name": "Nogal Premium 6 mm", "description": "Caja de 2.20 m² con manta IXPE.", "price": 169.90, "available": true, "imageUrl": "/images/proyectos-villa-lomas-alta.jpg", "order": 1 }
+      ],
+      "calculation": { "inputLabel": "Área del piso", "inputUnit": "m²", "coveragePerUnit": 2.20, "salesUnit": "cajas", "helpText": "Cada caja cubre 2.20 m²; agrega merma según modulación y recortes." }
+    },
+    {
+      "sku": "ISA-PISO-EM-180", "name": "Piso Espiga Miel", "slug": "piso-espiga-miel",
+      "summary": "Piso vinílico tono miel diseñado para instalación en patrón espiga.",
+      "description": "Colección de tablas cortas para composiciones tipo espiga. El tono miel aporta calidez y un ritmo clásico actualizado a departamentos, boutiques y restaurantes.",
+      "price": 184.90, "previousPrice": null, "discountPercentage": null, "availability": "BAJO_PEDIDO", "featured": true, "storePickup": false,
+      "seoTitle": "Piso Espiga Miel | ISADECOR", "seoDescription": "Piso vinílico tono miel en tablas para patrón espiga, caja de 1.80 m².",
+      "categorySlugs": ["pisos"], "imageSet": "flooring", "material": "LVT de alta resistencia", "finish": "Madera mate cepillada", "color": "Miel", "dimensions": "12 × 60 cm por tabla; caja de 1.80 m²", "thickness": "5 mm", "recommendedUse": "Departamentos, boutiques y restaurantes", "moistureResistance": "Alta", "installation": "Pegado en patrón espiga sobre base autonivelada",
+      "variants": [
+        { "sku": "ISA-PISO-EM-D", "name": "Espiga Derecha", "description": "Tablas mecanizadas para orientación derecha.", "price": 184.90, "available": true, "imageUrl": "/images/residencia-aura.jpg", "order": 0 },
+        { "sku": "ISA-PISO-EM-I", "name": "Espiga Izquierda", "description": "Tablas mecanizadas para orientación izquierda.", "price": 184.90, "available": true, "imageUrl": "/images/residencia-aura.jpg", "order": 1 }
+      ],
+      "calculation": { "inputLabel": "Área del piso", "inputUnit": "m²", "coveragePerUnit": 1.80, "salesUnit": "cajas", "helpText": "Cada caja cubre 1.80 m²; para espiga considera aproximadamente 10 % de merma." }
+    },
+    {
+      "sku": "ISA-PISO-RC-220", "name": "Piso Roble Ceniza", "slug": "piso-roble-ceniza",
+      "summary": "Piso SPC roble gris equilibrado para ambientes contemporáneos y versátiles.",
+      "description": "Piso de núcleo rígido con veta roble en tonalidad ceniza. Su color neutro facilita combinaciones con mobiliario claro, negro o metálico.",
+      "price": 134.90, "previousPrice": null, "discountPercentage": null, "availability": "DISPONIBLE", "featured": false, "storePickup": true,
+      "seoTitle": "Piso Roble Ceniza SPC | ISADECOR", "seoDescription": "Piso SPC color roble ceniza con sistema clic y cobertura de 2.20 m² por caja.",
+      "categorySlugs": ["pisos"], "imageSet": "flooring", "material": "SPC multicapa", "finish": "Madera mate", "color": "Roble ceniza", "dimensions": "18 × 122 cm por tabla; caja de 2.20 m²", "thickness": "5.5 mm con manta", "recommendedUse": "Departamentos, oficinas y tiendas", "moistureResistance": "Alta", "installation": "Flotante con sistema clic sobre base nivelada",
+      "variants": [
+        { "sku": "ISA-PISO-RC-C", "name": "Ceniza Claro", "description": "Gris claro de veta suave.", "price": 134.90, "available": true, "imageUrl": "/images/proyectos-villa-lomas-alta.jpg", "order": 0 },
+        { "sku": "ISA-PISO-RC-M", "name": "Ceniza Medio", "description": "Gris medio de veta contrastada.", "price": 139.90, "available": true, "imageUrl": "/images/casa-lujo.jpg", "order": 1 }
+      ],
+      "calculation": { "inputLabel": "Área del piso", "inputUnit": "m²", "coveragePerUnit": 2.20, "salesUnit": "cajas", "helpText": "La cantidad se calcula por cajas completas de 2.20 m²." }
+    },
+    {
+      "sku": "ISA-PISO-SB-223", "name": "Piso SPC Stone Beige", "slug": "piso-spc-stone-beige",
+      "summary": "Piso SPC efecto piedra beige en formato loseta para espacios sobrios y luminosos.",
+      "description": "Piso rígido de apariencia piedra natural con junta discreta. Adecuado para cocinas, tiendas y áreas sociales que buscan estética mineral y mantenimiento práctico.",
+      "price": 149.90, "previousPrice": 169.90, "discountPercentage": 11.77, "availability": "DISPONIBLE", "featured": true, "storePickup": true,
+      "seoTitle": "Piso SPC Stone Beige | ISADECOR", "seoDescription": "Piso SPC efecto piedra beige, resistente a humedad y con cobertura de 2.23 m² por caja.",
+      "categorySlugs": ["pisos"], "imageSet": "stone-light", "material": "SPC de núcleo rígido", "finish": "Piedra mate microtexturizada", "color": "Beige piedra", "dimensions": "30.5 × 61 cm por loseta; caja de 2.23 m²", "thickness": "5.5 mm con manta", "recommendedUse": "Cocinas, tiendas y áreas sociales", "moistureResistance": "Alta", "installation": "Flotante con sistema clic sobre base nivelada",
+      "variants": [
+        { "sku": "ISA-PISO-SB-S", "name": "Stone Beige Suave", "description": "Textura mineral uniforme.", "price": 149.90, "available": true, "imageUrl": "/images/isadecor-catalog-hero.jpg", "order": 0 },
+        { "sku": "ISA-PISO-SB-V", "name": "Stone Beige Veteado", "description": "Textura mineral con veta ligera.", "price": 154.90, "available": true, "imageUrl": "/images/servicios-acabados.jpg", "order": 1 }
+      ],
+      "calculation": { "inputLabel": "Área del piso", "inputUnit": "m²", "coveragePerUnit": 2.23, "salesUnit": "cajas", "helpText": "Cada caja cubre 2.23 m²; agrega margen por cortes perimetrales." }
+    },
+    {
+      "sku": "ISA-PISO-CG-223", "name": "Piso SPC Cemento Gris", "slug": "piso-spc-cemento-gris",
+      "summary": "Piso SPC efecto cemento gris para interiores urbanos de alto tránsito moderado.",
+      "description": "Loseta SPC de estética cementicia y formato práctico. Crea una base visual continua en lofts, oficinas, tiendas y cocinas sin obra húmeda.",
+      "price": 144.90, "previousPrice": null, "discountPercentage": null, "availability": "DISPONIBLE", "featured": false, "storePickup": true,
+      "seoTitle": "Piso SPC Cemento Gris | ISADECOR", "seoDescription": "Piso SPC efecto cemento gris, sistema clic y cobertura de 2.23 m² por caja.",
+      "categorySlugs": ["pisos"], "imageSet": "stone-dark", "material": "SPC de núcleo rígido", "finish": "Cemento mate microtexturizado", "color": "Gris cemento", "dimensions": "30.5 × 61 cm por loseta; caja de 2.23 m²", "thickness": "5.5 mm con manta", "recommendedUse": "Lofts, oficinas, tiendas y cocinas", "moistureResistance": "Alta", "installation": "Flotante con sistema clic sobre base nivelada",
+      "variants": [
+        { "sku": "ISA-PISO-CG-C", "name": "Cemento Gris Claro", "description": "Gris claro de nube suave.", "price": 144.90, "available": true, "imageUrl": "/images/proyectos-oficinas-nexus.jpg", "order": 0 },
+        { "sku": "ISA-PISO-CG-G", "name": "Cemento Grafito", "description": "Gris profundo de apariencia industrial.", "price": 149.90, "available": true, "imageUrl": "/images/isadecor-fondo.jpg", "order": 1 }
+      ],
+      "calculation": { "inputLabel": "Área del piso", "inputUnit": "m²", "coveragePerUnit": 2.23, "salesUnit": "cajas", "helpText": "La calculadora redondea a cajas completas de 2.23 m²." }
+    },
+    {
+      "sku": "ISA-PISO-RA-220", "name": "Piso Roble Arena", "slug": "piso-roble-arena",
+      "summary": "Piso SPC de roble arena, neutro y fácil de combinar en proyectos residenciales.",
+      "description": "Colección SPC de tonalidad arena y veta de roble discreta. Diseñada para crear continuidad visual en departamentos, dormitorios y estudios.",
+      "price": 132.90, "previousPrice": null, "discountPercentage": null, "availability": "DISPONIBLE", "featured": false, "storePickup": true,
+      "seoTitle": "Piso Roble Arena SPC | ISADECOR", "seoDescription": "Piso SPC roble arena con sistema clic, manta integrada y caja de 2.20 m².",
+      "categorySlugs": ["pisos"], "imageSet": "flooring", "material": "SPC multicapa", "finish": "Madera mate de poro suave", "color": "Roble arena", "dimensions": "18 × 122 cm por tabla; caja de 2.20 m²", "thickness": "5.5 mm con manta", "recommendedUse": "Departamentos, dormitorios y estudios", "moistureResistance": "Alta", "installation": "Flotante con sistema clic sobre base nivelada",
+      "variants": [
+        { "sku": "ISA-PISO-RA-N", "name": "Roble Arena Natural", "description": "Tono arena neutro.", "price": 132.90, "available": true, "imageUrl": "/images/residencia-aura.jpg", "order": 0 },
+        { "sku": "ISA-PISO-RA-D", "name": "Roble Arena Dorado", "description": "Tono arena con matiz cálido.", "price": 136.90, "available": true, "imageUrl": "/images/casa-lujo.jpg", "order": 1 }
+      ],
+      "calculation": { "inputLabel": "Área del piso", "inputUnit": "m²", "coveragePerUnit": 2.20, "salesUnit": "cajas", "helpText": "Cada caja cubre 2.20 m²; contempla merma de instalación." }
+    }
+  ]
+}

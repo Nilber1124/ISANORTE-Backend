@@ -165,6 +165,22 @@ Administrador inicial creado correctamente.
 Started ConstructoraApiApplication in ... seconds
 ```
 
+### Catálogo de demostración ISADECOR (opt-in)
+
+El catálogo demo se encuentra en `src/main/resources/data/isadecor-demo-products.json`. El loader usa
+la unidad `isadecor` y categorías activas que ya deben existir en la base de datos; no crea unidades,
+categorías ni migraciones. Es idempotente por SKU/slug y no elimina productos existentes.
+
+Para cargarlo una vez en desarrollo o durante una demo:
+
+```bash
+SEED_DEMO_PRODUCTS=true ./mvnw spring-boot:run
+```
+
+También se puede usar `--app.seed.demo-products=true`. La propiedad vale `false` por defecto, de modo
+que el seed no se ejecuta automáticamente en producción. Si falta alguna categoría indicada por el JSON,
+el arranque falla con el slug exacto que se debe crear previamente desde la administración.
+
 ---
 
 ## 🧪 Ejecución de Pruebas Unitarias
