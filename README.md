@@ -35,6 +35,15 @@ GRANT ALL PRIVILEGES ON DATABASE isanorte_db TO isanorte_user;
 
 *Nota: Flyway se encargará de crear las tablas de manera automática al iniciar la aplicación. No es necesario ejecutar ningún script de tablas (DDL) de forma manual.*
 
+**Variables de entorno para la base de datos y el puerto (obligatorias en Render):**
+```bash
+export DATABASE_URL="jdbc:postgresql://<host>/<db>?sslmode=require"   # en Neon/Render debe empezar con jdbc:postgresql://
+export DATABASE_USERNAME="tu_usuario"
+export DATABASE_PASSWORD="tu_contraseña"
+export PORT=8080   # Render la inyecta automáticamente; en local por defecto es 8080
+```
+Si no se definen, la aplicación usa `jdbc:postgresql://localhost:5432/isanorte_db` y el usuario `isanorte_user`, pero **no hay contraseña por defecto**: `DATABASE_PASSWORD` debe definirse siempre.
+
 ---
 
 ### 2. Credenciales de Cloudinary
