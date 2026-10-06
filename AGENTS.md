@@ -2,7 +2,7 @@
 
 ## Generación Obligatoria de Pruebas Unitarias
 Cada vez que se creen o modifiquen clases, métodos, endpoints, controladores, servicios o utilidades en el proyecto:
-1. **Generar pruebas unitarias**: Crear o actualizar los tests correspondientes en `src/test/java/` siguiendo la skill `generate-unit-tests`.
+1. **Generar pruebas unitarias**: Para cada funcionalidad o comportamiento nuevo, seguir la skill `feature-unit-tests`. Para cambios de comportamiento existente y correcciones de bugs, seguir `generate-unit-tests`. Crear o actualizar los tests correspondientes en `src/test/java/`.
 2. **Cobertura de escenarios**:
    - Camino feliz (happy path).
    - Casos borde/límite (nulls, vacíos, ceros, etc.).

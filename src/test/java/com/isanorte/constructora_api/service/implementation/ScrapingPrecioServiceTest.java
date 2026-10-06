@@ -69,5 +69,41 @@ class ScrapingPrecioServiceTest {
         assertEquals(UNSUPPORTED_CONTENT, assertThrows(ScrapingPrecioException.class,
                 () -> service.extraer("https://tienda.example/producto")).getEstado());
     }
+
+    @Test void rechazaUrlInvalidaAntesDeSolicitarLaPagina() {
+        assertEquals(INVALID_URL, assertThrows(ScrapingPrecioException.class,
+                () -> service.extraer("file:///etc/passwd")).getEstado());
+        verifyNoInteractions(client);
+    }
+
+    @Test void sigueRedireccionRelativaYExtraeLaUrlFinal() throws Exception {
+        when(client.obtener(any()))
+                .thenReturn(new PaginaExternaClient.Pagina(302, "/producto-final", null, null))
+                .thenReturn(new PaginaExternaClient.Pagina(200, null,
+                        "<main><h1>Mesa</h1><div class='product-price'>S/ 920.00</div></main>"
+                                .getBytes(StandardCharsets.UTF_8), "UTF-8"));
+
+        var result = service.extraer("https://tienda.example/producto");
+
+        assertEquals("https://tienda.example/producto-final", result.url());
+        assertEquals("920.00", result.precio().toPlainString());
+        verify(client, times(2)).obtener(any());
+    }
+
+    @Test void convierteRespuestaNoExitosaEnErrorDeSitio() throws Exception {
+        when(client.obtener(any())).thenReturn(new PaginaExternaClient.Pagina(404, null, null, null));
+
+        assertEquals(SITE_UNREACHABLE, assertThrows(ScrapingPrecioException.class,
+                () -> service.extraer("https://tienda.example/producto")).getEstado());
+        verify(client, times(1)).obtener(any());
+    }
+
+    @Test void redireccionSinDestinoEsErrorDeSitio() throws Exception {
+        when(client.obtener(any())).thenReturn(new PaginaExternaClient.Pagina(302, null, null, null));
+
+        assertEquals(SITE_UNREACHABLE, assertThrows(ScrapingPrecioException.class,
+                () -> service.extraer("https://tienda.example/producto")).getEstado());
+        verify(client, times(1)).obtener(any());
+    }
 }
 
