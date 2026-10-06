@@ -30,7 +30,9 @@ public interface ICotizacionService extends IGenericService<Cotizacion, UUID> {
 
     CotizacionResponse createResponse(CotizacionRequest request);
 
-    PublicCotizacionResponse createPublic(String siteKey, String unitSlug, PublicCotizacionRequest request);
+    PublicCotizacionResponse createPublic(String siteKey, String unitSlug, PublicCotizacionRequest request, UUID clienteId);
+
+    List<PublicCotizacionResponse> findPublicByCliente(UUID clienteId);
 
     CotizacionResponse updateEstado(UUID id, EstadoCotizacionRequest request);
 }

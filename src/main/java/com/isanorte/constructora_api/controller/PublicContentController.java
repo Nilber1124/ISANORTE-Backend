@@ -5,6 +5,8 @@ import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,6 +18,8 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
+import java.util.UUID;
+
 import com.isanorte.constructora_api.dto.request.SolicitudContactoCreateRequest;
 import com.isanorte.constructora_api.dto.request.CrearResenaRequest;
 import com.isanorte.constructora_api.dto.response.PublicBusinessUnitResponse;
@@ -23,6 +27,7 @@ import com.isanorte.constructora_api.dto.response.PublicHomeResponse;
 import com.isanorte.constructora_api.dto.response.PublicPageResponse;
 import com.isanorte.constructora_api.dto.response.PublicProductCatalogResponse;
 import com.isanorte.constructora_api.dto.response.PublicProductDetailResponse;
+import com.isanorte.constructora_api.dto.response.PublicProjectResponse;
 import com.isanorte.constructora_api.dto.response.PublicSiteResponse;
 import com.isanorte.constructora_api.dto.response.SolicitudContactoPublicResponse;
 import com.isanorte.constructora_api.dto.response.ProductoRecomendadoResponse;
@@ -126,6 +131,12 @@ public class PublicContentController {
         return ResponseEntity.ok(publicContentService.findPage(clave, pagina));
     }
 
+    @GetMapping("/sitios/{clave}/proyectos/{proyectoSlug}")
+    public ResponseEntity<PublicProjectResponse> findPublicProject(
+            @PathVariable String clave, @PathVariable String proyectoSlug) {
+        return ResponseEntity.ok(publicContentService.findPublicProject(clave, proyectoSlug));
+    }
+
     @GetMapping("/sitios/{clave}/unidades/{slug}")
     public ResponseEntity<PublicBusinessUnitResponse> findBusinessUnit(
             @PathVariable String clave, @PathVariable String slug) {
@@ -148,9 +159,10 @@ public class PublicContentController {
     public ResponseEntity<PublicCotizacionResponse> createPublicCotizacion(
             @PathVariable String siteKey,
             @PathVariable String unitSlug,
-            @Valid @RequestBody PublicCotizacionRequest request) {
+            @Valid @RequestBody PublicCotizacionRequest request,
+            @AuthenticationPrincipal Jwt jwt) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(cotizacionService.createPublic(siteKey, unitSlug, request));
+                .body(cotizacionService.createPublic(siteKey, unitSlug, request, UUID.fromString(jwt.getSubject())));
     }
 
     private ClientIdentity authenticatedClient(Authentication authentication) {

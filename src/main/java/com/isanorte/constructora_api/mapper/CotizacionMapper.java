@@ -20,6 +20,7 @@ public interface CotizacionMapper {
     @Mapping(target = "totalEstimado", ignore = true)
     @Mapping(target = "detalles", ignore = true)
     @Mapping(target = "seguimientos", ignore = true)
+    @Mapping(target = "cliente", ignore = true)
     @Mapping(target = "fechaCreacion", ignore = true)
     @Mapping(target = "fechaActualizacion", ignore = true)
     Cotizacion toEntity(CotizacionRequest request);
