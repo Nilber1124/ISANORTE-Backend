@@ -7,7 +7,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -52,7 +51,8 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http, AuthProperties auth,
-            JwtAuthenticationConverter converter) throws Exception {
+            JwtAuthenticationConverter converter,
+            org.springframework.web.cors.CorsConfigurationSource corsConfigurationSource) throws Exception {
         String adminAuthority = "ROLE_" + auth.adminRole().toUpperCase(java.util.Locale.ROOT);
         return http
                 .csrf(csrf -> csrf.disable())
@@ -66,7 +66,7 @@ public class SecurityConfig {
                 .httpBasic(httpBasic -> httpBasic.disable())
                 .formLogin(form -> form.disable())
                 .logout(logout -> logout.disable())
-                .cors(Customizer.withDefaults())
+                .cors(cors -> cors.configurationSource(corsConfigurationSource))
                 .build();
     }
 
