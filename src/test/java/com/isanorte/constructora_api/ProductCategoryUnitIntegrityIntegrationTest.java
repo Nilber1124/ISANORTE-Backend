@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 
 import java.util.List;
 import java.util.Map;
@@ -140,7 +141,8 @@ class ProductCategoryUnitIntegrityIntegrationTest {
                 "sku", "SKU-HTTP-" + random(5), "nombre", "Producto HTTP", "slug", "product-http-" + random(5),
                 "descripcion", "Descripción", "disponibilidad", "DISPONIBLE", "destacado", false,
                 "estado", "BORRADOR", "unidadNegocioId", unitA.getId(), "categoriaIds", List.of(categoryB.id()));
-        mockMvc.perform(post("/api/productos").contentType(MediaType.APPLICATION_JSON)
+        mockMvc.perform(post("/api/productos").with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
+                .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.status").value(409))

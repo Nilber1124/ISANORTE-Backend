@@ -125,8 +125,8 @@ app.jwt.expiration=${JWT_EXPIRATION:PT8H}
 - Son independientes de los administradores: tabla `clientes`, token con rol `CLIENTE` y sin acceso a `/api/**` administrativo.
 - `POST /api/publico/cuenta/registro` exige `aceptaTratamientoDatos: true` y una contraseña de al menos 8 caracteres. Un correo repetido responde `409`.
 - El token expira según `app.jwt.expiration`. Tras expirar, el frontend debe pedir un nuevo inicio de sesión.
-- Migración `V8__cuentas_clientes.sql`: crea `clientes` y agrega `cotizaciones.cliente_id`.
-- Migración `V9__carrito_cliente.sql`: crea `carritos_cliente`, un carrito por cuenta.
+- Migración `V9__cuentas_clientes.sql`: crea `clientes` y agrega `cotizaciones.cliente_id`.
+- Migración `V10__carrito_cliente.sql`: crea `carritos_cliente`, un carrito por cuenta.
 
 ### 1. Iniciar Sesión (`Login`)
 Envía una petición `POST` a `/api/auth/login`:

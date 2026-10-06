@@ -16,6 +16,7 @@ public interface IPublicContentService {
     PublicSiteResponse findSite(String clave);
     PublicHomeResponse findHome(String clave);
     PublicPageResponse findPage(String clave, TipoPaginaPublica pagina);
+    PublicProjectResponse findPublicProject(String clave, String proyectoSlug);
     PublicBusinessUnitResponse findBusinessUnit(String clave, String slug);
     PublicProductCatalogResponse findProductCatalog(String clave, String unidadSlug);
     PublicProductDetailResponse findPublicProduct(String clave, String unidadSlug, String productoSlug);

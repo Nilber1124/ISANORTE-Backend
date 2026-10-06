@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 
 import java.util.Map;
 import java.util.UUID;
@@ -47,13 +48,15 @@ class EmpresaRedSocialIntegrationTest {
         UUID empresaId = createEmpresa("crear-red");
         UUID redId = createRed(empresaId, "Instagram", "https://instagram.com/isanorte", "instagram", 0, false);
 
-        mockMvc.perform(get("/api/empresa/{id}", empresaId))
+        mockMvc.perform(get("/api/empresa/{id}", empresaId)
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.redesSociales[0].id").value(redId.toString()))
                 .andExpect(jsonPath("$.redesSociales[0].activo").value(false))
                 .andExpect(jsonPath("$.redesSociales[0].orden").value(0));
 
         mockMvc.perform(put("/api/empresa/{empresaId}/redes-sociales/{redId}", empresaId, redId)
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json(Map.of("nombre", "LinkedIn", "url", "https://linkedin.com/company/isanorte",
                         "icono", "linkedin", "orden", 0, "activo", false))))
@@ -63,10 +66,12 @@ class EmpresaRedSocialIntegrationTest {
                 .andExpect(jsonPath("$.activo").value(false))
                 .andExpect(jsonPath("$.orden").value(0));
 
-        mockMvc.perform(delete("/api/empresa/{empresaId}/redes-sociales/{redId}", empresaId, redId))
+        mockMvc.perform(delete("/api/empresa/{empresaId}/redes-sociales/{redId}", empresaId, redId)
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR")))
                 .andExpect(status().isNoContent());
         assertThat(redSocialRepository.existsById(redId)).isFalse();
-        mockMvc.perform(get("/api/empresa/{id}", empresaId))
+        mockMvc.perform(get("/api/empresa/{id}", empresaId)
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.redesSociales").isEmpty());
     }
@@ -79,15 +84,19 @@ class EmpresaRedSocialIntegrationTest {
         UUID noExiste = UUID.randomUUID();
 
         mockMvc.perform(post("/api/empresa/{id}/redes-sociales", noExiste)
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
                 .contentType(MediaType.APPLICATION_JSON).content(json(redBody("X", "https://x.test", null, 0, true))))
                 .andExpect(status().isNotFound());
         mockMvc.perform(put("/api/empresa/{empresaId}/redes-sociales/{redId}", empresaA, noExiste)
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
                 .contentType(MediaType.APPLICATION_JSON).content(json(redBody("X", "https://x.test", null, 0, true))))
                 .andExpect(status().isNotFound());
         mockMvc.perform(put("/api/empresa/{empresaId}/redes-sociales/{redId}", empresaA, redB)
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
                 .contentType(MediaType.APPLICATION_JSON).content(json(redBody("X", "https://x.test", null, 0, true))))
                 .andExpect(status().isBadRequest());
-        mockMvc.perform(delete("/api/empresa/{empresaId}/redes-sociales/{redId}", empresaA, redB))
+        mockMvc.perform(delete("/api/empresa/{empresaId}/redes-sociales/{redId}", empresaA, redB)
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR")))
                 .andExpect(status().isBadRequest());
     }
 
@@ -95,6 +104,7 @@ class EmpresaRedSocialIntegrationTest {
     void validaCamposObligatoriosDeRedSocial() throws Exception {
         UUID empresaId = createEmpresa("validacion-red");
         mockMvc.perform(post("/api/empresa/{id}/redes-sociales", empresaId)
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
                 .contentType(MediaType.APPLICATION_JSON).content("{\"icono\":\"x\"}"))
                 .andExpect(status().isBadRequest());
     }
@@ -112,7 +122,8 @@ class EmpresaRedSocialIntegrationTest {
         unidad = unidadNegocioRepository.saveAndFlush(unidad);
         UUID unidadId = unidad.getId();
 
-        mockMvc.perform(put("/api/empresa/{id}", empresaId).contentType(MediaType.APPLICATION_JSON)
+        mockMvc.perform(put("/api/empresa/{id}", empresaId)
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR")).contentType(MediaType.APPLICATION_JSON)
                 .content(json(empresaBody("actualizada-compatibilidad"))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.nombreComercial").value("Comercial actualizada-compatibilidad"))
@@ -123,7 +134,8 @@ class EmpresaRedSocialIntegrationTest {
     }
 
     private UUID createEmpresa(String suffix) throws Exception {
-        MvcResult result = mockMvc.perform(post("/api/empresa").contentType(MediaType.APPLICATION_JSON)
+        MvcResult result = mockMvc.perform(post("/api/empresa")
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR")).contentType(MediaType.APPLICATION_JSON)
                 .content(json(empresaBody(suffix))))
                 .andExpect(status().isCreated()).andReturn();
         return id(result);
@@ -132,7 +144,9 @@ class EmpresaRedSocialIntegrationTest {
     private UUID createEmpresaConRedInicial(String suffix) throws Exception {
         Map<String, Object> body = empresaBody(suffix);
         body.put("redesSociales", java.util.List.of(redBody("Inicial", "https://inicial.test", "link", 0, false)));
-        MvcResult result = mockMvc.perform(post("/api/empresa").contentType(MediaType.APPLICATION_JSON).content(json(body)))
+        MvcResult result = mockMvc.perform(post("/api/empresa")
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR")).contentType(MediaType.APPLICATION_JSON)
+                .content(json(body)))
                 .andExpect(status().isCreated()).andExpect(jsonPath("$.redesSociales.length()").value(1)).andReturn();
         return id(result);
     }
@@ -140,6 +154,7 @@ class EmpresaRedSocialIntegrationTest {
     private UUID createRed(UUID empresaId, String nombre, String url, String icono, int orden, boolean activo)
             throws Exception {
         MvcResult result = mockMvc.perform(post("/api/empresa/{id}/redes-sociales", empresaId)
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
                 .contentType(MediaType.APPLICATION_JSON).content(json(redBody(nombre, url, icono, orden, activo))))
                 .andExpect(status().isCreated()).andReturn();
         return id(result);

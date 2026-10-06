@@ -10,7 +10,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import java.math.BigDecimal;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -52,7 +52,6 @@ import com.isanorte.constructora_api.repository.SeccionLandingRepository;
 import com.isanorte.constructora_api.repository.SeoPaginaRepository;
 import com.isanorte.constructora_api.repository.ServicioRepository;
 import com.isanorte.constructora_api.repository.UnidadNegocioRepository;
-
 import tools.jackson.databind.ObjectMapper;
 
 @SpringBootTest
@@ -82,8 +81,12 @@ class DynamicContentApiIntegrationTest {
         config.put("tituloSitio", "Sitio");
         config.put("secciones", List.of(Map.of("tipo", "HERO", "etiqueta", "Arquitectura",
                 "imagenAlt", "Fachada", "orden", 0, "visible", false)));
-        mockMvc.perform(post("/api/configuracion-sitio").contentType(MediaType.APPLICATION_JSON).content(json(config)))
-                .andExpect(status().isCreated()).andExpect(jsonPath("$.clave").value("sitio-campos"))
+        mockMvc.perform(post("/api/configuracion-sitio")
+                        .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json(config)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.clave").value("sitio-campos"))
                 .andExpect(jsonPath("$.secciones[0].etiqueta").value("Arquitectura"))
                 .andExpect(jsonPath("$.secciones[0].imagenAlt").value("Fachada"))
                 .andExpect(jsonPath("$.secciones[0].orden").value(0))
@@ -97,19 +100,23 @@ class DynamicContentApiIntegrationTest {
         createLegacy.put("empresaId", legacy.getId());
         createLegacy.put("tituloSitio", "Sitio legado");
         UUID legacyId = id(mockMvc.perform(post("/api/configuracion-sitio")
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
                 .contentType(MediaType.APPLICATION_JSON).content(json(createLegacy)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.clave").value("site-" + legacy.getId())).andReturn());
 
         mockMvc.perform(put("/api/configuracion-sitio/{id}", legacyId)
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
                 .contentType(MediaType.APPLICATION_JSON).content(json(Map.of("tituloSitio", "Sin cambiar clave"))))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.clave").value("site-" + legacy.getId()));
         mockMvc.perform(put("/api/configuracion-sitio/{id}", legacyId)
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
                 .contentType(MediaType.APPLICATION_JSON).content(json(Map.of("clave", "sitio-canonico"))))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.clave").value("sitio-canonico"));
 
         ConfiguracionSitio occupied = site("occupied-key");
         mockMvc.perform(put("/api/configuracion-sitio/{id}", legacyId)
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
                 .contentType(MediaType.APPLICATION_JSON).content(json(Map.of("clave", occupied.getClave()))))
                 .andExpect(status().isConflict());
     }
@@ -122,17 +129,22 @@ class DynamicContentApiIntegrationTest {
         SeccionLanding services = section(site, TipoSeccionLanding.SERVICIOS, 1, true);
         Map<String, Object> body = Map.of("imagenUrl", "/hero.webp", "alt", "Hero", "orden", 0, "activo", true);
         UUID id = id(mockMvc.perform(post("/api/secciones-landing/{id}/escenas", hero.getId())
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
                 .contentType(MediaType.APPLICATION_JSON).content(json(body)))
                 .andExpect(status().isCreated()).andExpect(jsonPath("$.orden").value(0)).andReturn());
         mockMvc.perform(put("/api/secciones-landing/{id}/escenas/{child}", hero.getId(), id)
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
                 .contentType(MediaType.APPLICATION_JSON).content(json(Map.of(
                         "imagenUrl", "/hero-2.webp", "alt", "Nuevo", "orden", 1, "activo", false))))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.activo").value(false));
         mockMvc.perform(put("/api/secciones-landing/{id}/escenas/{child}", otherHero.getId(), id)
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
                 .contentType(MediaType.APPLICATION_JSON).content(json(body))).andExpect(status().isBadRequest());
         mockMvc.perform(post("/api/secciones-landing/{id}/escenas", services.getId())
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
                 .contentType(MediaType.APPLICATION_JSON).content(json(body))).andExpect(status().isBadRequest());
-        mockMvc.perform(delete("/api/secciones-landing/{id}/escenas/{child}", hero.getId(), id))
+        mockMvc.perform(delete("/api/secciones-landing/{id}/escenas/{child}", hero.getId(), id)
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR")))
                 .andExpect(status().isNoContent());
     }
 
@@ -142,20 +154,25 @@ class DynamicContentApiIntegrationTest {
         SeccionLanding other = section(site("action-other"), TipoSeccionLanding.HERO, 0, true);
         Map<String, Object> body = Map.of("texto", "Ver", "enlace", "/nosotros", "orden", 0, "activo", true);
         UUID id = id(mockMvc.perform(post("/api/secciones-landing/{id}/acciones", hero.getId())
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
                 .contentType(MediaType.APPLICATION_JSON).content(json(body))).andExpect(status().isCreated()).andReturn());
         mockMvc.perform(put("/api/secciones-landing/{id}/acciones/{child}", hero.getId(), id)
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
                 .contentType(MediaType.APPLICATION_JSON).content(json(Map.of(
                         "texto", "Conocer", "enlace", "https://isanorte.com/contacto",
                         "orden", 1, "activo", false))))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.texto").value("Conocer"))
                 .andExpect(jsonPath("$.activo").value(false));
         mockMvc.perform(post("/api/secciones-landing/{id}/acciones", hero.getId())
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
                 .contentType(MediaType.APPLICATION_JSON).content(json(Map.of(
                         "texto", "X", "enlace", "javascript:alert(1)", "orden", 1, "activo", true))))
                 .andExpect(status().isBadRequest());
         mockMvc.perform(put("/api/secciones-landing/{id}/acciones/{child}", other.getId(), id)
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
                 .contentType(MediaType.APPLICATION_JSON).content(json(body))).andExpect(status().isBadRequest());
-        mockMvc.perform(delete("/api/secciones-landing/{id}/acciones/{child}", hero.getId(), id))
+        mockMvc.perform(delete("/api/secciones-landing/{id}/acciones/{child}", hero.getId(), id)
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR")))
                 .andExpect(status().isNoContent());
     }
 
@@ -165,12 +182,14 @@ class DynamicContentApiIntegrationTest {
         for (String link : List.of("/servicios", "#contacto", "https://isanorte.com", "mailto:ventas@isanorte.com",
                 "tel:+51999999999")) {
             mockMvc.perform(post("/api/secciones-landing/{id}/acciones", services.getId())
+                    .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
                     .contentType(MediaType.APPLICATION_JSON).content(json(Map.of(
                             "texto", "Abrir", "enlace", link, "orden", 0, "activo", false))))
                     .andExpect(status().isCreated());
         }
         for (String link : List.of("//example.com", "data:text/html,x", "vbscript:msgbox(1)", "https://")) {
             mockMvc.perform(post("/api/secciones-landing/{id}/acciones", services.getId())
+                    .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
                     .contentType(MediaType.APPLICATION_JSON).content(json(Map.of(
                             "texto", "Abrir", "enlace", link, "orden", 0, "activo", false))))
                     .andExpect(status().isBadRequest());
@@ -179,8 +198,10 @@ class DynamicContentApiIntegrationTest {
         SeccionLanding cta = section(site("action-cta"), TipoSeccionLanding.CTA, 0, true);
         Map<String, Object> active = Map.of("texto", "Primaria", "enlace", "/contacto", "orden", 0, "activo", true);
         mockMvc.perform(post("/api/secciones-landing/{id}/acciones", cta.getId())
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
                 .contentType(MediaType.APPLICATION_JSON).content(json(active))).andExpect(status().isCreated());
         mockMvc.perform(post("/api/secciones-landing/{id}/acciones", cta.getId())
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
                 .contentType(MediaType.APPLICATION_JSON).content(json(active))).andExpect(status().isBadRequest());
     }
 
@@ -190,19 +211,24 @@ class DynamicContentApiIntegrationTest {
         Map<String, Object> sceneLate = Map.of("imagenUrl", "/late.webp", "orden", 2, "activo", true);
         Map<String, Object> sceneFirst = Map.of("imagenUrl", "/first.webp", "orden", 0, "activo", true);
         mockMvc.perform(post("/api/secciones-landing/{id}/escenas", hero.getId())
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
                 .contentType(MediaType.APPLICATION_JSON).content(json(sceneLate))).andExpect(status().isCreated());
         mockMvc.perform(post("/api/secciones-landing/{id}/escenas", hero.getId())
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
                 .contentType(MediaType.APPLICATION_JSON).content(json(sceneFirst))).andExpect(status().isCreated());
         mockMvc.perform(post("/api/secciones-landing/{id}/acciones", hero.getId())
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
                 .contentType(MediaType.APPLICATION_JSON).content(json(Map.of(
                         "texto", "Segunda", "enlace", "/dos", "orden", 2, "activo", true))))
                 .andExpect(status().isCreated());
         mockMvc.perform(post("/api/secciones-landing/{id}/acciones", hero.getId())
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
                 .contentType(MediaType.APPLICATION_JSON).content(json(Map.of(
                         "texto", "Primera", "enlace", "/uno", "orden", 0, "activo", true))))
                 .andExpect(status().isCreated());
 
-        mockMvc.perform(get("/api/secciones-landing/{id}", hero.getId())).andExpect(status().isOk())
+        mockMvc.perform(get("/api/secciones-landing/{id}", hero.getId())
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))).andExpect(status().isOk())
                 .andExpect(jsonPath("$.escenas[0].imagenUrl").value("/first.webp"))
                 .andExpect(jsonPath("$.acciones[0].texto").value("Primera"));
     }
@@ -213,14 +239,18 @@ class DynamicContentApiIntegrationTest {
         Servicio other = service("benefit-b", true, false, 1);
         Map<String, Object> body = Map.of("texto", "Garantía", "orden", 0, "activo", true);
         UUID id = id(mockMvc.perform(post("/api/servicios/{id}/beneficios", service.getId())
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
                 .contentType(MediaType.APPLICATION_JSON).content(json(body))).andExpect(status().isCreated()).andReturn());
         mockMvc.perform(put("/api/servicios/{id}/beneficios/{child}", service.getId(), id)
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
                 .contentType(MediaType.APPLICATION_JSON).content(json(Map.of(
                         "texto", "Garantía ampliada", "orden", 1, "activo", false))))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.activo").value(false));
-        mockMvc.perform(delete("/api/servicios/{id}/beneficios/{child}", other.getId(), id))
+        mockMvc.perform(delete("/api/servicios/{id}/beneficios/{child}", other.getId(), id)
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR")))
                 .andExpect(status().isBadRequest());
-        mockMvc.perform(delete("/api/servicios/{id}/beneficios/{child}", service.getId(), id))
+        mockMvc.perform(delete("/api/servicios/{id}/beneficios/{child}", service.getId(), id)
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR")))
                 .andExpect(status().isNoContent());
     }
 
@@ -232,20 +262,25 @@ class DynamicContentApiIntegrationTest {
         Map<String, Object> valid = Map.of("tipo", "IMAGEN_EDITORIAL", "url", "/editorial.webp",
                 "alt", "Sala terminada", "etiqueta", "Galería", "orden", 0, "activo", true);
         UUID id = id(mockMvc.perform(post("/api/unidades-negocio/{id}/recursos", unit.getId())
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
                 .contentType(MediaType.APPLICATION_JSON).content(json(valid))).andExpect(status().isCreated()).andReturn());
         mockMvc.perform(post("/api/unidades-negocio/{id}/recursos", unit.getId())
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
                 .contentType(MediaType.APPLICATION_JSON).content(json(Map.of(
                         "tipo", "IMAGEN_EDITORIAL", "url", "/sin-alt.webp", "orden", 1, "activo", true))))
                 .andExpect(status().isBadRequest());
         mockMvc.perform(put("/api/unidades-negocio/{id}/recursos/{child}", unit.getId(), id)
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
                 .contentType(MediaType.APPLICATION_JSON).content(json(Map.of(
                         "tipo", "CATALOGO", "url", "/catalogo.pdf", "etiqueta", "Descargar",
                         "orden", 1, "activo", false))))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.tipo").value("CATALOGO"))
                 .andExpect(jsonPath("$.activo").value(false));
-        mockMvc.perform(delete("/api/unidades-negocio/{id}/recursos/{child}", other.getId(), id))
+        mockMvc.perform(delete("/api/unidades-negocio/{id}/recursos/{child}", other.getId(), id)
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR")))
                 .andExpect(status().isBadRequest());
-        mockMvc.perform(delete("/api/unidades-negocio/{id}/recursos/{child}", unit.getId(), id))
+        mockMvc.perform(delete("/api/unidades-negocio/{id}/recursos/{child}", unit.getId(), id)
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR")))
                 .andExpect(status().isNoContent());
     }
 
@@ -256,15 +291,19 @@ class DynamicContentApiIntegrationTest {
         Map<String, Object> body = Map.of("valor", 120, "prefijo", "+", "etiqueta", "Proyectos",
                 "orden", 0, "activo", false);
         UUID id = id(mockMvc.perform(post("/api/empresa/{id}/estadisticas", company.getId())
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
                 .contentType(MediaType.APPLICATION_JSON).content(json(body)))
                 .andExpect(status().isCreated()).andExpect(jsonPath("$.activo").value(false)).andReturn());
         mockMvc.perform(put("/api/empresa/{id}/estadisticas/{child}", company.getId(), id)
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
                 .contentType(MediaType.APPLICATION_JSON).content(json(Map.of(
                         "valor", 121, "etiqueta", "Proyectos", "orden", 1, "activo", true))))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.valor").value(121));
-        mockMvc.perform(delete("/api/empresa/{id}/estadisticas/{child}", other.getId(), id))
+        mockMvc.perform(delete("/api/empresa/{id}/estadisticas/{child}", other.getId(), id)
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR")))
                 .andExpect(status().isBadRequest());
-        mockMvc.perform(delete("/api/empresa/{id}/estadisticas/{child}", company.getId(), id))
+        mockMvc.perform(delete("/api/empresa/{id}/estadisticas/{child}", company.getId(), id)
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR")))
                 .andExpect(status().isNoContent());
     }
 
@@ -275,21 +314,25 @@ class DynamicContentApiIntegrationTest {
         create.put("configuracionSitioId", site.getId()); create.put("pagina", "NOSOTROS");
         create.put("titulo", "Nosotros"); create.put("activo", true);
         create.put("tags", List.of("Arquitectura", "Construcción"));
-        UUID id = id(mockMvc.perform(post("/api/contenidos-pagina").contentType(MediaType.APPLICATION_JSON)
+        UUID id = id(mockMvc.perform(post("/api/contenidos-pagina")
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR")).contentType(MediaType.APPLICATION_JSON)
                 .content(json(create))).andExpect(status().isCreated())
                 .andExpect(jsonPath("$.tags[0]").value("Arquitectura")).andReturn());
-        mockMvc.perform(put("/api/contenidos-pagina/{id}", id).contentType(MediaType.APPLICATION_JSON)
+        mockMvc.perform(put("/api/contenidos-pagina/{id}", id)
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR")).contentType(MediaType.APPLICATION_JSON)
                 .content(json(Map.of("titulo", "Quiénes somos", "activo", false,
                         "tags", List.of("Obra Civil", "Acabados")))))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.pagina").value("NOSOTROS"))
                 .andExpect(jsonPath("$.configuracionSitioId").value(site.getId().toString()))
                 .andExpect(jsonPath("$.tags[0]").value("Obra Civil"));
-        mockMvc.perform(post("/api/contenidos-pagina").contentType(MediaType.APPLICATION_JSON).content(json(create)))
+        mockMvc.perform(post("/api/contenidos-pagina").with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
+                .contentType(MediaType.APPLICATION_JSON).content(json(create)))
                 .andExpect(status().isConflict());
 
         Map<String, Object> clearTags = new LinkedHashMap<>();
         clearTags.put("titulo", "Sin etiquetas"); clearTags.put("activo", true); clearTags.put("tags", null);
-        mockMvc.perform(put("/api/contenidos-pagina/{id}", id).contentType(MediaType.APPLICATION_JSON)
+        mockMvc.perform(put("/api/contenidos-pagina/{id}", id)
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR")).contentType(MediaType.APPLICATION_JSON)
                 .content(json(clearTags))).andExpect(status().isOk()).andExpect(jsonPath("$.tags.length()").value(0));
     }
 
@@ -300,19 +343,26 @@ class DynamicContentApiIntegrationTest {
         UnidadNegocio unit = unit(site.getEmpresa(), "seo-unit", true, false, 0);
         UnidadNegocio foreign = unit(otherSite.getEmpresa(), "seo-foreign", true, false, 0);
         Map<String, Object> home = seoBody(site.getId(), "HOME", null);
-        UUID id = id(mockMvc.perform(post("/api/seo-paginas").contentType(MediaType.APPLICATION_JSON).content(json(home)))
+        UUID id = id(mockMvc.perform(post("/api/seo-paginas").with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
+                .contentType(MediaType.APPLICATION_JSON).content(json(home)))
                 .andExpect(status().isCreated()).andReturn());
-        mockMvc.perform(post("/api/seo-paginas").contentType(MediaType.APPLICATION_JSON).content(json(home)))
+        mockMvc.perform(post("/api/seo-paginas").with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
+                .contentType(MediaType.APPLICATION_JSON).content(json(home)))
                 .andExpect(status().isConflict());
-        mockMvc.perform(post("/api/seo-paginas").contentType(MediaType.APPLICATION_JSON)
+        mockMvc.perform(post("/api/seo-paginas").with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
+                .contentType(MediaType.APPLICATION_JSON)
                 .content(json(seoBody(site.getId(), "UNIDAD_NEGOCIO", null)))).andExpect(status().isBadRequest());
-        mockMvc.perform(post("/api/seo-paginas").contentType(MediaType.APPLICATION_JSON)
+        mockMvc.perform(post("/api/seo-paginas").with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
+                .contentType(MediaType.APPLICATION_JSON)
                 .content(json(seoBody(site.getId(), "NOSOTROS", unit.getId())))).andExpect(status().isBadRequest());
-        mockMvc.perform(post("/api/seo-paginas").contentType(MediaType.APPLICATION_JSON)
+        mockMvc.perform(post("/api/seo-paginas").with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
+                .contentType(MediaType.APPLICATION_JSON)
                 .content(json(seoBody(site.getId(), "UNIDAD_NEGOCIO", foreign.getId())))).andExpect(status().isBadRequest());
-        mockMvc.perform(post("/api/seo-paginas").contentType(MediaType.APPLICATION_JSON)
+        mockMvc.perform(post("/api/seo-paginas").with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
+                .contentType(MediaType.APPLICATION_JSON)
                 .content(json(seoBody(site.getId(), "UNIDAD_NEGOCIO", unit.getId())))).andExpect(status().isCreated());
-        mockMvc.perform(put("/api/seo-paginas/{id}", id).contentType(MediaType.APPLICATION_JSON).content(json(Map.of(
+        mockMvc.perform(put("/api/seo-paginas/{id}", id).with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
+                .contentType(MediaType.APPLICATION_JSON).content(json(Map.of(
                 "title", "Home nueva", "description", "Nueva descripción", "robots", "NOINDEX_FOLLOW"))))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.tipoPagina").value("HOME"))
                 .andExpect(jsonPath("$.robots").value("NOINDEX_FOLLOW"));
@@ -331,16 +381,21 @@ class DynamicContentApiIntegrationTest {
         mockMvc.perform(post("/api/publico/contacto").contentType(MediaType.APPLICATION_JSON)
                 .content(json(Map.of("nombre", "Ana", "email", "ana@example.com", "telefono", "1"))))
                 .andExpect(status().isBadRequest());
-        mockMvc.perform(get("/api/solicitudes-contacto").param("estado", "NUEVA"))
+        mockMvc.perform(get("/api/solicitudes-contacto").with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
+                .param("estado", "NUEVA"))
                 .andExpect(status().isOk()).andExpect(jsonPath("$[0].id").value(id.toString()));
-        mockMvc.perform(get("/api/solicitudes-contacto"))
+        mockMvc.perform(get("/api/solicitudes-contacto").with(jwt().authorities(() -> "ROLE_ADMINISTRADOR")))
                 .andExpect(status().isOk()).andExpect(jsonPath("$[0].id").value(id.toString()));
-        mockMvc.perform(get("/api/solicitudes-contacto/{id}", id)).andExpect(status().isOk());
-        mockMvc.perform(patch("/api/solicitudes-contacto/{id}/estado", id).contentType(MediaType.APPLICATION_JSON)
+        mockMvc.perform(get("/api/solicitudes-contacto/{id}", id)
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))).andExpect(status().isOk());
+        mockMvc.perform(patch("/api/solicitudes-contacto/{id}/estado", id)
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR")).contentType(MediaType.APPLICATION_JSON)
                 .content("{\"estado\":\"RESPONDIDA\"}"))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.estado").value("RESPONDIDA"));
-        mockMvc.perform(get("/api/solicitudes-contacto/{id}", UUID.randomUUID())).andExpect(status().isNotFound());
-        mockMvc.perform(get("/api/solicitudes-contacto").param("estado", "DESCONOCIDA"))
+        mockMvc.perform(get("/api/solicitudes-contacto/{id}", UUID.randomUUID())
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))).andExpect(status().isNotFound());
+        mockMvc.perform(get("/api/solicitudes-contacto").with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
+                .param("estado", "DESCONOCIDA"))
                 .andExpect(status().isBadRequest()).andExpect(jsonPath("$.status").value(400));
     }
 
@@ -375,10 +430,12 @@ class DynamicContentApiIntegrationTest {
         visible.addEscena(HeroScene.builder().imagenUrl("/hidden.webp").orden(1).activo(false).build());
         seccionRepository.saveAndFlush(visible);
         mockMvc.perform(post("/api/secciones-landing/{id}/acciones", visible.getId())
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
                 .contentType(MediaType.APPLICATION_JSON).content(json(Map.of(
                         "texto", "Activa", "enlace", "/contacto", "orden", 0, "activo", true))))
                 .andExpect(status().isCreated());
         mockMvc.perform(post("/api/secciones-landing/{id}/acciones", visible.getId())
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
                 .contentType(MediaType.APPLICATION_JSON).content(json(Map.of(
                         "texto", "Oculta", "enlace", "/oculta", "orden", 1, "activo", false))))
                 .andExpect(status().isCreated());
@@ -386,10 +443,12 @@ class DynamicContentApiIntegrationTest {
         project("project-active", true, true, 0); project("project-hidden", false, true, 1);
         UnidadNegocio highlighted = unit(site.getEmpresa(), "highlighted", true, true, 0);
         mockMvc.perform(post("/api/unidades-negocio/{id}/recursos", highlighted.getId())
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
                 .contentType(MediaType.APPLICATION_JSON).content(json(Map.of(
                         "tipo", "IMAGEN_FONDO", "url", "/active.webp", "orden", 0, "activo", true))))
                 .andExpect(status().isCreated());
         mockMvc.perform(post("/api/unidades-negocio/{id}/recursos", highlighted.getId())
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
                 .contentType(MediaType.APPLICATION_JSON).content(json(Map.of(
                         "tipo", "IMAGEN_FONDO", "url", "/hidden.webp", "orden", 1, "activo", false))))
                 .andExpect(status().isCreated());
@@ -529,7 +588,7 @@ class DynamicContentApiIntegrationTest {
                 .andExpect(jsonPath("$.servicios[0].slug").value(featured.getSlug()))
                 .andExpect(jsonPath("$.servicios[0].slug").value(org.hamcrest.Matchers.not(catalogOnly.getSlug())));
 
-        mockMvc.perform(get("/api/servicios/activos"))
+        mockMvc.perform(get("/api/servicios/activos").with(jwt().authorities(() -> "ROLE_ADMINISTRADOR")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").exists())
                 .andExpect(jsonPath("$[0].fechaCreacion").exists());
