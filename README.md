@@ -102,6 +102,10 @@ app.jwt.expiration=${JWT_EXPIRATION:PT8H}
 ### Endpoints Públicos
 - `POST /api/auth/login`: Autenticación y obtención de token.
 - `GET /api/publico/**`: Consulta de catálogo de productos, banners, categorías, etc.
+- `GET .../productos/{productoSlug}/recomendados`: Hasta cuatro recomendaciones automáticas del catálogo publicado.
+- `GET .../productos/{productoSlug}/resenas` y `/resenas/resumen`: Comentarios y estadísticas persistidas.
+- `POST /api/publico/resenas/{resenaId}/util`: Incrementa el contador de utilidad de una reseña.
+- `POST .../productos/{productoSlug}/resenas`: Preparado para la futura autenticación de clientes; actualmente rechaza visitantes y credenciales administrativas.
 - `GET /actuator/health`: Chequeo de salud del servicio.
 
 ### Endpoints Protegidos

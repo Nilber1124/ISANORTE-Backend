@@ -20,7 +20,7 @@ class ComparacionCompetidoresControllerTest {
                         List.of(), List.of(), OffsetDateTime.now()));
         var controller = new PublicContentController(mock(IPublicContentService.class),
                 mock(ISolicitudContactoService.class), mock(IComparacionPrecioService.class), service,
-                mock(ICotizacionService.class));
+                mock(ICotizacionService.class), mock(IResenaProductoService.class));
         var mvc = MockMvcBuilders.standaloneSetup(controller).build();
 
         mvc.perform(get("/api/publico/sitios/isanorte/unidades/isadecor/productos/piso/comparacion-competidores"))

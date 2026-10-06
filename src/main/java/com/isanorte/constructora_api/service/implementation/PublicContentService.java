@@ -1,7 +1,12 @@
 package com.isanorte.constructora_api.service.implementation;
 
 import java.util.Comparator;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +24,7 @@ import com.isanorte.constructora_api.dto.response.PublicProductDocumentResponse;
 import com.isanorte.constructora_api.dto.response.PublicProductImageResponse;
 import com.isanorte.constructora_api.dto.response.PublicProductSpecificationResponse;
 import com.isanorte.constructora_api.dto.response.PublicProductVariantResponse;
+import com.isanorte.constructora_api.dto.response.ProductoRecomendadoResponse;
 import com.isanorte.constructora_api.dto.response.PublicProjectImageResponse;
 import com.isanorte.constructora_api.dto.response.PublicProjectResponse;
 import com.isanorte.constructora_api.dto.response.PublicProjectServiceResponse;
@@ -45,6 +51,7 @@ import com.isanorte.constructora_api.repository.ContenidoPaginaRepository;
 import com.isanorte.constructora_api.repository.EstadisticaEmpresaRepository;
 import com.isanorte.constructora_api.repository.ProyectoRepository;
 import com.isanorte.constructora_api.repository.ProductoRepository;
+import com.isanorte.constructora_api.repository.ResenaProductoRepository;
 import com.isanorte.constructora_api.repository.RedSocialRepository;
 import com.isanorte.constructora_api.repository.SeccionLandingRepository;
 import com.isanorte.constructora_api.repository.SeoPaginaRepository;
@@ -95,6 +102,7 @@ public class PublicContentService implements IPublicContentService {
     private final ServicioRepository servicioRepository;
     private final ProyectoRepository proyectoRepository;
     private final ProductoRepository productoRepository;
+    private final ResenaProductoRepository resenaProductoRepository;
     private final UnidadNegocioRepository unidadRepository;
     private final ContenidoPaginaRepository contenidoRepository;
     private final EstadisticaEmpresaRepository estadisticaEmpresaRepository;
@@ -268,6 +276,45 @@ public class PublicContentService implements IPublicContentService {
                 product.getEspecificaciones().stream().sorted(PRODUCT_SPECIFICATION_ORDER)
                         .map(publicProductMapper::toSpecification).toList(),
                 product.getDocumentos().stream().sorted(PRODUCT_DOCUMENT_ORDER).map(publicProductMapper::toDocument).toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ProductoRecomendadoResponse> findRecommendedProducts(
+            String clave, String unidadSlug, String productoSlug) {
+        ConfiguracionSitio site = findSiteEntity(clave);
+        UnidadNegocio unit = findPublicBusinessUnit(site, unidadSlug);
+        Producto current = productoRepository.findByUnidadNegocioIdAndSlugAndEstado(
+                        unit.getId(), productoSlug, EstadoPublicacion.PUBLICADO)
+                .orElseThrow(() -> new ModelNotFoundException(
+                        "Producto público no encontrado con slug: " + productoSlug));
+        Set<UUID> categoryIds = publicCategories(current, unit).stream()
+                .map(CategoriaProducto::getId)
+                .collect(java.util.stream.Collectors.toSet());
+        List<Producto> candidates = productoRepository.findByUnidadNegocioIdAndEstadoOrderByNombreAscIdAsc(
+                        unit.getId(), EstadoPublicacion.PUBLICADO).stream()
+                .filter(product -> !product.getId().equals(current.getId()))
+                .toList();
+
+        LinkedHashSet<Producto> recommended = new LinkedHashSet<>();
+        candidates.stream()
+                .filter(product -> product.getCategorias().stream()
+                        .anyMatch(category -> categoryIds.contains(category.getId())))
+                .forEach(recommended::add);
+        candidates.forEach(recommended::add);
+
+        return recommended.stream().limit(4).map(product -> {
+            long reviewCount = resenaProductoRepository.countByProductoId(product.getId());
+            Double average = resenaProductoRepository.averageByProductoId(product.getId());
+            BigDecimal rating = average == null
+                    ? null
+                    : BigDecimal.valueOf(average).setScale(1, RoundingMode.HALF_UP);
+            PublicProductCategoryResponse category = publicCategories(product, unit).stream()
+                    .findFirst().map(publicProductMapper::toCategory).orElse(null);
+            return new ProductoRecomendadoResponse(
+                    product.getNombre(), product.getSlug(), product.getPrecioBase(),
+                    publicProductMapper.toImage(primaryImage(product)), category, rating, reviewCount);
+        }).toList();
     }
 
     private ConfiguracionSitio findSiteEntity(String key) {

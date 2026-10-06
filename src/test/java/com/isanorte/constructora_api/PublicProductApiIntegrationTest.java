@@ -3,6 +3,7 @@ package com.isanorte.constructora_api;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -15,6 +16,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.isanorte.constructora_api.enums.EstadoDisponibilidad;
@@ -28,12 +30,14 @@ import com.isanorte.constructora_api.model.Empresa;
 import com.isanorte.constructora_api.model.EspecificacionProducto;
 import com.isanorte.constructora_api.model.ImagenProducto;
 import com.isanorte.constructora_api.model.Producto;
+import com.isanorte.constructora_api.model.ResenaProducto;
 import com.isanorte.constructora_api.model.UnidadNegocio;
 import com.isanorte.constructora_api.model.VarianteProducto;
 import com.isanorte.constructora_api.repository.CategoriaProductoRepository;
 import com.isanorte.constructora_api.repository.ConfiguracionSitioRepository;
 import com.isanorte.constructora_api.repository.EmpresaRepository;
 import com.isanorte.constructora_api.repository.ProductoRepository;
+import com.isanorte.constructora_api.repository.ResenaProductoRepository;
 import com.isanorte.constructora_api.repository.UnidadNegocioRepository;
 
 @SpringBootTest
@@ -48,6 +52,58 @@ class PublicProductApiIntegrationTest {
     @Autowired private UnidadNegocioRepository unidadRepository;
     @Autowired private CategoriaProductoRepository categoriaRepository;
     @Autowired private ProductoRepository productoRepository;
+    @Autowired private ResenaProductoRepository resenaRepository;
+
+    @Test
+    void recomendacionesYResenasPublicasUsanProductosYDatosPersistidos() throws Exception {
+        ConfiguracionSitio site = site("reviews");
+        UnidadNegocio unit = unit(site.getEmpresa(), "reviews-unit", true);
+        CategoriaProducto category = category("reviews-category", unit, true, 0);
+        Producto current = product(unit, "reviews-current", EstadoPublicacion.PUBLICADO);
+        current.addCategoria(category);
+        productoRepository.saveAndFlush(current);
+        Producto related = product(unit, "reviews-related", EstadoPublicacion.PUBLICADO);
+        related.addCategoria(category);
+        productoRepository.saveAndFlush(related);
+        Producto fallback = product(unit, "reviews-fallback", EstadoPublicacion.PUBLICADO);
+        product(unit, "reviews-draft", EstadoPublicacion.BORRADOR);
+
+        ResenaProducto relatedReview = resenaRepository.saveAndFlush(ResenaProducto.builder()
+                .producto(related).clienteId(UUID.randomUUID()).nombreCliente("Cliente relacionado")
+                .calificacion(5).comentario("Excelente alternativa").compraVerificada(true).build());
+        ResenaProducto currentReview = resenaRepository.saveAndFlush(ResenaProducto.builder()
+                .producto(current).clienteId(UUID.randomUUID()).nombreCliente("Cliente ISADECOR")
+                .calificacion(4).titulo("Buen acabado").comentario("La instalación fue sencilla.").build());
+
+        String productPath = "/api/publico/sitios/{key}/unidades/{unit}/productos/{product}";
+        mockMvc.perform(get(productPath + "/recomendados", site.getClave(), unit.getSlug(), current.getSlug()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].slug").value(related.getSlug()))
+                .andExpect(jsonPath("$[0].calificacionPromedio").value(5.0))
+                .andExpect(jsonPath("$[*].slug", not(hasItem(current.getSlug()))))
+                .andExpect(jsonPath("$[*].slug", hasItem(fallback.getSlug())))
+                .andExpect(jsonPath("$.length()").value(2));
+
+        mockMvc.perform(get(productPath + "/resenas", site.getClave(), unit.getSlug(), current.getSlug()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].nombreCliente").value("Cliente ISADECOR"))
+                .andExpect(jsonPath("$[0].calificacion").value(4));
+        mockMvc.perform(get(productPath + "/resenas/resumen", site.getClave(), unit.getSlug(), current.getSlug()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.promedio").value(4.0))
+                .andExpect(jsonPath("$.total").value(1))
+                .andExpect(jsonPath("$.distribucion[1].calificacion").value(4))
+                .andExpect(jsonPath("$.distribucion[1].cantidad").value(1));
+        mockMvc.perform(post("/api/publico/resenas/{id}/util", currentReview.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.cantidadUtil").value(1));
+        mockMvc.perform(post(productPath + "/resenas", site.getClave(), unit.getSlug(), current.getSlug())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"calificacion\":5,\"comentario\":\"Excelente\"}"))
+                .andExpect(status().isUnauthorized());
+
+        org.junit.jupiter.api.Assertions.assertNotNull(relatedReview.getId());
+    }
 
     @Test
     void catalogoPublicoSeAcotaALaUnidadYSoloExponeCategoriasValidas() throws Exception {
