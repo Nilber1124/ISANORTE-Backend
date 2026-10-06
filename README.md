@@ -101,11 +101,24 @@ app.jwt.expiration=${JWT_EXPIRATION:PT8H}
 
 ### Endpoints Públicos
 - `POST /api/auth/login`: Autenticación y obtención de token.
-- `GET /api/publico/**`: Consulta de catálogo de productos, banners, categorías, etc.
+- `GET /api/publico/**`: Consulta de catálogo de productos, banners, categorías, etc. Navegar la tienda no requiere cuenta.
+- `POST /api/publico/cuenta/registro` y `POST /api/publico/cuenta/login`: Cuentas de cliente (ver abajo).
 - `GET /actuator/health`: Chequeo de salud del servicio.
 
 ### Endpoints Protegidos
 - Todas las rutas bajo `/api/**` que no sean públicas requieren el rol `ADMINISTRADOR`.
+- Requieren sesión de cliente (rol `CLIENTE`, cabecera `Authorization: Bearer <token>`):
+  - `GET /api/publico/cuenta/me` y `GET /api/publico/cuenta/cotizaciones`.
+  - `GET` y `PUT /api/publico/cuenta/carrito`: carrito guardado en la cuenta (se reemplaza completo en cada `PUT`, máximo 50 líneas).
+  - `POST /api/publico/sitios/{clave}/unidades/{unidadSlug}/cotizaciones`: la cotización queda vinculada a la cuenta.
+  - `POST .../productos/{productoSlug}/comparar-precio` y `GET .../productos/{productoSlug}/comparacion-competidores`.
+
+### Cuentas de cliente
+- Son independientes de los administradores: tabla `clientes`, token con rol `CLIENTE` y sin acceso a `/api/**` administrativo.
+- `POST /api/publico/cuenta/registro` exige `aceptaTratamientoDatos: true` y una contraseña de al menos 8 caracteres. Un correo repetido responde `409`.
+- El token expira según `app.jwt.expiration`. Tras expirar, el frontend debe pedir un nuevo inicio de sesión.
+- Migración `V8__cuentas_clientes.sql`: crea `clientes` y agrega `cotizaciones.cliente_id`.
+- Migración `V9__carrito_cliente.sql`: crea `carritos_cliente`, un carrito por cuenta.
 
 ### 1. Iniciar Sesión (`Login`)
 Envía una petición `POST` a `/api/auth/login`:

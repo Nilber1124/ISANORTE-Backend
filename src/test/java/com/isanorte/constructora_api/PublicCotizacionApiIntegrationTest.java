@@ -21,6 +21,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import tools.jackson.databind.ObjectMapper;
+import com.isanorte.constructora_api.dto.request.ClienteRegistroRequest;
 import com.isanorte.constructora_api.dto.request.PublicCotizacionRequest;
 import com.isanorte.constructora_api.dto.request.PublicCotizacionRequest.DetallePublicoRequest;
 import com.isanorte.constructora_api.enums.CanalCotizacion;
@@ -33,6 +34,7 @@ import com.isanorte.constructora_api.model.Empresa;
 import com.isanorte.constructora_api.model.Producto;
 import com.isanorte.constructora_api.model.UnidadNegocio;
 import com.isanorte.constructora_api.model.VarianteProducto;
+import com.isanorte.constructora_api.service.IClienteAuthService;
 import com.isanorte.constructora_api.repository.ConfiguracionSitioRepository;
 import com.isanorte.constructora_api.repository.CotizacionRepository;
 import com.isanorte.constructora_api.repository.EmpresaRepository;
@@ -52,6 +54,7 @@ class PublicCotizacionApiIntegrationTest {
     @Autowired private UnidadNegocioRepository unidadRepository;
     @Autowired private ProductoRepository productoRepository;
     @Autowired private CotizacionRepository cotizacionRepository;
+    @Autowired private IClienteAuthService clienteAuthService;
 
     @Test
     void registrarCotizacionPublicaConDetallesYVarianteExitosa() throws Exception {
@@ -84,6 +87,7 @@ class PublicCotizacionApiIntegrationTest {
 
         var result = mockMvc.perform(post("/api/publico/sitios/{siteKey}/unidades/{unitSlug}/cotizaciones",
                 site.getClave(), unit.getSlug())
+                .header("Authorization", "Bearer " + clienteToken())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -119,6 +123,7 @@ class PublicCotizacionApiIntegrationTest {
         assertEquals(1, saved.getDetalles().size());
         assertEquals(product.getId(), saved.getDetalles().get(0).getProducto().getId());
         assertNotNull(saved.getDetalles().get(0).getVariante());
+        assertNotNull(saved.getCliente());
     }
 
     @Test
@@ -143,6 +148,7 @@ class PublicCotizacionApiIntegrationTest {
 
         mockMvc.perform(post("/api/publico/sitios/{siteKey}/unidades/{unitSlug}/cotizaciones",
                 site.getClave(), unit.getSlug())
+                .header("Authorization", "Bearer " + clienteToken())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -166,6 +172,7 @@ class PublicCotizacionApiIntegrationTest {
                 "prod-slug", null, 1, null, null);
 
         mockMvc.perform(post("/api/publico/sitios/sitio-inexistente/unidades/isadecor/cotizaciones")
+                .header("Authorization", "Bearer " + clienteToken())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound());
@@ -183,12 +190,14 @@ class PublicCotizacionApiIntegrationTest {
 
         mockMvc.perform(post("/api/publico/sitios/{siteKey}/unidades/{unitSlug}/cotizaciones",
                 site.getClave(), inactiveUnit.getSlug())
+                .header("Authorization", "Bearer " + clienteToken())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound());
 
         mockMvc.perform(post("/api/publico/sitios/{siteKey}/unidades/{unitSlug}/cotizaciones",
                 site.getClave(), foreignUnit.getSlug())
+                .header("Authorization", "Bearer " + clienteToken())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound());
@@ -207,6 +216,7 @@ class PublicCotizacionApiIntegrationTest {
 
         mockMvc.perform(post("/api/publico/sitios/{siteKey}/unidades/{unitSlug}/cotizaciones",
                 site.getClave(), unitA.getSlug())
+                .header("Authorization", "Bearer " + clienteToken())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound());
@@ -224,6 +234,7 @@ class PublicCotizacionApiIntegrationTest {
 
         mockMvc.perform(post("/api/publico/sitios/{siteKey}/unidades/{unitSlug}/cotizaciones",
                 site.getClave(), unit.getSlug())
+                .header("Authorization", "Bearer " + clienteToken())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound());
@@ -241,6 +252,7 @@ class PublicCotizacionApiIntegrationTest {
 
         mockMvc.perform(post("/api/publico/sitios/{siteKey}/unidades/{unitSlug}/cotizaciones",
                 site.getClave(), unit.getSlug())
+                .header("Authorization", "Bearer " + clienteToken())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -262,6 +274,7 @@ class PublicCotizacionApiIntegrationTest {
 
         mockMvc.perform(post("/api/publico/sitios/{siteKey}/unidades/{unitSlug}/cotizaciones",
                 site.getClave(), unit.getSlug())
+                .header("Authorization", "Bearer " + clienteToken())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(invalidJson))
                 .andExpect(status().isBadRequest());
@@ -312,5 +325,10 @@ class PublicCotizacionApiIntegrationTest {
 
     private String random(int length) {
         return UUID.randomUUID().toString().replace("-", "").substring(0, length);
+    }
+
+    private String clienteToken() {
+        return clienteAuthService.registrar(new ClienteRegistroRequest(
+                "Cliente", "Prueba", "cliente." + random(8) + "@example.com", "claveSegura123", null, true)).token();
     }
 }

@@ -18,6 +18,7 @@ import com.isanorte.constructora_api.enums.EstadoCotizacion;
 import com.isanorte.constructora_api.enums.EstadoPublicacion;
 import com.isanorte.constructora_api.exception.ModelNotFoundException;
 import com.isanorte.constructora_api.mapper.CotizacionMapper;
+import com.isanorte.constructora_api.model.Cliente;
 import com.isanorte.constructora_api.model.ConfiguracionSitio;
 import com.isanorte.constructora_api.model.Cotizacion;
 import com.isanorte.constructora_api.model.DetalleCotizacion;
@@ -25,6 +26,7 @@ import com.isanorte.constructora_api.model.Producto;
 import com.isanorte.constructora_api.model.SeguimientoCotizacion;
 import com.isanorte.constructora_api.model.UnidadNegocio;
 import com.isanorte.constructora_api.model.VarianteProducto;
+import com.isanorte.constructora_api.repository.ClienteRepository;
 import com.isanorte.constructora_api.repository.ConfiguracionSitioRepository;
 import com.isanorte.constructora_api.repository.CotizacionRepository;
 import com.isanorte.constructora_api.repository.IGenericRepository;
@@ -43,6 +45,7 @@ public class CotizacionService extends GenericService<Cotizacion, UUID> implemen
     private final ConfiguracionSitioRepository configuracionRepository;
     private final UnidadNegocioRepository unidadRepository;
     private final CotizacionMapper cotizacionMapper;
+    private final ClienteRepository clienteRepository;
 
     @Override
     protected IGenericRepository<Cotizacion, UUID> getRepo() {
@@ -171,7 +174,8 @@ public class CotizacionService extends GenericService<Cotizacion, UUID> implemen
 
     @Override
     @Transactional
-    public PublicCotizacionResponse createPublic(String siteKey, String unitSlug, PublicCotizacionRequest request) {
+    public PublicCotizacionResponse createPublic(String siteKey, String unitSlug, PublicCotizacionRequest request,
+            UUID clienteId) {
         ConfiguracionSitio site = configuracionRepository.findByClave(siteKey)
                 .orElseThrow(() -> new ModelNotFoundException("Sitio público no encontrado con clave: " + siteKey));
 
@@ -226,8 +230,19 @@ public class CotizacionService extends GenericService<Cotizacion, UUID> implemen
                 request.canal() != null ? request.canal() : CanalCotizacion.FORMULARIO,
                 internalDetalles);
 
+        Cliente cliente = clienteRepository.findById(clienteId)
+                .orElseThrow(() -> new ModelNotFoundException("Cuenta de cliente no encontrada"));
         Cotizacion cotizacion = create(internalRequest);
-        return cotizacionMapper.toPublicResponse(cotizacion);
+        cotizacion.setCliente(cliente);
+        return cotizacionMapper.toPublicResponse(cotizacionRepository.save(cotizacion));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<PublicCotizacionResponse> findPublicByCliente(UUID clienteId) {
+        return cotizacionRepository.findByClienteIdOrderByFechaCreacionDesc(clienteId).stream()
+                .map(cotizacionMapper::toPublicResponse)
+                .toList();
     }
 
     private VarianteProducto resolveVariante(Producto producto, UUID varianteId) {

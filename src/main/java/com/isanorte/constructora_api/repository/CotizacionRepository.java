@@ -15,4 +15,6 @@ public interface CotizacionRepository extends IGenericRepository<Cotizacion, UUI
     Optional<Cotizacion> findByCodigo(String codigo);
 
     List<Cotizacion> findByEstado(EstadoCotizacion estado);
+
+    List<Cotizacion> findByClienteIdOrderByFechaCreacionDesc(UUID clienteId);
 }

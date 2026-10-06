@@ -304,6 +304,15 @@ public class PublicContentService implements IPublicContentService {
                         .toList());
     }
 
+    @Override @Transactional(readOnly = true)
+    public PublicProjectResponse findPublicProject(String clave, String proyectoSlug) {
+        findSiteEntity(clave);
+        var project = proyectoRepository.findBySlugAndActivoTrue(proyectoSlug)
+                .orElseThrow(() -> new ModelNotFoundException("Proyecto público no encontrado con slug: " + proyectoSlug));
+        proyectoRepository.findWithServicesByIdIn(List.of(project.getId()));
+        return toPublicProject(project);
+    }
+
     private List<PublicProjectResponse> publicProjects() {
         List<com.isanorte.constructora_api.model.Proyecto> projects =
                 proyectoRepository.findPublicActiveWithImagesOrderByOrdenAscIdAsc();

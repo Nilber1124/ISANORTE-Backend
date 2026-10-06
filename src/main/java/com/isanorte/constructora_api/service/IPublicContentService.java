@@ -5,6 +5,7 @@ import com.isanorte.constructora_api.dto.response.PublicHomeResponse;
 import com.isanorte.constructora_api.dto.response.PublicPageResponse;
 import com.isanorte.constructora_api.dto.response.PublicProductCatalogResponse;
 import com.isanorte.constructora_api.dto.response.PublicProductDetailResponse;
+import com.isanorte.constructora_api.dto.response.PublicProjectResponse;
 import com.isanorte.constructora_api.dto.response.PublicSiteResponse;
 import com.isanorte.constructora_api.enums.TipoPaginaPublica;
 
@@ -15,4 +16,5 @@ public interface IPublicContentService {
     PublicBusinessUnitResponse findBusinessUnit(String clave, String slug);
     PublicProductCatalogResponse findProductCatalog(String clave, String unidadSlug);
     PublicProductDetailResponse findPublicProduct(String clave, String unidadSlug, String productoSlug);
+    PublicProjectResponse findPublicProject(String clave, String proyectoSlug);
 }
