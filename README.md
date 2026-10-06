@@ -35,14 +35,15 @@ GRANT ALL PRIVILEGES ON DATABASE isanorte_db TO isanorte_user;
 
 *Nota: Flyway se encargará de crear las tablas de manera automática al iniciar la aplicación. No es necesario ejecutar ningún script de tablas (DDL) de forma manual.*
 
-**Variables de entorno para la base de datos y el puerto (obligatorias en Render):**
+**Variables de entorno para la base de datos, CORS y puerto (obligatorias en Render):**
 ```bash
-export DATABASE_URL="jdbc:postgresql://<host>/<db>?sslmode=require"   # en Neon/Render debe empezar con jdbc:postgresql://
-export DATABASE_USERNAME="tu_usuario"
-export DATABASE_PASSWORD="tu_contraseña"
+export SPRING_DATASOURCE_URL="jdbc:postgresql://<host>/<db>?sslmode=require"   # debe empezar con jdbc:postgresql://
+export SPRING_DATASOURCE_USERNAME="tu_usuario"
+export SPRING_DATASOURCE_PASSWORD="tu_contraseña"
+export CORS_ALLOWED_ORIGINS="https://tu-frontend.vercel.app"   # opcional; por defecto incluye localhost y Vercel
 export PORT=8080   # Render la inyecta automáticamente; en local por defecto es 8080
 ```
-Si no se definen, la aplicación usa `jdbc:postgresql://localhost:5432/isanorte_db` y el usuario `isanorte_user`, pero **no hay contraseña por defecto**: `DATABASE_PASSWORD` debe definirse siempre.
+Si no se definen `SPRING_DATASOURCE_URL` y `SPRING_DATASOURCE_USERNAME`, la aplicación usa `jdbc:postgresql://localhost:5432/isanorte_db` y el usuario `isanorte_user`. **No hay contraseña por defecto**: `SPRING_DATASOURCE_PASSWORD` debe definirse siempre.
 
 ---
 
@@ -110,16 +111,12 @@ app.jwt.expiration=${JWT_EXPIRATION:PT8H}
 
 ### Endpoints Públicos
 - `POST /api/auth/login`: Autenticación y obtención de token.
-<<<<<<< HEAD
-- `GET /api/publico/**`: Consulta de catálogo de productos, banners, categorías, etc.
+- `GET /api/publico/**`: Consulta de catálogo de productos, banners, categorías, etc. Navegar la tienda no requiere cuenta.
+- `POST /api/publico/cuenta/registro` y `POST /api/publico/cuenta/login`: Cuentas de cliente (ver abajo).
 - `GET .../productos/{productoSlug}/recomendados`: Hasta cuatro recomendaciones automáticas del catálogo publicado.
 - `GET .../productos/{productoSlug}/resenas` y `/resenas/resumen`: Comentarios y estadísticas persistidas.
 - `POST /api/publico/resenas/{resenaId}/util`: Incrementa el contador de utilidad de una reseña.
 - `POST .../productos/{productoSlug}/resenas`: Preparado para la futura autenticación de clientes; actualmente rechaza visitantes y credenciales administrativas.
-=======
-- `GET /api/publico/**`: Consulta de catálogo de productos, banners, categorías, etc. Navegar la tienda no requiere cuenta.
-- `POST /api/publico/cuenta/registro` y `POST /api/publico/cuenta/login`: Cuentas de cliente (ver abajo).
->>>>>>> feature/cliente-carrito
 - `GET /actuator/health`: Chequeo de salud del servicio.
 
 ### Endpoints Protegidos
