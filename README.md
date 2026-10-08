@@ -120,6 +120,11 @@ app.jwt.expiration=${JWT_EXPIRATION:PT8H}
 - `GET /actuator/health`: Chequeo de salud del servicio.
 
 ### Endpoints Protegidos
+
+El modulo de anuncios administra `GET/POST /api/anuncios`, `GET/PUT/DELETE /api/anuncios/{id}` y
+`PATCH /api/anuncios/{id}/activo`. Estas rutas requieren JWT administrativo. Las imagenes reutilizan
+la carga Cloudinary existente en `POST /api/archivos/subir-imagen`.
+
 - Todas las rutas bajo `/api/**` que no sean públicas requieren el rol `ADMINISTRADOR`.
 - Requieren sesión de cliente (rol `CLIENTE`, cabecera `Authorization: Bearer <token>`):
   - `GET /api/publico/cuenta/me` y `GET /api/publico/cuenta/cotizaciones`.
@@ -128,11 +133,19 @@ app.jwt.expiration=${JWT_EXPIRATION:PT8H}
   - `POST .../productos/{productoSlug}/comparar-precio` y `GET .../productos/{productoSlug}/comparacion-competidores`.
 
 ### Cuentas de cliente
+
 - Son independientes de los administradores: tabla `clientes`, token con rol `CLIENTE` y sin acceso a `/api/**` administrativo.
 - `POST /api/publico/cuenta/registro` exige `aceptaTratamientoDatos: true` y una contraseña de al menos 8 caracteres. Un correo repetido responde `409`.
 - El token expira según `app.jwt.expiration`. Tras expirar, el frontend debe pedir un nuevo inicio de sesión.
 - Migración `V9__cuentas_clientes.sql`: crea `clientes` y agrega `cotizaciones.cliente_id`.
 - Migración `V10__carrito_cliente.sql`: crea `carritos_cliente`, un carrito por cuenta.
+
+### Anuncios públicos
+
+- `GET /api/publico/anuncios/ISANORTE` y `GET /api/publico/anuncios/ISADECOR` no requieren autenticación.
+- Solo retornan anuncios activos, vigentes y destinados al sitio solicitado o a `AMBOS`, ordenados por
+  orden de visualización, fecha de creación e identificador.
+- `V11__create_anuncios.sql` crea la tabla, las restricciones de enums y vigencia, y el índice de consulta pública.
 
 ### 1. Iniciar Sesión (`Login`)
 Envía una petición `POST` a `/api/auth/login`:

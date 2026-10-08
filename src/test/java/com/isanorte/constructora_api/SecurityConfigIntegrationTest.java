@@ -72,6 +72,30 @@ class SecurityConfigIntegrationTest {
     }
 
     @Test
+    @DisplayName("Consulta pública de anuncios permite acceso anónimo")
+    void publicAnnouncementsAllowAnonymousAccess() throws Exception {
+        mockMvc.perform(get("/api/publico/anuncios/ISANORTE"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("Administración de anuncios deniega acceso anónimo")
+    void adminAnnouncementsDenyAnonymousAccess() throws Exception {
+        mockMvc.perform(get("/api/anuncios"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("Administración de anuncios acepta JWT de administrador")
+    void adminAnnouncementsAllowAdminAccess() throws Exception {
+        Instant now = Instant.now();
+        String token = createToken("admin@isanorte.com", Set.of("ADMINISTRADOR"), now, now.plusSeconds(3600));
+
+        mockMvc.perform(get("/api/anuncios").header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk());
+    }
+
+    @Test
     @DisplayName("Endpoint /api/categorias/activas bajo /api/** continúa protegido y devuelve 401 si no hay token")
     void activeCategoriesDeniesAnonymousAccess() throws Exception {
         mockMvc.perform(get("/api/categorias/activas"))
