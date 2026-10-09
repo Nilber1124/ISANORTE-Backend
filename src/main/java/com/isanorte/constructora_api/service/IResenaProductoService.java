@@ -16,7 +16,7 @@ public interface IResenaProductoService {
 
     ResenaProductoResponse createPublicReview(
             String clave, String unidadSlug, String productoSlug,
-            UUID clienteId, String nombreCliente, CrearResenaRequest request);
+            UUID clienteId, CrearResenaRequest request);
 
     ResenaProductoResponse markUseful(UUID resenaId);
 }

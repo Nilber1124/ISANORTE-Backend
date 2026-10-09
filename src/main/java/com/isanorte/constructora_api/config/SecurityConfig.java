@@ -71,6 +71,8 @@ public class SecurityConfig {
                                 "/api/publico/sitios/*/unidades/*/productos/*/comparar-precio").hasAuthority(clienteAuthority)
                         .requestMatchers(HttpMethod.GET,
                                 "/api/publico/sitios/*/unidades/*/productos/*/comparacion-competidores").hasAuthority(clienteAuthority)
+                        .requestMatchers(HttpMethod.POST,
+                                "/api/publico/sitios/*/unidades/*/productos/*/resenas").hasAuthority(clienteAuthority)
                         .requestMatchers("/api/publico/**").permitAll()
                         .requestMatchers("/api/**").hasAuthority(adminAuthority)
                         .anyRequest().permitAll())

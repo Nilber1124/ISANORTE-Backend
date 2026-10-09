@@ -86,7 +86,7 @@ public class PublicContentController {
             @Valid @RequestBody CrearResenaRequest request, Authentication authentication) {
         ClientIdentity client = authenticatedClient(authentication);
         return ResponseEntity.status(HttpStatus.CREATED).body(resenaProductoService.createPublicReview(
-                clave, unidadSlug, productoSlug, client.id(), client.name(), request));
+                clave, unidadSlug, productoSlug, client.id(), request));
     }
 
     @PostMapping("/resenas/{resenaId}/util")
@@ -172,19 +172,18 @@ public class PublicContentController {
         }
         boolean isClient = token.getAuthorities().stream()
                 .anyMatch(authority -> authority.getAuthority().equals("ROLE_CLIENTE"));
-        String clientId = token.getToken().getClaimAsString("cliente_id");
-        String clientName = token.getToken().getClaimAsString("nombre");
-        if (!isClient || clientId == null || clientName == null || clientName.isBlank()) {
+        String clientId = token.getToken().getSubject();
+        if (!isClient || clientId == null) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                    "La autenticación de clientes todavía no está disponible");
+                    "La identidad del cliente no está disponible");
         }
         try {
-            return new ClientIdentity(UUID.fromString(clientId), clientName);
+            return new ClientIdentity(UUID.fromString(clientId));
         } catch (IllegalArgumentException exception) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Identidad de cliente inválida");
         }
     }
 
-    private record ClientIdentity(UUID id, String name) {
+    private record ClientIdentity(UUID id) {
     }
 }

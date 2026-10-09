@@ -9,6 +9,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.math.BigDecimal;
 import java.util.UUID;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +20,11 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.http.MediaType;
+import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
+import org.springframework.security.oauth2.jwt.JwtClaimsSet;
+import org.springframework.security.oauth2.jwt.JwtEncoder;
+import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
+import org.springframework.security.oauth2.jwt.JwsHeader;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.isanorte.constructora_api.enums.EstadoDisponibilidad;
@@ -31,6 +39,7 @@ import com.isanorte.constructora_api.model.EspecificacionProducto;
 import com.isanorte.constructora_api.model.ImagenProducto;
 import com.isanorte.constructora_api.model.Producto;
 import com.isanorte.constructora_api.model.ResenaProducto;
+import com.isanorte.constructora_api.model.Cliente;
 import com.isanorte.constructora_api.model.UnidadNegocio;
 import com.isanorte.constructora_api.model.VarianteProducto;
 import com.isanorte.constructora_api.repository.CategoriaProductoRepository;
@@ -38,6 +47,7 @@ import com.isanorte.constructora_api.repository.ConfiguracionSitioRepository;
 import com.isanorte.constructora_api.repository.EmpresaRepository;
 import com.isanorte.constructora_api.repository.ProductoRepository;
 import com.isanorte.constructora_api.repository.ResenaProductoRepository;
+import com.isanorte.constructora_api.repository.ClienteRepository;
 import com.isanorte.constructora_api.repository.UnidadNegocioRepository;
 
 @SpringBootTest
@@ -53,6 +63,8 @@ class PublicProductApiIntegrationTest {
     @Autowired private CategoriaProductoRepository categoriaRepository;
     @Autowired private ProductoRepository productoRepository;
     @Autowired private ResenaProductoRepository resenaRepository;
+    @Autowired private ClienteRepository clienteRepository;
+    @Autowired private JwtEncoder jwtEncoder;
 
     @Test
     void recomendacionesYResenasPublicasUsanProductosYDatosPersistidos() throws Exception {
@@ -101,6 +113,21 @@ class PublicProductApiIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"calificacion\":5,\"comentario\":\"Excelente\"}"))
                 .andExpect(status().isUnauthorized());
+
+        Cliente cliente = clienteRepository.saveAndFlush(Cliente.builder()
+                .nombre("Ana").apellido("Cliente").email("ana-" + random(6) + "@example.com")
+                .passwordHash("hash-no-expuesto").activo(true).consentimientoDatos(true)
+                .fechaConsentimiento(LocalDateTime.now()).build());
+        String token = createToken(cliente.getId().toString(), Set.of("CLIENTE"));
+        mockMvc.perform(post(productPath + "/resenas", site.getClave(), unit.getSlug(), current.getSlug())
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"calificacion\":5,\"comentario\":\"Excelente\"}"))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.nombreCliente").value("Ana Cliente"))
+                .andExpect(jsonPath("$.calificacion").value(5));
+        org.junit.jupiter.api.Assertions.assertTrue(resenaRepository.findByProductoId(current.getId()).stream()
+                .anyMatch(review -> cliente.getId().equals(review.getClienteId())));
 
         org.junit.jupiter.api.Assertions.assertNotNull(relatedReview.getId());
     }
@@ -273,5 +300,13 @@ class PublicProductApiIntegrationTest {
 
     private String random(int length) {
         return UUID.randomUUID().toString().replace("-", "").substring(0, length);
+    }
+
+    private String createToken(String subject, Set<String> roles) {
+        Instant now = Instant.now();
+        JwtClaimsSet claims = JwtClaimsSet.builder().issuer("isanorte-api").subject(subject)
+                .issuedAt(now).expiresAt(now.plusSeconds(3600)).claim("roles", roles).build();
+        JwsHeader header = JwsHeader.with(MacAlgorithm.HS256).type("JWT").build();
+        return jwtEncoder.encode(JwtEncoderParameters.from(header, claims)).getTokenValue();
     }
 }
