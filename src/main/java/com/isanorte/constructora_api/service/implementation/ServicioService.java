@@ -46,12 +46,25 @@ public class ServicioService extends GenericService<Servicio, UUID> implements I
     }
 
     @Override
+    public boolean isSlugAvailable(String slug, UUID excludeId) {
+        if (excludeId != null) {
+            return !servicioRepository.existsBySlugAndIdNot(slug, excludeId);
+        }
+        return !servicioRepository.existsBySlug(slug);
+    }
+
+    @Override
     @Transactional
     public Servicio create(ServicioRequest request) {
         if (servicioRepository.existsBySlug(request.slug())) {
-            throw new IllegalStateException("Ya existe un servicio con slug: " + request.slug());
+            throw new IllegalStateException("Ya existe un servicio con esa ruta.");
         }
-        return servicioRepository.save(servicioMapper.toEntity(request));
+        validatePublicationRules(request.imagenUrl(), request.activo(), request.destacado());
+        Servicio servicio = servicioMapper.toEntity(request);
+        if (request.orden() == null) {
+            servicio.setOrden(servicioRepository.findMaxOrden() + 1);
+        }
+        return servicioRepository.save(servicio);
     }
 
     @Override
@@ -100,8 +113,9 @@ public class ServicioService extends GenericService<Servicio, UUID> implements I
     public ServicioResponse update(UUID id, ServicioUpdateRequest request) {
         Servicio servicio = super.findById(id);
         if (servicioRepository.existsBySlugAndIdNot(request.slug(), id)) {
-            throw new IllegalStateException("Ya existe un servicio con slug: " + request.slug());
+            throw new IllegalStateException("Ya existe un servicio con esa ruta.");
         }
+        validatePublicationRules(request.imagenUrl(), request.activo(), request.destacado());
         servicioMapper.updateEntity(request, servicio);
         return servicioMapper.toResponse(servicioRepository.saveAndFlush(servicio));
     }
@@ -110,8 +124,24 @@ public class ServicioService extends GenericService<Servicio, UUID> implements I
     @Transactional
     public ServicioResponse updateActivo(UUID id, ActivoRequest request) {
         Servicio servicio = super.findById(id);
+        if (Boolean.TRUE.equals(request.activo())
+                && (servicio.getImagenUrl() == null || servicio.getImagenUrl().isBlank())) {
+            throw new IllegalArgumentException("No se puede publicar un servicio sin imagen.");
+        }
+        if (!Boolean.TRUE.equals(request.activo()) && Boolean.TRUE.equals(servicio.getDestacado())) {
+            servicio.setDestacado(false);
+        }
         servicio.setActivo(request.activo());
         return servicioMapper.toResponse(servicioRepository.saveAndFlush(servicio));
+    }
+
+    private void validatePublicationRules(String imagenUrl, Boolean activo, Boolean destacado) {
+        if (Boolean.TRUE.equals(activo) && (imagenUrl == null || imagenUrl.isBlank())) {
+            throw new IllegalArgumentException("No se puede publicar un servicio sin imagen.");
+        }
+        if (Boolean.TRUE.equals(destacado) && !Boolean.TRUE.equals(activo)) {
+            throw new IllegalArgumentException("No se puede destacar un servicio inactivo.");
+        }
     }
 
     @Override
