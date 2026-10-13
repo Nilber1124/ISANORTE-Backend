@@ -27,4 +27,7 @@ public interface ServicioRepository extends IGenericRepository<Servicio, UUID> {
     boolean existsBySlug(String slug);
 
     boolean existsBySlugAndIdNot(String slug, UUID id);
+
+    @Query("SELECT COALESCE(MAX(s.orden), 0) FROM Servicio s")
+    Integer findMaxOrden();
 }

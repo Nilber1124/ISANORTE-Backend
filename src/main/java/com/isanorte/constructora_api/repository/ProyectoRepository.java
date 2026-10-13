@@ -1,9 +1,11 @@
 package com.isanorte.constructora_api.repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -31,4 +33,8 @@ public interface ProyectoRepository extends IGenericRepository<Proyecto, UUID> {
     boolean existsBySlug(String slug);
 
     boolean existsBySlugAndIdNot(String slug, UUID id);
+
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE Proyecto p SET p.activo = :activo, p.fechaActualizacion = :now WHERE p.id = :id")
+    int updateActivoById(@Param("id") UUID id, @Param("activo") Boolean activo, @Param("now") LocalDateTime now);
 }

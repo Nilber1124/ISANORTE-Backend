@@ -7,7 +7,7 @@ import jakarta.validation.constraints.Size;
 public record ServicioRequest(
     @NotBlank String nombre,
     @NotBlank String slug,
-    String resumen,
+    @Size(max = 160) String resumen,
     @NotBlank String descripcion,
     String imagenUrl,
     @Size(max = 180) String etiqueta,
