@@ -31,7 +31,8 @@ public class PublicProductMapper {
         return new PublicProductCardResponse(
                 product.getNombre(), product.getSku(), product.getSlug(), product.getResumen(),
                 product.getDescripcion(), product.getPrecioBase(), product.getPrecioAnterior(),
-                product.getDescuentoPorcentaje(), product.getDisponibilidad(), product.getRetiroEnTienda(),
+                product.getDescuentoPorcentaje(), product.getDisponibilidad(), product.getDestacado(),
+                product.getOrdenDestacado(), product.getRetiroEnTienda(),
                 toImage(primaryImage), categories);
     }
 

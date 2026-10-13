@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import com.isanorte.constructora_api.enums.DestinoAnuncio;
 import com.isanorte.constructora_api.enums.TipoAccionAnuncio;
+import com.isanorte.constructora_api.enums.UbicacionAnuncio;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -50,12 +51,20 @@ public class Anuncio {
     @Column(nullable = false, length = 500)
     private String imagenUrl;
 
+    @Column(length = 500)
+    private String imagenHoverUrl;
+
     @Column(nullable = false, length = 60)
     private String etiqueta;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private DestinoAnuncio destino;
+
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 30)
+    private UbicacionAnuncio ubicacion = UbicacionAnuncio.GENERAL;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
@@ -92,6 +101,7 @@ public class Anuncio {
         fechaActualizacion = now;
         if (activo == null) activo = true;
         if (orden == null) orden = 0;
+        if (ubicacion == null) ubicacion = UbicacionAnuncio.GENERAL;
     }
 
     @PreUpdate

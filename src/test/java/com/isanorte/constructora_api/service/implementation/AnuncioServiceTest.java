@@ -24,6 +24,7 @@ import com.isanorte.constructora_api.dto.request.ActivoRequest;
 import com.isanorte.constructora_api.dto.request.AnuncioRequest;
 import com.isanorte.constructora_api.enums.DestinoAnuncio;
 import com.isanorte.constructora_api.enums.TipoAccionAnuncio;
+import com.isanorte.constructora_api.enums.UbicacionAnuncio;
 import com.isanorte.constructora_api.exception.ModelNotFoundException;
 import com.isanorte.constructora_api.model.Anuncio;
 import com.isanorte.constructora_api.repository.AnuncioRepository;
@@ -48,6 +49,7 @@ class AnuncioServiceTest {
                 .descripcionResumida("Descripción")
                 .contenidoDetallado("Contenido")
                 .imagenUrl("https://cdn.example/anuncio.webp")
+                .ubicacion(UbicacionAnuncio.GENERAL)
                 .etiqueta("Nuevo")
                 .destino(DestinoAnuncio.ISANORTE)
                 .tipoAccion(TipoAccionAnuncio.RUTA_INTERNA)
@@ -90,21 +92,21 @@ class AnuncioServiceTest {
 
     @Test
     void findPublicos_debeConsultarVigentesDelDestinoSolicitado() {
-        when(anuncioRepository.findPublicosVigentes(eq(DestinoAnuncio.ISANORTE), any(LocalDateTime.class)))
+        when(anuncioRepository.findPublicosVigentes(eq(DestinoAnuncio.ISANORTE), eq(UbicacionAnuncio.GENERAL), any(LocalDateTime.class)))
                 .thenReturn(List.of(anuncio));
 
-        var result = anuncioService.findPublicos(DestinoAnuncio.ISANORTE);
+        var result = anuncioService.findPublicos(DestinoAnuncio.ISANORTE, UbicacionAnuncio.GENERAL);
 
         assertEquals(1, result.size());
         assertEquals(anuncioId, result.getFirst().id());
-        verify(anuncioRepository).findPublicosVigentes(eq(DestinoAnuncio.ISANORTE), any(LocalDateTime.class));
+        verify(anuncioRepository).findPublicosVigentes(eq(DestinoAnuncio.ISANORTE), eq(UbicacionAnuncio.GENERAL), any(LocalDateTime.class));
     }
 
     @Test
     void findPublicos_debeRechazarAmbosComoSitioSolicitado() {
         assertThrows(IllegalArgumentException.class,
-                () -> anuncioService.findPublicos(DestinoAnuncio.AMBOS));
-        verify(anuncioRepository, never()).findPublicosVigentes(any(), any());
+                () -> anuncioService.findPublicos(DestinoAnuncio.AMBOS, UbicacionAnuncio.GENERAL));
+        verify(anuncioRepository, never()).findPublicosVigentes(any(), any(), any());
     }
 
     @Test
@@ -126,7 +128,7 @@ class AnuncioServiceTest {
     private AnuncioRequest request(DestinoAnuncio destino) {
         return new AnuncioRequest(
                 " Promoción ", " Descripción ", " Contenido ", " ",
-                "https://cdn.example/anuncio.webp", "Nuevo", destino,
+                "https://cdn.example/anuncio.webp", null, "Nuevo", destino, UbicacionAnuncio.GENERAL,
                 TipoAccionAnuncio.RUTA_INTERNA, "/contacto", "Contactar",
                 null, null, true, 1);
     }

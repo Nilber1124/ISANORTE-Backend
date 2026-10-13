@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.isanorte.constructora_api.enums.DestinoAnuncio;
+import com.isanorte.constructora_api.enums.UbicacionAnuncio;
 import com.isanorte.constructora_api.model.Anuncio;
 
 @Repository
@@ -21,12 +22,17 @@ public interface AnuncioRepository extends IGenericRepository<Anuncio, UUID> {
             where anuncio.activo = true
               and (anuncio.destino = :destino
                    or anuncio.destino = com.isanorte.constructora_api.enums.DestinoAnuncio.AMBOS)
+              and anuncio.ubicacion = :ubicacion
               and (anuncio.fechaInicio is null or anuncio.fechaInicio <= :ahora)
               and (anuncio.fechaFin is null or anuncio.fechaFin >= :ahora)
             order by anuncio.orden asc, anuncio.fechaCreacion desc, anuncio.id asc
             """)
     List<Anuncio> findPublicosVigentes(
             @Param("destino") DestinoAnuncio destino,
+            @Param("ubicacion") UbicacionAnuncio ubicacion,
             @Param("ahora") LocalDateTime ahora);
+
+    boolean existsByEtiquetaAndDestinoAndUbicacion(
+            String etiqueta, DestinoAnuncio destino, UbicacionAnuncio ubicacion);
 }
 

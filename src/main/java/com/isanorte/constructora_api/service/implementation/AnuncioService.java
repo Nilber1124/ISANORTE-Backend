@@ -11,6 +11,7 @@ import com.isanorte.constructora_api.dto.request.ActivoRequest;
 import com.isanorte.constructora_api.dto.request.AnuncioRequest;
 import com.isanorte.constructora_api.dto.response.AnuncioResponse;
 import com.isanorte.constructora_api.enums.DestinoAnuncio;
+import com.isanorte.constructora_api.enums.UbicacionAnuncio;
 import com.isanorte.constructora_api.exception.ModelNotFoundException;
 import com.isanorte.constructora_api.model.Anuncio;
 import com.isanorte.constructora_api.repository.AnuncioRepository;
@@ -68,11 +69,11 @@ public class AnuncioService implements IAnuncioService {
     }
 
     @Override
-    public List<AnuncioResponse> findPublicos(DestinoAnuncio destino) {
+    public List<AnuncioResponse> findPublicos(DestinoAnuncio destino, UbicacionAnuncio ubicacion) {
         if (destino == DestinoAnuncio.AMBOS) {
             throw new IllegalArgumentException("El destino público debe ser ISANORTE o ISADECOR");
         }
-        return anuncioRepository.findPublicosVigentes(destino, LocalDateTime.now()).stream()
+        return anuncioRepository.findPublicosVigentes(destino, ubicacion, LocalDateTime.now()).stream()
                 .map(this::toResponse)
                 .toList();
     }
@@ -88,8 +89,10 @@ public class AnuncioService implements IAnuncioService {
         anuncio.setContenidoDetallado(request.contenidoDetallado().trim());
         anuncio.setCondiciones(trimToNull(request.condiciones()));
         anuncio.setImagenUrl(request.imagenUrl().trim());
+        anuncio.setImagenHoverUrl(trimToNull(request.imagenHoverUrl()));
         anuncio.setEtiqueta(request.etiqueta().trim());
         anuncio.setDestino(request.destino());
+        anuncio.setUbicacion(request.ubicacion());
         anuncio.setTipoAccion(request.tipoAccion());
         anuncio.setDestinoAccion(request.destinoAccion().trim());
         anuncio.setTextoBoton(request.textoBoton().trim());
@@ -107,7 +110,7 @@ public class AnuncioService implements IAnuncioService {
         return new AnuncioResponse(
                 anuncio.getId(), anuncio.getTitulo(), anuncio.getDescripcionResumida(),
                 anuncio.getContenidoDetallado(), anuncio.getCondiciones(), anuncio.getImagenUrl(),
-                anuncio.getEtiqueta(), anuncio.getDestino(), anuncio.getTipoAccion(),
+                anuncio.getImagenHoverUrl(), anuncio.getEtiqueta(), anuncio.getDestino(), anuncio.getUbicacion(), anuncio.getTipoAccion(),
                 anuncio.getDestinoAccion(), anuncio.getTextoBoton(), anuncio.getFechaInicio(),
                 anuncio.getFechaFin(), anuncio.getActivo(), anuncio.getOrden(),
                 anuncio.getFechaCreacion(), anuncio.getFechaActualizacion());

@@ -13,6 +13,7 @@ import com.isanorte.constructora_api.dto.request.ProductoRequest;
 import com.isanorte.constructora_api.dto.request.EstadoPublicacionRequest;
 import com.isanorte.constructora_api.dto.request.ConfiguracionCalculoRequest;
 import com.isanorte.constructora_api.dto.request.DocumentoProductoRequest;
+import com.isanorte.constructora_api.dto.request.DestacadoProductoRequest;
 import com.isanorte.constructora_api.dto.request.EspecificacionProductoRequest;
 import com.isanorte.constructora_api.dto.request.ImagenProductoRequest;
 import com.isanorte.constructora_api.dto.request.ProductoUpdateRequest;
@@ -231,6 +232,15 @@ public class ProductoService extends GenericService<Producto, UUID> implements I
                 producto.addCategoria(categoria);
             }
         }
+        return productoMapper.toResponse(productoRepository.saveAndFlush(producto));
+    }
+
+    @Override
+    @Transactional
+    public ProductoResponse updateDestacado(UUID id, DestacadoProductoRequest request) {
+        Producto producto = super.findById(id);
+        producto.setDestacado(request.destacado());
+        producto.setOrdenDestacado(request.ordenDestacado());
         return productoMapper.toResponse(productoRepository.saveAndFlush(producto));
     }
 

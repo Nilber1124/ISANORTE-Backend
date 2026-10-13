@@ -7,6 +7,7 @@ import com.isanorte.constructora_api.dto.request.ActivoRequest;
 import com.isanorte.constructora_api.dto.request.AnuncioRequest;
 import com.isanorte.constructora_api.dto.response.AnuncioResponse;
 import com.isanorte.constructora_api.enums.DestinoAnuncio;
+import com.isanorte.constructora_api.enums.UbicacionAnuncio;
 
 public interface IAnuncioService {
     List<AnuncioResponse> findAll();
@@ -15,6 +16,6 @@ public interface IAnuncioService {
     AnuncioResponse update(UUID id, AnuncioRequest request);
     AnuncioResponse updateActivo(UUID id, ActivoRequest request);
     void delete(UUID id);
-    List<AnuncioResponse> findPublicos(DestinoAnuncio destino);
+    List<AnuncioResponse> findPublicos(DestinoAnuncio destino, UbicacionAnuncio ubicacion);
 }
 

@@ -101,6 +101,10 @@ public class Producto {
     private Boolean destacado = false;
 
     @Builder.Default
+    @Column(nullable = false)
+    private Integer ordenDestacado = 0;
+
+    @Builder.Default
     @Column(name = "retiro_en_tienda")
     private Boolean retiroEnTienda = false;
 
@@ -342,6 +346,9 @@ public class Producto {
 
         if (destacado == null) {
             destacado = false;
+        }
+        if (ordenDestacado == null) {
+            ordenDestacado = 0;
         }
 
         if (retiroEnTienda == null) {

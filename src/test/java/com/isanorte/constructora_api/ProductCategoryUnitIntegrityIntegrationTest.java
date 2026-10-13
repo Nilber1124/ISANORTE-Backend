@@ -166,7 +166,7 @@ class ProductCategoryUnitIntegrityIntegrationTest {
         return new ProductoRequest(
                 "SKU-" + seed + "-" + random(5), "Producto " + seed + random(4),
                 "product-" + seed + "-" + random(5), null, "Descripción", null, null, null,
-                EstadoDisponibilidad.DISPONIBLE, false, false, EstadoPublicacion.BORRADOR, null, null,
+                EstadoDisponibilidad.DISPONIBLE, false, 0, false, EstadoPublicacion.BORRADOR, null, null,
                 unitId, categoryIds, null, null, null, null, null);
     }
 
@@ -174,7 +174,7 @@ class ProductCategoryUnitIntegrityIntegrationTest {
         return new ProductoUpdateRequest(
                 product.getSku(), product.getNombre(), product.getSlug(), product.getResumen(), product.getDescripcion(),
                 product.getPrecioBase(), product.getPrecioAnterior(), product.getDescuentoPorcentaje(),
-                product.getDisponibilidad(), Boolean.TRUE.equals(product.getDestacado()), product.getRetiroEnTienda(),
+                product.getDisponibilidad(), Boolean.TRUE.equals(product.getDestacado()), product.getOrdenDestacado(), product.getRetiroEnTienda(),
                 product.getEstado(), product.getTituloSeo(), product.getDescripcionSeo(), unitId, categoryIds);
     }
 

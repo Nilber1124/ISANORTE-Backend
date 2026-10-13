@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.isanorte.constructora_api.dto.request.EstadoPublicacionRequest;
 import com.isanorte.constructora_api.dto.request.ConfiguracionCalculoRequest;
 import com.isanorte.constructora_api.dto.request.DocumentoProductoRequest;
+import com.isanorte.constructora_api.dto.request.DestacadoProductoRequest;
 import com.isanorte.constructora_api.dto.request.EspecificacionProductoRequest;
 import com.isanorte.constructora_api.dto.request.ImagenProductoRequest;
 import com.isanorte.constructora_api.dto.request.ProductoRequest;
@@ -85,6 +86,12 @@ public class ProductoController {
     public ResponseEntity<ProductoResponse> update(
             @PathVariable UUID id, @Valid @RequestBody ProductoUpdateRequest request) {
         return ResponseEntity.ok(productoService.update(id, request));
+    }
+
+    @PatchMapping("/{id}/destacado")
+    public ResponseEntity<ProductoResponse> updateDestacado(
+            @PathVariable UUID id, @Valid @RequestBody DestacadoProductoRequest request) {
+        return ResponseEntity.ok(productoService.updateDestacado(id, request));
     }
 
     @PatchMapping("/{id}/estado")

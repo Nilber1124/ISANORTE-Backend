@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import com.isanorte.constructora_api.enums.DestinoAnuncio;
 import com.isanorte.constructora_api.enums.TipoAccionAnuncio;
+import com.isanorte.constructora_api.enums.UbicacionAnuncio;
 
 class AnuncioRequestTest {
 
@@ -33,7 +34,8 @@ class AnuncioRequestTest {
     private AnuncioRequest request(LocalDateTime inicio, LocalDateTime fin) {
         return new AnuncioRequest(
                 "Título", "Resumen", "Contenido", null, "https://cdn.example/image.webp",
-                "Etiqueta", DestinoAnuncio.ISANORTE, TipoAccionAnuncio.RUTA_INTERNA,
+                null, "Etiqueta", DestinoAnuncio.ISANORTE, UbicacionAnuncio.GENERAL,
+                TipoAccionAnuncio.RUTA_INTERNA,
                 "/contacto", "Abrir", inicio, fin, true, 0);
     }
 }

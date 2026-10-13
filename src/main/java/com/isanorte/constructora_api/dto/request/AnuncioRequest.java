@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 import com.isanorte.constructora_api.enums.DestinoAnuncio;
 import com.isanorte.constructora_api.enums.TipoAccionAnuncio;
+import com.isanorte.constructora_api.enums.UbicacionAnuncio;
 
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
@@ -17,8 +18,10 @@ public record AnuncioRequest(
         @NotBlank String contenidoDetallado,
         String condiciones,
         @NotBlank @Size(max = 500) String imagenUrl,
+        @Size(max = 500) String imagenHoverUrl,
         @NotBlank @Size(max = 60) String etiqueta,
         @NotNull DestinoAnuncio destino,
+        @NotNull UbicacionAnuncio ubicacion,
         @NotNull TipoAccionAnuncio tipoAccion,
         @NotBlank @Size(max = 500) String destinoAccion,
         @NotBlank @Size(max = 80) String textoBoton,

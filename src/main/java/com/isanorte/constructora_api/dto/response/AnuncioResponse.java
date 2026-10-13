@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import com.isanorte.constructora_api.enums.DestinoAnuncio;
 import com.isanorte.constructora_api.enums.TipoAccionAnuncio;
+import com.isanorte.constructora_api.enums.UbicacionAnuncio;
 
 public record AnuncioResponse(
         UUID id,
@@ -13,8 +14,10 @@ public record AnuncioResponse(
         String contenidoDetallado,
         String condiciones,
         String imagenUrl,
+        String imagenHoverUrl,
         String etiqueta,
         DestinoAnuncio destino,
+        UbicacionAnuncio ubicacion,
         TipoAccionAnuncio tipoAccion,
         String destinoAccion,
         String textoBoton,

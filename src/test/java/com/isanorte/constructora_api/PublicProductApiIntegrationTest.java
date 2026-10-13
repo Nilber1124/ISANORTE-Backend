@@ -175,7 +175,8 @@ class PublicProductApiIntegrationTest {
                 .andExpect(jsonPath("$.productos[*].slug", not(hasItem(productB.getSlug()))))
                 .andExpect(jsonPath("$.productos[0].id").doesNotExist())
                 .andExpect(jsonPath("$.productos[0].estado").doesNotExist())
-                .andExpect(jsonPath("$.productos[0].destacado").doesNotExist())
+                .andExpect(jsonPath("$.productos[0].destacado").value(false))
+                .andExpect(jsonPath("$.productos[0].ordenDestacado").value(0))
                 .andExpect(jsonPath("$.productos[0].fechaCreacion").doesNotExist())
                 .andExpect(jsonPath("$.productos[0].unidadNegocioId").doesNotExist());
 

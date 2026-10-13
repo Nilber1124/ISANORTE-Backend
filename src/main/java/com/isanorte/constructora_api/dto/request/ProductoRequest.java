@@ -28,6 +28,7 @@ public record ProductoRequest(
     @DecimalMin("0.0") @DecimalMax("100.0") BigDecimal descuentoPorcentaje,
     @NotNull EstadoDisponibilidad disponibilidad,
     Boolean destacado,
+    @PositiveOrZero Integer ordenDestacado,
     Boolean retiroEnTienda,
     @NotNull EstadoPublicacion estado,
     String tituloSeo,

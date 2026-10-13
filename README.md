@@ -82,6 +82,7 @@ La API cuenta con autenticación basada en **JSON Web Tokens (JWT)** y control d
 | `ADMIN_PASSWORD` | `app.auth.initial-password` | **Entre 12 y 72 caracteres** | Contraseña del administrador inicial (hasheada con BCrypt). |
 | `JWT_EXPIRATION` | `app.jwt.expiration` | Formato ISO-8601 (ej: `PT8H`) | Tiempo de validez del token (por defecto 8 horas). |
 | `ADMIN_ROLE` | `app.auth.admin-role` | Nombre de rol (por defecto `ADMINISTRADOR`) | Nombre del rol con permisos administrativos. |
+| `SEED_DEMO_HOME_ISADECOR` | `app.seed.demo-home-isadecor` | `true` o `false` (por defecto `false`) | Inserta una sola vez contenido demostrativo administrable del Home ISADECOR. No activar en producción. |
 
 > **⚠️ Importante:** 
 > - Si `JWT_SECRET` tiene menos de 32 caracteres, la aplicación arrojará una excepción al iniciar y se detendrá.
@@ -146,6 +147,10 @@ la carga Cloudinary existente en `POST /api/archivos/subir-imagen`.
 - Solo retornan anuncios activos, vigentes y destinados al sitio solicitado o a `AMBOS`, ordenados por
   orden de visualización, fecha de creación e identificador.
 - `V11__create_anuncios.sql` crea la tabla, las restricciones de enums y vigencia, y el índice de consulta pública.
+- El parámetro opcional `ubicacion` permite consultar `GENERAL`, `CINTA_HOME`,
+  `PROMOCION_PRINCIPAL`, `PROMOCION_SECUNDARIA`, `ANUNCIOS_HOME` o `CATEGORIA_SUPERIOR`.
+- `V12__home_isadecor_administrable.sql` amplía anuncios para estas ubicaciones y agrega el orden
+  de productos destacados. El seed del Home es opt-in e idempotente mediante `SEED_DEMO_HOME_ISADECOR=true`.
 
 ### 1. Iniciar Sesión (`Login`)
 Envía una petición `POST` a `/api/auth/login`:
