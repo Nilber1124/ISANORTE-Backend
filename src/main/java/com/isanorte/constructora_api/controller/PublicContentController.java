@@ -33,6 +33,7 @@ import com.isanorte.constructora_api.dto.response.SolicitudContactoPublicRespons
 import com.isanorte.constructora_api.dto.response.ProductoRecomendadoResponse;
 import com.isanorte.constructora_api.dto.response.ResenaProductoResponse;
 import com.isanorte.constructora_api.dto.response.ResumenResenasResponse;
+import com.isanorte.constructora_api.enums.OrdenCatalogoProducto;
 import com.isanorte.constructora_api.enums.OrdenResena;
 import com.isanorte.constructora_api.enums.TipoPaginaPublica;
 import com.isanorte.constructora_api.service.IPublicContentService;
@@ -145,8 +146,17 @@ public class PublicContentController {
 
     @GetMapping("/sitios/{clave}/unidades/{unidadSlug}/catalogo")
     public ResponseEntity<PublicProductCatalogResponse> findProductCatalog(
-            @PathVariable String clave, @PathVariable String unidadSlug) {
-        return ResponseEntity.ok(publicContentService.findProductCatalog(clave, unidadSlug));
+            @PathVariable String clave, @PathVariable String unidadSlug,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "12") int size,
+            @RequestParam(required = false) String categoria,
+            @RequestParam(required = false) String q,
+            @RequestParam(defaultValue = "false") boolean soloDescuento,
+            @RequestParam(defaultValue = "false") boolean soloDisponible,
+            @RequestParam(defaultValue = "false") boolean soloDestacados,
+            @RequestParam(defaultValue = "DESTACADOS") OrdenCatalogoProducto orden) {
+        return ResponseEntity.ok(publicContentService.findProductCatalog(
+                clave, unidadSlug, page, size, categoria, q, soloDescuento, soloDisponible, soloDestacados, orden));
     }
 
     @GetMapping("/sitios/{clave}/unidades/{unidadSlug}/productos/{productoSlug}")

@@ -13,4 +13,5 @@ public class UploadResponseDto {
     private String url;
     private String publicId;
     private String format;
+    private Long bytes;
 }

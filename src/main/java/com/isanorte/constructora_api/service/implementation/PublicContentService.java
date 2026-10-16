@@ -4,10 +4,18 @@ import java.util.Comparator;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.LinkedHashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +25,7 @@ import com.isanorte.constructora_api.dto.response.PublicCompanyStatisticResponse
 import com.isanorte.constructora_api.dto.response.PublicHomeResponse;
 import com.isanorte.constructora_api.dto.response.PublicPageResponse;
 import com.isanorte.constructora_api.dto.response.PublicProductCardResponse;
+import com.isanorte.constructora_api.dto.response.PublicProductCatalogCategoryResponse;
 import com.isanorte.constructora_api.dto.response.PublicProductCatalogResponse;
 import com.isanorte.constructora_api.dto.response.PublicProductCategoryResponse;
 import com.isanorte.constructora_api.dto.response.PublicProductDetailResponse;
@@ -32,6 +41,7 @@ import com.isanorte.constructora_api.dto.response.PublicServiceBenefitResponse;
 import com.isanorte.constructora_api.dto.response.PublicServiceResponse;
 import com.isanorte.constructora_api.dto.response.PublicSiteResponse;
 import com.isanorte.constructora_api.enums.EstadoPublicacion;
+import com.isanorte.constructora_api.enums.OrdenCatalogoProducto;
 import com.isanorte.constructora_api.enums.TipoPaginaPublica;
 import com.isanorte.constructora_api.enums.TipoPaginaSeo;
 import com.isanorte.constructora_api.exception.ModelNotFoundException;
@@ -46,6 +56,7 @@ import com.isanorte.constructora_api.model.SeoPagina;
 import com.isanorte.constructora_api.model.UnidadNegocio;
 import com.isanorte.constructora_api.model.VarianteProducto;
 import com.isanorte.constructora_api.mapper.PublicProductMapper;
+import com.isanorte.constructora_api.repository.CategoriaProductoRepository;
 import com.isanorte.constructora_api.repository.ConfiguracionSitioRepository;
 import com.isanorte.constructora_api.repository.ContenidoPaginaRepository;
 import com.isanorte.constructora_api.repository.EstadisticaEmpresaRepository;
@@ -57,6 +68,7 @@ import com.isanorte.constructora_api.repository.SeccionLandingRepository;
 import com.isanorte.constructora_api.repository.SeoPaginaRepository;
 import com.isanorte.constructora_api.repository.ServicioRepository;
 import com.isanorte.constructora_api.repository.UnidadNegocioRepository;
+import com.isanorte.constructora_api.repository.specification.ProductoCatalogSpecifications;
 import com.isanorte.constructora_api.service.IPublicContentService;
 
 import lombok.RequiredArgsConstructor;
@@ -64,6 +76,7 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class PublicContentService implements IPublicContentService {
+    private static final int CATALOG_MAX_PAGE_SIZE = 48;
     private static final Comparator<com.isanorte.constructora_api.model.HeroScene> SCENE_ORDER =
             Comparator.comparing(com.isanorte.constructora_api.model.HeroScene::getOrden)
                     .thenComparing(value -> value.getId().toString());
@@ -102,6 +115,7 @@ public class PublicContentService implements IPublicContentService {
     private final ServicioRepository servicioRepository;
     private final ProyectoRepository proyectoRepository;
     private final ProductoRepository productoRepository;
+    private final CategoriaProductoRepository categoriaProductoRepository;
     private final ResenaProductoRepository resenaProductoRepository;
     private final UnidadNegocioRepository unidadRepository;
     private final ContenidoPaginaRepository contenidoRepository;
@@ -230,25 +244,54 @@ public class PublicContentService implements IPublicContentService {
     }
 
     @Override @Transactional(readOnly = true)
-    public PublicProductCatalogResponse findProductCatalog(String clave, String unidadSlug) {
+    public PublicProductCatalogResponse findProductCatalog(
+            String clave, String unidadSlug, int page, int size, String categoriaSlug, String q,
+            boolean soloDescuento, boolean soloDisponible, boolean soloDestacados, OrdenCatalogoProducto orden) {
+        validateCatalogPagination(page, size);
         ConfiguracionSitio site = findSiteEntity(clave);
         UnidadNegocio unit = findPublicBusinessUnit(site, unidadSlug);
-        List<Producto> products = productoRepository.findByUnidadNegocioIdAndEstadoOrderByNombreAscIdAsc(
-                unit.getId(), EstadoPublicacion.PUBLICADO);
-        List<PublicProductCategoryResponse> categories = products.stream()
-                .flatMap(product -> publicCategories(product, unit).stream())
-                .distinct()
-                .sorted(PRODUCT_CATEGORY_ORDER)
-                .map(publicProductMapper::toCategory)
-                .toList();
-        List<PublicProductCardResponse> cards = products.stream()
+
+        Specification<Producto> spec = Specification
+                .where(ProductoCatalogSpecifications.perteneceAUnidad(unit.getId()))
+                .and(ProductoCatalogSpecifications.estado(EstadoPublicacion.PUBLICADO))
+                .and(ProductoCatalogSpecifications.categoriaSlug(categoriaSlug, unit.getId()))
+                .and(ProductoCatalogSpecifications.textoBusqueda(q))
+                .and(ProductoCatalogSpecifications.soloDescuento(soloDescuento))
+                .and(ProductoCatalogSpecifications.soloDisponible(soloDisponible))
+                .and(ProductoCatalogSpecifications.soloDestacados(soloDestacados))
+                .and(ProductoCatalogSpecifications.ordenadoPor(orden));
+
+        Page<Producto> productPage = productoRepository.findAll(spec, PageRequest.of(page, size, Sort.unsorted()));
+        List<UUID> orderedIds = productPage.getContent().stream().map(Producto::getId).toList();
+
+        Map<UUID, Producto> hydratedById = productoRepository.findByIdIn(orderedIds).stream()
+                .collect(Collectors.toMap(Producto::getId, Function.identity(), (a, b) -> a, LinkedHashMap::new));
+        List<PublicProductCardResponse> cards = orderedIds.stream()
+                .map(hydratedById::get)
                 .map(product -> publicProductMapper.toCard(
                         product,
                         primaryImage(product),
                         publicCategories(product, unit).stream().map(publicProductMapper::toCategory).toList()))
                 .toList();
+
+        List<PublicProductCatalogCategoryResponse> categories = categoriaProductoRepository
+                .findPublicCategoryCounts(unit.getId(), EstadoPublicacion.PUBLICADO);
+
         return new PublicProductCatalogResponse(
-                new PublicProductCatalogResponse.Unidad(unit.getNombre(), unit.getSlug()), categories, cards);
+                new PublicProductCatalogResponse.Unidad(unit.getNombre(), unit.getSlug()),
+                categories,
+                new PublicProductCatalogResponse.Pagina(
+                        cards, productPage.getNumber(), productPage.getSize(),
+                        productPage.getTotalElements(), productPage.getTotalPages()));
+    }
+
+    private void validateCatalogPagination(int page, int size) {
+        if (page < 0) {
+            throw new IllegalArgumentException("page debe ser mayor o igual a 0");
+        }
+        if (size < 1 || size > CATALOG_MAX_PAGE_SIZE) {
+            throw new IllegalArgumentException("size debe estar entre 1 y " + CATALOG_MAX_PAGE_SIZE);
+        }
     }
 
     @Override @Transactional(readOnly = true)
