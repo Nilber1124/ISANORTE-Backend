@@ -23,6 +23,7 @@ import com.isanorte.constructora_api.enums.TipoRecursoUnidadNegocio;
 import com.isanorte.constructora_api.enums.TipoSeccionLanding;
 import com.isanorte.constructora_api.model.AccionLanding;
 import com.isanorte.constructora_api.model.BeneficioServicio;
+import com.isanorte.constructora_api.model.Catalogo;
 import com.isanorte.constructora_api.model.ConfiguracionSitio;
 import com.isanorte.constructora_api.model.ContenidoPagina;
 import com.isanorte.constructora_api.model.Empresa;
@@ -44,6 +45,7 @@ import com.isanorte.constructora_api.repository.EstadisticaEmpresaRepository;
 import com.isanorte.constructora_api.repository.HeroSceneRepository;
 import com.isanorte.constructora_api.repository.ProyectoRepository;
 import com.isanorte.constructora_api.repository.RecursoUnidadNegocioRepository;
+import com.isanorte.constructora_api.repository.CatalogoRepository;
 import com.isanorte.constructora_api.repository.SeoPaginaRepository;
 import com.isanorte.constructora_api.repository.ServicioRepository;
 import com.isanorte.constructora_api.repository.SolicitudContactoRepository;
@@ -64,6 +66,7 @@ class DynamicContentPersistenceIntegrationTest {
     @Autowired private AccionLandingRepository accionLandingRepository;
     @Autowired private UnidadNegocioRepository unidadNegocioRepository;
     @Autowired private RecursoUnidadNegocioRepository recursoUnidadNegocioRepository;
+    @Autowired private CatalogoRepository catalogoRepository;
     @Autowired private ServicioRepository servicioRepository;
     @Autowired private BeneficioServicioRepository beneficioServicioRepository;
     @Autowired private ProyectoRepository proyectoRepository;
@@ -129,6 +132,26 @@ class DynamicContentPersistenceIntegrationTest {
         unidadNegocioRepository.saveAndFlush(unidad);
         entityManager.clear();
         assertThat(recursoUnidadNegocioRepository.existsById(recursoId)).isFalse();
+    }
+
+    @Test
+    void persisteCatalogoYAplicaOrphanRemoval() {
+        Empresa empresa = persistedCompany("catalogo-persist");
+        UnidadNegocio unidad = UnidadNegocio.builder()
+                .nombre("ISADECOR Catálogos").slug("isadecor-catalogos-test").empresa(empresa).build();
+        Catalogo catalogo = Catalogo.builder()
+                .titulo("Paneles WPC").imagenPortadaUrl("/portada.webp").archivoUrl("/paneles-wpc.pdf").build();
+        unidad.addCatalogo(catalogo);
+        unidadNegocioRepository.saveAndFlush(unidad);
+
+        UUID catalogoId = catalogo.getId();
+        assertThat(catalogo.getOrden()).isZero();
+        assertThat(catalogo.getUnidadNegocio()).isSameAs(unidad);
+
+        unidad.removeCatalogo(catalogo);
+        unidadNegocioRepository.saveAndFlush(unidad);
+        entityManager.clear();
+        assertThat(catalogoRepository.existsById(catalogoId)).isFalse();
     }
 
     @Test

@@ -1483,6 +1483,32 @@ paths:
         - {name: unidadId, in: path, required: true, schema: {type: string, format: uuid}}
         - {name: recursoId, in: path, required: true, schema: {type: string, format: uuid}}
       responses: {'204': {description: Recurso eliminado}, '400': {$ref: '#/components/responses/BadRequest'}, '404': {$ref: '#/components/responses/NotFound'}}
+  /api/unidades-negocio/{unidadId}/catalogos:
+    post:
+      tags: [Unidades de negocio]
+      operationId: crearCatalogoUnidad
+      x-access-intent: ADMINISTRATIVO
+      parameters: [{name: unidadId, in: path, required: true, schema: {type: string, format: uuid}}]
+      requestBody: {required: true, content: {application/json: {schema: {$ref: '#/components/schemas/CatalogoRequest'}}}}
+      responses: {'201': {description: Catálogo creado, content: {application/json: {schema: {$ref: '#/components/schemas/CatalogoResponse'}}}}, '400': {$ref: '#/components/responses/BadRequest'}, '404': {$ref: '#/components/responses/NotFound'}}
+  /api/unidades-negocio/{unidadId}/catalogos/{catalogoId}:
+    put:
+      tags: [Unidades de negocio]
+      operationId: actualizarCatalogoUnidad
+      x-access-intent: ADMINISTRATIVO
+      parameters:
+        - {name: unidadId, in: path, required: true, schema: {type: string, format: uuid}}
+        - {name: catalogoId, in: path, required: true, schema: {type: string, format: uuid}}
+      requestBody: {required: true, content: {application/json: {schema: {$ref: '#/components/schemas/CatalogoRequest'}}}}
+      responses: {'200': {description: Catálogo actualizado, content: {application/json: {schema: {$ref: '#/components/schemas/CatalogoResponse'}}}}, '400': {$ref: '#/components/responses/BadRequest'}, '404': {$ref: '#/components/responses/NotFound'}}
+    delete:
+      tags: [Unidades de negocio]
+      operationId: eliminarCatalogoUnidad
+      x-access-intent: ADMINISTRATIVO
+      parameters:
+        - {name: unidadId, in: path, required: true, schema: {type: string, format: uuid}}
+        - {name: catalogoId, in: path, required: true, schema: {type: string, format: uuid}}
+      responses: {'204': {description: Catálogo eliminado}, '400': {$ref: '#/components/responses/BadRequest'}, '404': {$ref: '#/components/responses/NotFound'}}
   /api/empresa/{empresaId}/estadisticas:
     post:
       tags: [Empresa]
@@ -3010,6 +3036,19 @@ components:
       allOf:
         - {$ref: '#/components/schemas/RecursoUnidadNegocioRequest'}
         - {type: object, required: [id], properties: {id: {type: string, format: uuid}}}
+    CatalogoRequest:
+      type: object
+      required: [titulo, imagenPortadaUrl, archivoUrl, orden, activo]
+      properties:
+        titulo: {type: string, maxLength: 200}
+        imagenPortadaUrl: {type: string, maxLength: 500}
+        archivoUrl: {type: string, maxLength: 500}
+        orden: {type: integer, minimum: 0}
+        activo: {type: boolean}
+    CatalogoResponse:
+      allOf:
+        - {$ref: '#/components/schemas/CatalogoRequest'}
+        - {type: object, required: [id], properties: {id: {type: string, format: uuid}}}
     EstadisticaEmpresaRequest:
       type: object
       required: [valor, etiqueta, orden, activo]
@@ -3224,6 +3263,13 @@ components:
         alt: {type: string, nullable: true}
         etiqueta: {type: string, nullable: true}
         orden: {type: integer}
+    PublicCatalogo:
+      type: object
+      properties:
+        titulo: {type: string}
+        imagenPortadaUrl: {type: string}
+        archivoUrl: {type: string}
+        orden: {type: integer}
     PublicHomeUnidad:
       allOf:
         - {$ref: '#/components/schemas/PublicUnidadResumen'}
@@ -3338,6 +3384,7 @@ components:
         imagenUrl: {type: string, nullable: true}
         imagenAlt: {type: string, nullable: true}
         recursos: {type: array, items: {$ref: '#/components/schemas/PublicRecursoUnidad'}}
+        catalogos: {type: array, items: {$ref: '#/components/schemas/PublicCatalogo'}}
         seo:
           allOf: [{$ref: '#/components/schemas/PublicSeo'}]
           nullable: true
@@ -3605,7 +3652,7 @@ components:
 
     UnidadNegocioResponse:
       type: object
-      required: [id, nombre, slug, descripcion, icono, imagenUrl, imagenAlt, activo, destacado, orden, empresa, recursos, fechaCreacion, fechaActualizacion]
+      required: [id, nombre, slug, descripcion, icono, imagenUrl, imagenAlt, activo, destacado, orden, empresa, recursos, catalogos, fechaCreacion, fechaActualizacion]
       properties:
         id: {type: string, format: uuid}
         nombre: {type: string}
@@ -3621,5 +3668,8 @@ components:
         recursos:
           type: array
           items: {$ref: '#/components/schemas/RecursoUnidadNegocioResponse'}
+        catalogos:
+          type: array
+          items: {$ref: '#/components/schemas/CatalogoResponse'}
         fechaCreacion: {type: string, format: date-time, nullable: true}
         fechaActualizacion: {type: string, format: date-time, nullable: true}

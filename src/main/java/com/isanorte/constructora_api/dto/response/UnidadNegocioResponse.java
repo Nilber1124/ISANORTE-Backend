@@ -17,6 +17,7 @@ public record UnidadNegocioResponse(
     Integer orden,
     EmpresaResumen empresa,
     List<RecursoUnidadNegocioResponse> recursos,
+    List<CatalogoResponse> catalogos,
     LocalDateTime fechaCreacion,
     LocalDateTime fechaActualizacion) {
 

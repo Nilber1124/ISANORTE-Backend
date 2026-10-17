@@ -7,6 +7,7 @@ import org.mapstruct.ReportingPolicy;
 
 import com.isanorte.constructora_api.dto.request.AccionLandingRequest;
 import com.isanorte.constructora_api.dto.request.BeneficioServicioRequest;
+import com.isanorte.constructora_api.dto.request.CatalogoRequest;
 import com.isanorte.constructora_api.dto.request.ContenidoPaginaRequest;
 import com.isanorte.constructora_api.dto.request.ContenidoPaginaUpdateRequest;
 import com.isanorte.constructora_api.dto.request.EstadisticaEmpresaRequest;
@@ -17,6 +18,7 @@ import com.isanorte.constructora_api.dto.request.SeoPaginaUpdateRequest;
 import com.isanorte.constructora_api.dto.request.SolicitudContactoCreateRequest;
 import com.isanorte.constructora_api.dto.response.AccionLandingResponse;
 import com.isanorte.constructora_api.dto.response.BeneficioServicioResponse;
+import com.isanorte.constructora_api.dto.response.CatalogoResponse;
 import com.isanorte.constructora_api.dto.response.ContenidoPaginaResponse;
 import com.isanorte.constructora_api.dto.response.EstadisticaEmpresaResponse;
 import com.isanorte.constructora_api.dto.response.HeroSceneResponse;
@@ -26,6 +28,7 @@ import com.isanorte.constructora_api.dto.response.SolicitudContactoPublicRespons
 import com.isanorte.constructora_api.dto.response.SolicitudContactoResponse;
 import com.isanorte.constructora_api.model.AccionLanding;
 import com.isanorte.constructora_api.model.BeneficioServicio;
+import com.isanorte.constructora_api.model.Catalogo;
 import com.isanorte.constructora_api.model.ContenidoPagina;
 import com.isanorte.constructora_api.model.EstadisticaEmpresa;
 import com.isanorte.constructora_api.model.HeroScene;
@@ -67,6 +70,14 @@ public interface DynamicContentMapper {
     @Mapping(target = "fechaCreacion", ignore = true) @Mapping(target = "fechaActualizacion", ignore = true)
     void update(RecursoUnidadNegocioRequest request, @MappingTarget RecursoUnidadNegocio entity);
     RecursoUnidadNegocioResponse toResponse(RecursoUnidadNegocio entity);
+
+    @Mapping(target = "id", ignore = true) @Mapping(target = "unidadNegocio", ignore = true)
+    @Mapping(target = "fechaCreacion", ignore = true) @Mapping(target = "fechaActualizacion", ignore = true)
+    Catalogo toEntity(CatalogoRequest request);
+    @Mapping(target = "id", ignore = true) @Mapping(target = "unidadNegocio", ignore = true)
+    @Mapping(target = "fechaCreacion", ignore = true) @Mapping(target = "fechaActualizacion", ignore = true)
+    void update(CatalogoRequest request, @MappingTarget Catalogo entity);
+    CatalogoResponse toResponse(Catalogo entity);
 
     @Mapping(target = "id", ignore = true) @Mapping(target = "empresa", ignore = true)
     @Mapping(target = "fechaCreacion", ignore = true) @Mapping(target = "fechaActualizacion", ignore = true)

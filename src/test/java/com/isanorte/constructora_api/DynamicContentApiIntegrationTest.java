@@ -285,6 +285,36 @@ class DynamicContentApiIntegrationTest {
     }
 
     @Test
+    void crudCatalogoValidaCamposYOwnership() throws Exception {
+        Empresa company = company("catalogo");
+        UnidadNegocio unit = unit(company, "catalogo-a", true, false, 0);
+        UnidadNegocio other = unit(company, "catalogo-b", true, false, 1);
+        Map<String, Object> valid = Map.of("titulo", "Paneles WPC", "imagenPortadaUrl", "/portada.webp",
+                "archivoUrl", "/paneles-wpc.pdf", "orden", 0, "activo", true);
+        UUID id = id(mockMvc.perform(post("/api/unidades-negocio/{id}/catalogos", unit.getId())
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
+                .contentType(MediaType.APPLICATION_JSON).content(json(valid))).andExpect(status().isCreated()).andReturn());
+        mockMvc.perform(post("/api/unidades-negocio/{id}/catalogos", unit.getId())
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
+                .contentType(MediaType.APPLICATION_JSON).content(json(Map.of(
+                        "titulo", "Sin portada", "archivoUrl", "/sin-portada.pdf", "orden", 1, "activo", true))))
+                .andExpect(status().isBadRequest());
+        mockMvc.perform(put("/api/unidades-negocio/{id}/catalogos/{child}", unit.getId(), id)
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
+                .contentType(MediaType.APPLICATION_JSON).content(json(Map.of(
+                        "titulo", "Paneles WPC 2026", "imagenPortadaUrl", "/portada-2026.webp",
+                        "archivoUrl", "/paneles-wpc-2026.pdf", "orden", 1, "activo", false))))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.titulo").value("Paneles WPC 2026"))
+                .andExpect(jsonPath("$.activo").value(false));
+        mockMvc.perform(delete("/api/unidades-negocio/{id}/catalogos/{child}", other.getId(), id)
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR")))
+                .andExpect(status().isBadRequest());
+        mockMvc.perform(delete("/api/unidades-negocio/{id}/catalogos/{child}", unit.getId(), id)
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR")))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
     void crudEstadisticaValidaOwnership() throws Exception {
         Empresa company = company("stats-a");
         Empresa other = company("stats-b");
@@ -479,6 +509,9 @@ class DynamicContentApiIntegrationTest {
         seoRepository.saveAndFlush(SeoPagina.builder().tipoPagina(TipoPaginaSeo.NOSOTROS).title("Nosotros SEO")
                 .description("Descripción").configuracionSitio(site).build());
         UnidadNegocio unit = unit(site.getEmpresa(), "public-unit", true, false, 0);
+        unit.addCatalogo(com.isanorte.constructora_api.model.Catalogo.builder()
+                .titulo("Paneles WPC").imagenPortadaUrl("/portada.webp").archivoUrl("/paneles-wpc.pdf").build());
+        unidadRepository.saveAndFlush(unit);
         seoRepository.saveAndFlush(SeoPagina.builder().tipoPagina(TipoPaginaSeo.UNIDAD_NEGOCIO).title("Unidad SEO")
                 .description("Descripción").configuracionSitio(site).unidadNegocio(unit).build());
         UnidadNegocio foreign = unit(other.getEmpresa(), "foreign-unit", true, false, 0);
@@ -488,7 +521,9 @@ class DynamicContentApiIntegrationTest {
                 .andExpect(jsonPath("$.seo.title").value("Nosotros SEO"))
                 .andExpect(jsonPath("$.proyectos").value(nullValue()));
         mockMvc.perform(get("/api/publico/sitios/{key}/unidades/{slug}", site.getClave(), unit.getSlug()))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.seo.title").value("Unidad SEO"));
+                .andExpect(status().isOk()).andExpect(jsonPath("$.seo.title").value("Unidad SEO"))
+                .andExpect(jsonPath("$.catalogos[0].titulo").value("Paneles WPC"))
+                .andExpect(jsonPath("$.catalogos[0].archivoUrl").value("/paneles-wpc.pdf"));
         mockMvc.perform(get("/api/publico/sitios/{key}/unidades/{slug}", site.getClave(), foreign.getSlug()))
                 .andExpect(status().isNotFound());
         mockMvc.perform(get("/api/publico/sitios/{key}/unidades/{slug}", site.getClave(), inactive.getSlug()))

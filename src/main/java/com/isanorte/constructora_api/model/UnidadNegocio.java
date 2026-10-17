@@ -92,6 +92,12 @@ public class UnidadNegocio {
     @OrderBy("orden ASC, id ASC")
     private List<RecursoUnidadNegocio> recursos = new ArrayList<>();
 
+    @Setter(AccessLevel.NONE)
+    @Builder.Default
+    @OneToMany(mappedBy = "unidadNegocio", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("orden ASC, id ASC")
+    private List<Catalogo> catalogos = new ArrayList<>();
+
     @Column(nullable = false)
     private LocalDateTime fechaCreacion;
 
@@ -134,6 +140,20 @@ public class UnidadNegocio {
     public void removeRecurso(RecursoUnidadNegocio recurso) {
         Objects.requireNonNull(recurso, "El recurso no puede ser null");
         if (recursos.remove(recurso)) recurso.setUnidadNegocio(null);
+    }
+
+    public void addCatalogo(Catalogo catalogo) {
+        Objects.requireNonNull(catalogo, "El catálogo no puede ser null");
+        if (catalogo.getUnidadNegocio() != null && catalogo.getUnidadNegocio() != this) {
+            throw new IllegalStateException("El catálogo ya pertenece a otra unidad de negocio");
+        }
+        catalogos.add(catalogo);
+        catalogo.setUnidadNegocio(this);
+    }
+
+    public void removeCatalogo(Catalogo catalogo) {
+        Objects.requireNonNull(catalogo, "El catálogo no puede ser null");
+        if (catalogos.remove(catalogo)) catalogo.setUnidadNegocio(null);
     }
 
     @PrePersist

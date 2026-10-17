@@ -45,6 +45,7 @@ import com.isanorte.constructora_api.enums.OrdenCatalogoProducto;
 import com.isanorte.constructora_api.enums.TipoPaginaPublica;
 import com.isanorte.constructora_api.enums.TipoPaginaSeo;
 import com.isanorte.constructora_api.exception.ModelNotFoundException;
+import com.isanorte.constructora_api.model.Catalogo;
 import com.isanorte.constructora_api.model.ConfiguracionSitio;
 import com.isanorte.constructora_api.model.ContenidoPagina;
 import com.isanorte.constructora_api.model.CategoriaProducto;
@@ -239,6 +240,12 @@ public class PublicContentService implements IPublicContentService {
                         .sorted(RESOURCE_ORDER)
                         .map(item -> new PublicBusinessUnitResponse.Recurso(item.getTipo(), item.getUrl(),
                                 item.getAlt(), item.getEtiqueta(), item.getOrden())).toList(),
+                unit.getCatalogos().stream()
+                        .filter(item -> Boolean.TRUE.equals(item.getActivo()))
+                        .sorted(Comparator.comparing(Catalogo::getOrden).thenComparing(c -> c.getId().toString()))
+                        .map(item -> new PublicBusinessUnitResponse.Catalogo(
+                                item.getTitulo(), item.getImagenPortadaUrl(), item.getArchivoUrl(), item.getOrden()))
+                        .toList(),
                 seo == null ? null : new PublicBusinessUnitResponse.Seo(
                         seo.getTitle(), seo.getDescription(), seo.getOgImageUrl(), seo.getRobots()));
     }
