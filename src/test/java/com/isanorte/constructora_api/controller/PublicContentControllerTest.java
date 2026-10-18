@@ -18,6 +18,7 @@ import com.isanorte.constructora_api.exception.ModelNotFoundException;
 import com.isanorte.constructora_api.service.IComparacionCompetidoresService;
 import com.isanorte.constructora_api.service.IComparacionPrecioService;
 import com.isanorte.constructora_api.service.ICotizacionService;
+import com.isanorte.constructora_api.service.IPedidoService;
 import com.isanorte.constructora_api.service.IPublicContentService;
 import com.isanorte.constructora_api.service.IResenaProductoService;
 import com.isanorte.constructora_api.service.ISolicitudContactoService;
@@ -76,6 +77,6 @@ class PublicContentControllerTest {
     private PublicContentController controllerWith(IPublicContentService service) {
         return new PublicContentController(service, mock(ISolicitudContactoService.class),
                 mock(IComparacionPrecioService.class), mock(IComparacionCompetidoresService.class),
-                mock(ICotizacionService.class), mock(IResenaProductoService.class));
+                mock(ICotizacionService.class), mock(IPedidoService.class), mock(IResenaProductoService.class));
     }
 }

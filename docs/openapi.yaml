@@ -25,6 +25,7 @@ tags:
   - name: Categorías
   - name: Configuración del sitio
   - name: Cotizaciones
+  - name: Pedidos
   - name: Empresa
   - name: Productos
   - name: Proyectos
@@ -371,6 +372,61 @@ paths:
           schema: {$ref: '#/components/schemas/EstadoCotizacion'}
       responses:
         '200': {$ref: '#/components/responses/CotizacionesOk'}
+        '400':
+          description: Valor de estado inválido; el cuerpo no está normalizado expresamente por GlobalExceptionHandler
+
+  /api/pedidos:
+    get:
+      tags: [Pedidos]
+      operationId: listarPedidos
+      summary: Lista pedidos
+      description: Incluye datos de cliente, dirección y facturación; acceso administrativo.
+      x-access-intent: ADMINISTRATIVO
+      responses:
+        '200': {$ref: '#/components/responses/PedidosOk'}
+  /api/pedidos/{id}:
+    get:
+      tags: [Pedidos]
+      operationId: obtenerPedidoPorId
+      summary: Obtiene un pedido por UUID
+      x-access-intent: ADMINISTRATIVO
+      parameters:
+        - $ref: '#/components/parameters/UuidId'
+      responses:
+        '200': {$ref: '#/components/responses/PedidoOk'}
+        '404': {$ref: '#/components/responses/NotFound'}
+  /api/pedidos/{id}/estado:
+    patch:
+      tags: [Pedidos]
+      operationId: cambiarEstadoPedido
+      summary: Cambia el estado de un pedido, registrando un seguimiento histórico
+      description: Rechaza transiciones desde CANCELADO y transiciones al mismo estado; al cancelar un pedido con stock ya descontado, restituye el stock de cada producto gestionado por inventario.
+      x-access-intent: ADMINISTRATIVO
+      parameters:
+        - $ref: '#/components/parameters/UuidId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/EstadoPedidoRequest'}
+      responses:
+        '200': {$ref: '#/components/responses/PedidoOk'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
+  /api/pedidos/estado/{estado}:
+    get:
+      tags: [Pedidos]
+      operationId: listarPedidosPorEstado
+      summary: Lista pedidos por estado
+      x-access-intent: ADMINISTRATIVO
+      parameters:
+        - name: estado
+          in: path
+          required: true
+          schema: {$ref: '#/components/schemas/EstadoPedido'}
+      responses:
+        '200': {$ref: '#/components/responses/PedidosOk'}
         '400':
           description: Valor de estado inválido; el cuerpo no está normalizado expresamente por GlobalExceptionHandler
 
@@ -1941,6 +1997,18 @@ components:
           schema:
             type: array
             items: {$ref: '#/components/schemas/CotizacionResponse'}
+    PedidoOk:
+      description: Pedido encontrado
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/PedidoResponse'}
+    PedidosOk:
+      description: Lista de pedidos
+      content:
+        application/json:
+          schema:
+            type: array
+            items: {$ref: '#/components/schemas/PedidoResponse'}
     EmpresasOk:
       description: Lista de empresas
       content:
@@ -2120,6 +2188,9 @@ components:
     EstadoCotizacion:
       type: string
       enum: [NUEVA, EN_REVISION, CONTACTADA, COTIZADA, CERRADA, CANCELADA]
+    EstadoPedido:
+      type: string
+      enum: [PENDIENTE_PAGO, PAGADO_MANUAL, EN_PREPARACION, ENVIADO, ENTREGADO, CANCELADO]
     EstadoDisponibilidad:
       type: string
       enum: [DISPONIBLE, AGOTADO, BAJO_PEDIDO, CONSULTAR]
@@ -2663,6 +2734,12 @@ components:
       properties:
         estado: {$ref: '#/components/schemas/EstadoCotizacion'}
       example: {estado: EN_REVISION}
+    EstadoPedidoRequest:
+      type: object
+      required: [estado]
+      properties:
+        estado: {$ref: '#/components/schemas/EstadoPedido'}
+      example: {estado: PAGADO_MANUAL}
 
     ApiErrorResponse:
       type: object
@@ -2828,6 +2905,62 @@ components:
             - $ref: '#/components/schemas/EstadoCotizacion'
           nullable: true
         comentario: {type: string, nullable: true}
+        fecha: {type: string, format: date-time, nullable: true}
+
+    PedidoResponse:
+      type: object
+      required: [id, codigo, clienteId, direccionCalle, direccionDistrito, direccionCiudad, direccionTelefonoContacto, estado, totalPedido, stockDescontado, detalles, seguimientos, fechaCreacion, fechaActualizacion]
+      properties:
+        id: {type: string, format: uuid}
+        codigo: {type: string}
+        clienteId: {type: string, format: uuid}
+        direccionAlias: {type: string, nullable: true}
+        direccionCalle: {type: string}
+        direccionDistrito: {type: string}
+        direccionCiudad: {type: string}
+        direccionReferencia: {type: string, nullable: true}
+        direccionTelefonoContacto: {type: string}
+        ruc: {type: string, nullable: true}
+        razonSocial: {type: string, nullable: true}
+        estado: {$ref: '#/components/schemas/EstadoPedido'}
+        totalPedido: {type: number, nullable: true}
+        stockDescontado: {type: boolean}
+        detalles:
+          type: array
+          nullable: true
+          items: {$ref: '#/components/schemas/PedidoDetalleResponse'}
+        seguimientos:
+          type: array
+          nullable: true
+          items: {$ref: '#/components/schemas/PedidoSeguimientoResponse'}
+        fechaCreacion: {type: string, format: date-time, nullable: true}
+        fechaActualizacion: {type: string, format: date-time, nullable: true}
+    PedidoDetalleResponse:
+      type: object
+      required: [id, productoId, varianteId, nombreProducto, sku, cantidad, precioUnitario, subtotal, notas]
+      properties:
+        id: {type: string, format: uuid}
+        productoId: {type: string, format: uuid}
+        varianteId: {type: string, format: uuid, nullable: true}
+        nombreProducto: {type: string}
+        sku: {type: string, nullable: true}
+        cantidad: {type: integer, format: int32}
+        precioUnitario: {type: number, nullable: true}
+        subtotal: {type: number, nullable: true}
+        notas: {type: string, nullable: true}
+    PedidoSeguimientoResponse:
+      type: object
+      required: [id, administradorId, administradorNombre, estadoAnterior, estadoNuevo, comentario, fecha]
+      properties:
+        id: {type: string, format: uuid}
+        administradorId: {type: string, format: uuid, nullable: true}
+        administradorNombre: {type: string, nullable: true}
+        estadoAnterior:
+          allOf:
+            - $ref: '#/components/schemas/EstadoPedido'
+          nullable: true
+        estadoNuevo: {$ref: '#/components/schemas/EstadoPedido'}
+        comentario: {type: string}
         fecha: {type: string, format: date-time, nullable: true}
 
     EmpresaResponse:

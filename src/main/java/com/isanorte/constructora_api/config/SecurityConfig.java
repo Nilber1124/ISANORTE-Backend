@@ -68,6 +68,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/publico/cuenta/**").hasAuthority(clienteAuthority)
                         // Cotizar y comparar precios requieren cuenta; el catálogo sigue siendo público.
                         .requestMatchers(HttpMethod.POST, "/api/publico/sitios/*/unidades/*/cotizaciones",
+                                "/api/publico/sitios/*/unidades/*/pedidos",
                                 "/api/publico/sitios/*/unidades/*/productos/*/comparar-precio").hasAuthority(clienteAuthority)
                         .requestMatchers(HttpMethod.GET,
                                 "/api/publico/sitios/*/unidades/*/productos/*/comparacion-competidores").hasAuthority(clienteAuthority)
