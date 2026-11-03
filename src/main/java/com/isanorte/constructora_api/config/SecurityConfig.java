@@ -25,6 +25,7 @@ import com.isanorte.constructora_api.security.JwtService;
 @Configuration
 @EnableConfigurationProperties({ AuthProperties.class, JwtProperties.class })
 public class SecurityConfig {
+    private static final String ROLE_PREFIX = "ROLE_";
 
     @Bean
     PasswordEncoder passwordEncoder() {
@@ -45,7 +46,7 @@ public class SecurityConfig {
     JwtAuthenticationConverter jwtAuthenticationConverter() {
         var authorities = new JwtGrantedAuthoritiesConverter();
         authorities.setAuthoritiesClaimName("roles");
-        authorities.setAuthorityPrefix("ROLE_");
+        authorities.setAuthorityPrefix(ROLE_PREFIX);
         var converter = new JwtAuthenticationConverter();
         converter.setJwtGrantedAuthoritiesConverter(authorities);
         return converter;
@@ -55,8 +56,8 @@ public class SecurityConfig {
     SecurityFilterChain securityFilterChain(HttpSecurity http, AuthProperties auth,
             JwtAuthenticationConverter converter,
             org.springframework.web.cors.CorsConfigurationSource corsConfigurationSource) throws Exception {
-        String adminAuthority = "ROLE_" + auth.adminRole().toUpperCase(java.util.Locale.ROOT);
-        String clienteAuthority = "ROLE_" + JwtService.ROL_CLIENTE;
+        String adminAuthority = ROLE_PREFIX + auth.adminRole().toUpperCase(java.util.Locale.ROOT);
+        String clienteAuthority = ROLE_PREFIX + JwtService.ROL_CLIENTE;
         return http
                 // La API usa JWT Bearer stateless, no cookies de autenticación. Se excluye
                 // únicamente /api/** y se conserva CSRF para futuras rutas web no API.
