@@ -18,8 +18,6 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
-import java.util.UUID;
-
 import com.isanorte.constructora_api.dto.request.SolicitudContactoCreateRequest;
 import com.isanorte.constructora_api.dto.request.CrearResenaRequest;
 import com.isanorte.constructora_api.dto.response.PublicBusinessUnitResponse;
