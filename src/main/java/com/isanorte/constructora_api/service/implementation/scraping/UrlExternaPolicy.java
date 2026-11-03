@@ -26,9 +26,9 @@ public class UrlExternaPolicy {
 
         @Override
         public boolean equals(Object other) {
-            return this == other || other instanceof Destino destination
-                    && Objects.equals(uri, destination.uri)
-                    && Arrays.equals(direcciones, destination.direcciones);
+            return this == other || other instanceof Destino(URI otherUri, InetAddress[] otherAddresses)
+                    && Objects.equals(uri, otherUri)
+                    && Arrays.equals(direcciones, otherAddresses);
         }
 
         @Override

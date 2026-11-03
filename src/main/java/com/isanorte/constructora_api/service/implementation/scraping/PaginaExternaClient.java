@@ -34,11 +34,12 @@ public class PaginaExternaClient {
 
         @Override
         public boolean equals(Object other) {
-            return this == other || other instanceof Pagina page
-                    && status == page.status
-                    && Objects.equals(location, page.location)
-                    && Arrays.equals(html, page.html)
-                    && Objects.equals(charset, page.charset);
+            return this == other || other instanceof Pagina(
+                    int otherStatus, String otherLocation, byte[] otherHtml, String otherCharset)
+                    && status == otherStatus
+                    && Objects.equals(location, otherLocation)
+                    && Arrays.equals(html, otherHtml)
+                    && Objects.equals(charset, otherCharset);
         }
 
         @Override

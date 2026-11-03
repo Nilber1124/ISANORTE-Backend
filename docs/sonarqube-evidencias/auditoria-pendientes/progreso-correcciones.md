@@ -10,6 +10,7 @@ Los estados `FIXED` solo se registran cuando el usuario confirma un análisis re
 | 4 | `AaGdRnvV97lfKRteM0Ze`, `AaGdRnvQ97lfKRteM0Zd`, `AaEN8OsTTwfNugJobk5v`, `AaEN8Or8TwfNugJobk5q`, `AaEN8Or8TwfNugJobk5r`, `AaEN8OsHTwfNugJobk5s`, `AaGg3z0rPtLvwDc7UMX-`, `AaEN8OsHTwfNugJobk5t`, `AaGg3z0rPtLvwDc7UMX_`, `AaEN8OsHTwfNugJobk5u`, `AaEN8OtNTwfNugJobk5z`, `AaEN8OtNTwfNugJobk50`, `AaEN8OtNTwfNugJobk51`, `AaEN8Os5TwfNugJobk5w`, `AaEN8Os5TwfNugJobk5x`, `AaEN8Os5TwfNugJobk5y` | Aislar una sola invocación susceptible de lanzar en lambdas de pruebas | 7 clases, 50/50 pruebas | Este commit; push a `develop` | Pendiente de verificar |
 | 5 | `AaEN8OthTwfNugJobk52` | Retirar parámetros sin uso del helper `projectImage` | `DynamicContentApiIntegrationTest` | Este commit; push a `develop` | Pendiente de verificar |
 | 6 | `AaEN8OttTwfNugJobk53` | Consolidar verificaciones repetidas con una aserción AssertJ por producto | `DemoProductSeederTest` | Este commit; push a `develop` | Pendiente de verificar |
+| 7 | `AaGg3zyhPtLvwDc7UMX0`, `AaGg3zymPtLvwDc7UMX1` | Usar record patterns Java 21 conservando igualdad profunda de arrays | `PaginaExternaClientTest`, `UrlExternaPolicyTest` | Este commit; push a `develop` | Pendiente de verificar |
 
 ## Pendientes y bloqueos
 
