@@ -47,6 +47,14 @@ Si no se definen `SPRING_DATASOURCE_URL` y `SPRING_DATASOURCE_USERNAME`, la apli
 
 `src/main/resources/application.properties` está excluido de Git porque puede contener configuración local sensible. Usa `application.example.properties` como plantilla y conserva las credenciales exclusivamente en variables de entorno o en un gestor de secretos. Si una credencial llegó a versionarse, eliminarla del archivo no es suficiente: debe revocarse y rotarse en el proveedor correspondiente.
 
+**Configuración para Render:** el perfil versionado `application-render.properties` enlaza estas variables sin almacenar secretos. Actívalo en el panel de Render con:
+
+```bash
+SPRING_PROFILES_ACTIVE=render
+```
+
+El perfil escucha en `0.0.0.0` y usa el puerto proporcionado por `PORT`. Mantiene Flyway limitado temporalmente a V12, por lo que V13 y V14 no se ejecutarán hasta que se validen y autoricen por separado. Los archivos `.env`, `application.properties` y otros perfiles locales quedan excluidos del contexto Docker; solo se permiten expresamente las plantillas seguras `application.example.properties` y `application-render.properties`.
+
 ---
 
 ### 2. Credenciales de Cloudinary
