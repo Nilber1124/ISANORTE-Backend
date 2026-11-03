@@ -1,7 +1,9 @@
 package com.isanorte.constructora_api.service.implementation.scraping;
 
 import java.net.*;
+import java.util.Arrays;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.concurrent.*;
 import jakarta.annotation.PreDestroy;
 import org.springframework.stereotype.Component;
@@ -12,7 +14,33 @@ import static com.isanorte.constructora_api.enums.EstadoComparacionPrecio.*;
 public class UrlExternaPolicy {
     private final ExecutorService dnsExecutor = new ThreadPoolExecutor(0, 4, 30, TimeUnit.SECONDS,
             new SynchronousQueue<>(), Thread.ofPlatform().daemon().name("price-dns-", 0).factory());
-    public record Destino(URI uri, InetAddress[] direcciones) {}
+    public record Destino(URI uri, InetAddress[] direcciones) {
+        public Destino {
+            direcciones = direcciones == null ? null : direcciones.clone();
+        }
+
+        @Override
+        public InetAddress[] direcciones() {
+            return direcciones == null ? null : direcciones.clone();
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            return this == other || other instanceof Destino destination
+                    && Objects.equals(uri, destination.uri)
+                    && Arrays.equals(direcciones, destination.direcciones);
+        }
+
+        @Override
+        public int hashCode() {
+            return 31 * Objects.hashCode(uri) + Arrays.hashCode(direcciones);
+        }
+
+        @Override
+        public String toString() {
+            return "Destino[uri=" + uri + ", direcciones=" + Arrays.toString(direcciones) + "]";
+        }
+    }
 
     public Destino validar(String value) {
         URI uri;
