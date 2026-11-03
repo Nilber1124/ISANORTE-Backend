@@ -1,5 +1,7 @@
 package com.isanorte.constructora_api.service.implementation.scraping;
 
+import com.isanorte.constructora_api.util.BusinessTime;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
@@ -143,7 +145,7 @@ public class PrecioHtmlExtractor {
         }
         String until = text(node, "priceValidUntil");
         if (until != null) {
-            try { if (LocalDate.parse(until).isBefore(LocalDate.now())) return; }
+            try { if (LocalDate.parse(until).isBefore(BusinessTime.today())) return; }
             catch (java.time.format.DateTimeParseException ignored) { return; }
         }
         String amount = text(node, "price");
