@@ -1,5 +1,7 @@
 package com.isanorte.constructora_api.model;
 
+import com.isanorte.constructora_api.util.BusinessTime;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -72,7 +74,7 @@ public class ResenaProducto {
     @PrePersist
     protected void onCreate() {
         if (fechaCreacion == null) {
-            fechaCreacion = LocalDateTime.now();
+            fechaCreacion = BusinessTime.now();
         }
         if (compraVerificada == null) {
             compraVerificada = false;
