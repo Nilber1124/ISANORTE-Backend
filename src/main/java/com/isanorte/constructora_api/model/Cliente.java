@@ -1,5 +1,7 @@
 package com.isanorte.constructora_api.model;
 
+import com.isanorte.constructora_api.util.BusinessTime;
+
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.UUID;
@@ -77,7 +79,7 @@ public class Cliente {
 
     @PrePersist
     void prePersist() {
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = BusinessTime.now();
         this.fechaCreacion = now;
         this.fechaActualizacion = now;
         this.email = normalizarEmail(this.email);
@@ -85,7 +87,7 @@ public class Cliente {
 
     @PreUpdate
     void preUpdate() {
-        this.fechaActualizacion = LocalDateTime.now();
+        this.fechaActualizacion = BusinessTime.now();
         this.email = normalizarEmail(this.email);
     }
 
