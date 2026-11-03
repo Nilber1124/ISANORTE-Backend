@@ -52,13 +52,13 @@ public class DemoHomeIsadecorSeeder implements ApplicationRunner {
 
     private List<DemoItem> items() {
         return List.of(
-                item("CINTA-WPC", "Paneles WPC", "Acabados decorativos para muros.", "/images/isadecor-left-1.jpg", null, UbicacionAnuncio.CINTA_HOME, TipoAccionAnuncio.CATEGORIA, "wall-panels", EXPLORE, 0),
-                item("CINTA-SPC", "Mármol SPC", "Superficies contemporáneas de demostración.", LEFT_IMAGE, null, UbicacionAnuncio.CINTA_HOME, TipoAccionAnuncio.CATEGORIA, "revestimientos", EXPLORE, 1),
-                item("PROMO-PRINCIPAL", "Texturas que definen el ambiente", "Composición de muestra para presentar colecciones ISADECOR.", "/images/isadecor-fondo.jpg", null, UbicacionAnuncio.PROMOCION_PRINCIPAL, TipoAccionAnuncio.RUTA_INTERNA, CATALOG_PATH, "Ver catálogo", 0),
-                item("PROMO-SEC-1", "Superficies contemporáneas", "Espacio demostrativo para novedades de acabados.", LEFT_IMAGE, null, UbicacionAnuncio.PROMOCION_SECUNDARIA, TipoAccionAnuncio.RUTA_INTERNA, CATALOG_PATH, "Ver colección", 0),
-                item("PROMO-SEC-2", "Detalles para cada proyecto", "Presentación visual reemplazable desde administración.", "/images/proyectos-showroom-isadecor.jpg", null, UbicacionAnuncio.PROMOCION_SECUNDARIA, TipoAccionAnuncio.RUTA_INTERNA, CATALOG_PATH, "Descubrir", 1),
-                item("ANUNCIO-1", "Descubre acabados en detalle", "Colecciones, novedades y asesoría para elegir materiales.", "/images/recorrido-sala.jpg", null, UbicacionAnuncio.ANUNCIOS_HOME, TipoAccionAnuncio.RUTA_INTERNA, CATALOG_PATH, "Conocer más", 0),
-                item("ANUNCIO-2", "Materiales para cada proyecto", "Soluciones decorativas para espacios residenciales y comerciales.", "/images/recorrido-cocina.jpg", null, UbicacionAnuncio.ANUNCIOS_HOME, TipoAccionAnuncio.RUTA_INTERNA, CATALOG_PATH, EXPLORE, 1),
+                new DemoItem("CINTA-WPC", "Paneles WPC", "Acabados decorativos para muros.", "/images/isadecor-left-1.jpg", null, UbicacionAnuncio.CINTA_HOME, TipoAccionAnuncio.CATEGORIA, "wall-panels", EXPLORE, 0),
+                new DemoItem("CINTA-SPC", "Mármol SPC", "Superficies contemporáneas de demostración.", LEFT_IMAGE, null, UbicacionAnuncio.CINTA_HOME, TipoAccionAnuncio.CATEGORIA, "revestimientos", EXPLORE, 1),
+                new DemoItem("PROMO-PRINCIPAL", "Texturas que definen el ambiente", "Composición de muestra para presentar colecciones ISADECOR.", "/images/isadecor-fondo.jpg", null, UbicacionAnuncio.PROMOCION_PRINCIPAL, TipoAccionAnuncio.RUTA_INTERNA, CATALOG_PATH, "Ver catálogo", 0),
+                new DemoItem("PROMO-SEC-1", "Superficies contemporáneas", "Espacio demostrativo para novedades de acabados.", LEFT_IMAGE, null, UbicacionAnuncio.PROMOCION_SECUNDARIA, TipoAccionAnuncio.RUTA_INTERNA, CATALOG_PATH, "Ver colección", 0),
+                new DemoItem("PROMO-SEC-2", "Detalles para cada proyecto", "Presentación visual reemplazable desde administración.", "/images/proyectos-showroom-isadecor.jpg", null, UbicacionAnuncio.PROMOCION_SECUNDARIA, TipoAccionAnuncio.RUTA_INTERNA, CATALOG_PATH, "Descubrir", 1),
+                new DemoItem("ANUNCIO-1", "Descubre acabados en detalle", "Colecciones, novedades y asesoría para elegir materiales.", "/images/recorrido-sala.jpg", null, UbicacionAnuncio.ANUNCIOS_HOME, TipoAccionAnuncio.RUTA_INTERNA, CATALOG_PATH, "Conocer más", 0),
+                new DemoItem("ANUNCIO-2", "Materiales para cada proyecto", "Soluciones decorativas para espacios residenciales y comerciales.", "/images/recorrido-cocina.jpg", null, UbicacionAnuncio.ANUNCIOS_HOME, TipoAccionAnuncio.RUTA_INTERNA, CATALOG_PATH, EXPLORE, 1),
                 category("CAT-WPC", "Wall Panel WPC", "Textura y calidez para muros.", "/images/isadecor-left-1.jpg", "/images/recorrido-sala.jpg", "wall-panels", 0),
                 category("CAT-MARMOL", "Planchas SPC Mármol", "Superficies de gran formato.", LEFT_IMAGE, "/images/recorrido-cocina.jpg", "revestimientos", 1),
                 category("CAT-CIELO", "Cielo Raso PVC", "Sistemas prácticos para techos.", "/images/isadecor-top.jpg", "/images/recorrido-bano.jpg", "paneles-decorativos", 2),
@@ -67,15 +67,8 @@ public class DemoHomeIsadecorSeeder implements ApplicationRunner {
 
     private DemoItem category(String key, String title, String description, String image,
             String hoverImage, String slug, int order) {
-        return item(key, title, description, image, hoverImage, UbicacionAnuncio.CATEGORIA_SUPERIOR,
+        return new DemoItem(key, title, description, image, hoverImage, UbicacionAnuncio.CATEGORIA_SUPERIOR,
                 TipoAccionAnuncio.CATEGORIA, slug, "Ver categoría", order);
-    }
-
-    private DemoItem item(String key, String title, String description, String image,
-            String hoverImage, UbicacionAnuncio location, TipoAccionAnuncio actionType,
-            String destination, String button, int order) {
-        return new DemoItem(key, title, description, image, hoverImage, location,
-                actionType, destination, button, order);
     }
 
     private record DemoItem(String key, String title, String description, String image,
