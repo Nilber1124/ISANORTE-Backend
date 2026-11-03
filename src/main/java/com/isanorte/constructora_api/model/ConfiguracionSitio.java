@@ -1,5 +1,7 @@
 package com.isanorte.constructora_api.model;
 
+import com.isanorte.constructora_api.util.BusinessTime;
+
 import java.text.Normalizer;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -163,14 +165,17 @@ public class ConfiguracionSitio {
 
     @PrePersist
     protected void onCreate() {
-        normalizeClave();
-        fechaActualizacion = LocalDateTime.now();
+        prepareForPersistence();
     }
 
     @PreUpdate
     protected void onUpdate() {
+        prepareForPersistence();
+    }
+
+    private void prepareForPersistence() {
         normalizeClave();
-        fechaActualizacion = LocalDateTime.now();
+        fechaActualizacion = BusinessTime.now();
     }
 
     private void normalizeClave() {
