@@ -658,7 +658,7 @@ class DynamicContentApiIntegrationTest {
         catalogOnly.setFechaProyecto("2025");
         proyectoRepository.saveAndFlush(catalogOnly);
         projectService(catalogOnly, filterService);
-        projectImage(catalogOnly, "/cover.webp", "Portada pública", true, 0);
+        projectImage(catalogOnly, "/cover.webp", "Portada pública");
 
         Proyecto noRelations = project("project-no-relations", true, false, 1);
         Proyecto featured = project("project-featured", true, true, 2);
@@ -763,7 +763,7 @@ class DynamicContentApiIntegrationTest {
         proyectoRepository.saveAndFlush(project);
     }
 
-    private void projectImage(Proyecto project, String url, String alt, boolean principal, int order) {
+    private void projectImage(Proyecto project, String url, String alt) {
         project.setImagenUrl(url);
         project.setImagenAlt(alt);
         proyectoRepository.saveAndFlush(project);
