@@ -2,11 +2,11 @@ package com.isanorte.constructora_api.service;
 
 import java.util.List;
 
-public interface IGenericService<T, ID> {
+public interface IGenericService<T, I> {
 
     T save(T t);
 
     List<T> findAll();
 
-    T findById(ID id);
+    T findById(I id);
 }
