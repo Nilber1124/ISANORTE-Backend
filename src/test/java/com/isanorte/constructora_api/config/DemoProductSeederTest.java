@@ -61,13 +61,14 @@ class DemoProductSeederTest {
         ArgumentCaptor<Producto> captor = ArgumentCaptor.forClass(Producto.class);
         verify(productoRepository, times(26)).save(captor.capture());
         List<Producto> products = captor.getAllValues();
-        assertThat(products).allMatch(product -> product.getEstado() == EstadoPublicacion.PUBLICADO);
-        assertThat(products).allMatch(product -> product.getUnidadNegocio() == unit);
-        assertThat(products).allMatch(product -> product.getCategorias().size() == 1);
-        assertThat(products).allMatch(product -> product.getImagenes().size() == 3);
-        assertThat(products).allMatch(product -> product.getVariantes().size() == 2);
-        assertThat(products).allMatch(product -> product.getEspecificaciones().size() == 8);
-        assertThat(products).allMatch(product -> product.getConfiguracionCalculo() != null);
+        assertThat(products).allSatisfy(product -> assertThat(product)
+                .returns(EstadoPublicacion.PUBLICADO, Producto::getEstado)
+                .returns(unit, Producto::getUnidadNegocio)
+                .returns(1, value -> value.getCategorias().size())
+                .returns(3, value -> value.getImagenes().size())
+                .returns(2, value -> value.getVariantes().size())
+                .returns(8, value -> value.getEspecificaciones().size())
+                .matches(value -> value.getConfiguracionCalculo() != null, "tiene configuración de cálculo"));
         assertThat(products).filteredOn(product -> product.getPrecioAnterior() != null).hasSize(7);
         assertThat(products).extracting(Producto::getSku).doesNotHaveDuplicates();
         assertThat(products).extracting(Producto::getSlug).doesNotHaveDuplicates();
