@@ -2,7 +2,6 @@ package com.isanorte.constructora_api.exception;
 
 import com.isanorte.constructora_api.util.BusinessTime;
 
-import java.time.OffsetDateTime;
 import java.util.stream.Collectors;
 
 import org.springframework.dao.DataIntegrityViolationException;

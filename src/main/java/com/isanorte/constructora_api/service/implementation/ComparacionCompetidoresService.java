@@ -4,7 +4,6 @@ import com.isanorte.constructora_api.util.BusinessTime;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.OffsetDateTime;
 import java.util.*;
 import org.springframework.stereotype.Service;
 import com.isanorte.constructora_api.dto.response.ComparacionCompetidoresResponse;
