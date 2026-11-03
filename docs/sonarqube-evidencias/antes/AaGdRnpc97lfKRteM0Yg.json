@@ -1,0 +1,116 @@
+{
+  "capturedAt": "2026-11-02T20:43:30.388Z",
+  "phase": "antes",
+  "issue": {
+    "key": "AaGdRnpc97lfKRteM0Yg",
+    "rule": "java:S8688",
+    "component": "src/main/java/com/isanorte/constructora_api/model/DireccionCliente.java",
+    "line": 84,
+    "message": "Explicitly specify the time zone by passing a ZoneId or a Clock to the .now() method.",
+    "originalStatus": "OPEN",
+    "analysisUuid": "f1aaf36f-0a62-4365-b5a7-7bd4c1eb7da8"
+  },
+  "fileStem": "AaGdRnpc97lfKRteM0Yg",
+  "sourceUrl": "https://sonarcloud.io/project/issues?id=Nilber1124_ISANORTE-Backend&open=AaGdRnpc97lfKRteM0Yg&s=IMPACT_RANK&issueStatuses=OPEN%2CCONFIRMED",
+  "screenshot": "docs/sonarqube-evidencias/antes/AaGdRnpc97lfKRteM0Yg.png",
+  "analysisRevision": {
+    "available": true,
+    "analysisUuid": "f1aaf36f-0a62-4365-b5a7-7bd4c1eb7da8",
+    "revision": "73615cec38bbd6051dd9aad7a2ef9de06a5e3f93",
+    "date": "2026-11-02T17:19:42+0000",
+    "projectVersion": "not provided",
+    "gitCommitAvailable": true
+  },
+  "validationResult": "CORRECTA_REANUDADA",
+  "evidenceStatus": "correcta",
+  "captureOrigin": "regenerada",
+  "previousCaptureReview": {
+    "order": 3,
+    "issueId": "AaGdRnpc97lfKRteM0Yg",
+    "fileStem": "AaGdRnpc97lfKRteM0Yg",
+    "rule": "java:S8688",
+    "component": "src/main/java/com/isanorte/constructora_api/model/DireccionCliente.java",
+    "line": 84,
+    "classification": "INCOMPLETA",
+    "reason": "El visor está vacío, cargando o no contiene suficiente código renderizado.",
+    "pngExists": true,
+    "metadataExists": true,
+    "visualMetrics": {
+      "width": 1600,
+      "height": 1000,
+      "ink": 8,
+      "gutterInk": 0,
+      "codeInk": 0,
+      "colored": 0,
+      "rowsWithInk": 5
+    }
+  },
+  "verification": {
+    "apiMatches": {
+      "id": true,
+      "rule": true,
+      "component": true,
+      "line": true,
+      "message": true
+    },
+    "codeViewer": {
+      "attempts": 1,
+      "beforeCapture": {
+        "ready": true,
+        "urlIssueId": "AaGdRnpc97lfKRteM0Yg",
+        "expectedIssueId": "AaGdRnpc97lfKRteM0Yg",
+        "baseDetailsVisible": true,
+        "selectedLineVisible": true,
+        "sourceRendered": true,
+        "targetLineElements": 1,
+        "nearbyLineNumbers": 18,
+        "codeTokens": 58,
+        "renderedCodeCharacters": 331,
+        "activeLoaders": 0,
+        "loadingTextVisible": false,
+        "unavailable": false
+      },
+      "afterCapture": {
+        "ready": true,
+        "urlIssueId": "AaGdRnpc97lfKRteM0Yg",
+        "expectedIssueId": "AaGdRnpc97lfKRteM0Yg",
+        "baseDetailsVisible": true,
+        "selectedLineVisible": true,
+        "sourceRendered": true,
+        "targetLineElements": 1,
+        "nearbyLineNumbers": 18,
+        "codeTokens": 58,
+        "renderedCodeCharacters": 331,
+        "activeLoaders": 0,
+        "loadingTextVisible": false,
+        "unavailable": false
+      },
+      "screenshotValidation": {
+        "width": 1600,
+        "height": 1000,
+        "ink": 11365,
+        "gutterInk": 1093,
+        "codeInk": 9392,
+        "rowsWithInk": 141,
+        "valid": true
+      },
+      "urlIssueId": "AaGdRnpc97lfKRteM0Yg"
+    }
+  },
+  "failureReason": null,
+  "metadata": "docs/sonarqube-evidencias/antes/AaGdRnpc97lfKRteM0Yg.json",
+  "existingCaptureReview": {
+    "reviewedAt": "2026-11-02T21:33:21.744Z",
+    "classification": "CORRECTA",
+    "reason": "El visor contiene líneas y código renderizado.",
+    "visualMetrics": {
+      "width": 1600,
+      "height": 1000,
+      "ink": 11365,
+      "gutterInk": 1093,
+      "codeInk": 9392,
+      "colored": 1467,
+      "rowsWithInk": 141
+    }
+  }
+}

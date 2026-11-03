@@ -1,0 +1,48 @@
+{
+  "capturedAt": "2026-11-02T18:40:58.455Z",
+  "phase": "antes",
+  "issue": {
+    "key": "AaEN8OrTTwfNugJobk5E",
+    "rule": "plsql:VarcharUsageCheck",
+    "component": "src/main/resources/db/migration/V1__baseline_schema_actual.sql",
+    "line": 198,
+    "message": "Use VARCHAR2 instead of VARCHAR.",
+    "exportedStatus": "OPEN",
+    "analysisUuid": "850dbaee-7b4a-4213-a918-77e7e31d5a26"
+  },
+  "sourceUrl": "https://sonarcloud.io/project/issues?id=Nilber1124_ISANORTE-Backend&open=AaEN8OrTTwfNugJobk5E&s=IMPACT_RANK&issueStatuses=OPEN%2CCONFIRMED",
+  "screenshot": "docs/sonarqube-evidencias/antes/AaEN8OrTTwfNugJobk5E.png",
+  "analysisRevision": {
+    "available": true,
+    "analysisUuid": "f1aaf36f-0a62-4365-b5a7-7bd4c1eb7da8",
+    "revision": "73615cec38bbd6051dd9aad7a2ef9de06a5e3f93",
+    "date": "2026-11-02T17:19:42+0000",
+    "projectVersion": "not provided",
+    "gitCommitAvailable": true
+  },
+  "verification": {
+    "apiMatches": {
+      "id": true,
+      "rule": true,
+      "component": true,
+      "line": true,
+      "message": true
+    },
+    "visible": {
+      "messageVisible": true,
+      "ruleVisible": true,
+      "fileVisible": true,
+      "selectedLineVisible": true
+    },
+    "urlIssueId": "AaEN8OrTTwfNugJobk5E"
+  },
+  "evidenceStatus": "correcta",
+  "detail": null,
+  "metadata": "docs/sonarqube-evidencias/antes/AaEN8OrTTwfNugJobk5E.json",
+  "existingCaptureReview": {
+    "reviewedAt": "2026-11-02T18:46:57.734Z",
+    "classification": "INCORRECTA",
+    "reason": "El ID de los metadatos o de la URL no coincide con el nombre de la evidencia.",
+    "visualMetrics": null
+  }
+}

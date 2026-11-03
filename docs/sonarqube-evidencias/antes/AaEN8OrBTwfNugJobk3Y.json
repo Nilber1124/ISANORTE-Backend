@@ -1,0 +1,56 @@
+{
+  "capturedAt": "2026-11-02T18:35:20.520Z",
+  "phase": "antes",
+  "issue": {
+    "key": "AaEN8OrBTwfNugJobk3y",
+    "rule": "plsql:S1192",
+    "component": "src/main/resources/db/migration/V4__contenido_inicial_isanorte.sql",
+    "line": 277,
+    "message": "Define a constant instead of duplicating this literal 3 times.",
+    "exportedStatus": "OPEN",
+    "analysisUuid": "850dbaee-7b4a-4213-a918-77e7e31d5a26"
+  },
+  "sourceUrl": "https://sonarcloud.io/project/issues?id=Nilber1124_ISANORTE-Backend&open=AaEN8OrBTwfNugJobk3y&s=IMPACT_RANK&issueStatuses=OPEN%2CCONFIRMED",
+  "screenshot": "docs/sonarqube-evidencias/antes/AaEN8OrBTwfNugJobk3y.png",
+  "analysisRevision": {
+    "available": true,
+    "analysisUuid": "f1aaf36f-0a62-4365-b5a7-7bd4c1eb7da8",
+    "revision": "73615cec38bbd6051dd9aad7a2ef9de06a5e3f93",
+    "date": "2026-11-02T17:19:42+0000",
+    "projectVersion": "not provided",
+    "gitCommitAvailable": true
+  },
+  "verification": {
+    "apiMatches": {
+      "id": true,
+      "rule": true,
+      "component": true,
+      "line": true,
+      "message": true
+    },
+    "visible": {
+      "messageVisible": true,
+      "ruleVisible": true,
+      "fileVisible": true,
+      "selectedLineVisible": true
+    },
+    "urlIssueId": "AaEN8OrBTwfNugJobk3y"
+  },
+  "evidenceStatus": "correcta",
+  "detail": null,
+  "metadata": "docs/sonarqube-evidencias/antes/AaEN8OrBTwfNugJobk3y.json",
+  "existingCaptureReview": {
+    "reviewedAt": "2026-11-02T18:46:54.638Z",
+    "classification": "INCOMPLETA",
+    "reason": "El visor está vacío, cargando o no contiene suficiente código renderizado.",
+    "visualMetrics": {
+      "width": 1600,
+      "height": 1000,
+      "ink": 8,
+      "gutterInk": 0,
+      "codeInk": 0,
+      "colored": 0,
+      "rowsWithInk": 3
+    }
+  }
+}
