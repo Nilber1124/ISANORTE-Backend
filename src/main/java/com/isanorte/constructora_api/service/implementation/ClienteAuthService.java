@@ -1,5 +1,7 @@
 package com.isanorte.constructora_api.service.implementation;
 
+import com.isanorte.constructora_api.util.BusinessTime;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -40,7 +42,7 @@ public class ClienteAuthService implements IClienteAuthService {
             throw new IllegalStateException("Ya existe una cuenta con este correo. Inicia sesión para continuar.");
         }
 
-        LocalDateTime ahora = LocalDateTime.now();
+        LocalDateTime ahora = BusinessTime.now();
         Cliente cliente = Cliente.builder()
                 .nombre(request.nombre().trim())
                 .apellido(blankToNull(request.apellido()))
@@ -72,7 +74,7 @@ public class ClienteAuthService implements IClienteAuthService {
             throw new CredencialesInvalidasException();
         }
 
-        encontrado.setUltimoAcceso(LocalDateTime.now());
+        encontrado.setUltimoAcceso(BusinessTime.now());
         return emitir(repository.save(encontrado));
     }
 
