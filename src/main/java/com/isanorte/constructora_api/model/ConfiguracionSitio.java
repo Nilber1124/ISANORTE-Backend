@@ -181,12 +181,19 @@ public class ConfiguracionSitio {
             clave = "site-" + empresa.getId();
             return;
         }
-        clave = Normalizer.normalize(clave.trim().toLowerCase(), Normalizer.Form.NFD)
+        clave = stripEdgeHyphens(Normalizer.normalize(clave.trim().toLowerCase(), Normalizer.Form.NFD)
                 .replaceAll("\\p{M}", "")
-                .replaceAll("[^a-z0-9]+", "-")
-                .replaceAll("^-+|-+$", "");
+                .replaceAll("[^a-z0-9]+", "-"));
         if (clave.isBlank()) {
             throw new IllegalStateException("La clave de sitio no puede quedar vacía tras normalizarse");
         }
+    }
+
+    private static String stripEdgeHyphens(String value) {
+        int start = 0;
+        int end = value.length();
+        while (start < end && value.charAt(start) == '-') start++;
+        while (end > start && value.charAt(end - 1) == '-') end--;
+        return value.substring(start, end);
     }
 }
