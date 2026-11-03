@@ -58,7 +58,9 @@ public class SecurityConfig {
         String adminAuthority = "ROLE_" + auth.adminRole().toUpperCase(java.util.Locale.ROOT);
         String clienteAuthority = "ROLE_" + JwtService.ROL_CLIENTE;
         return http
-                .csrf(csrf -> csrf.disable())
+                // La API usa JWT Bearer stateless, no cookies de autenticación. Se excluye
+                // únicamente /api/** y se conserva CSRF para futuras rutas web no API.
+                .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**"))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()

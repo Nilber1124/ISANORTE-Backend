@@ -1,6 +1,9 @@
 package com.isanorte.constructora_api;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.Instant;
@@ -17,6 +20,7 @@ import org.springframework.security.oauth2.jwt.JwsHeader;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
@@ -140,6 +144,44 @@ class SecurityConfigIntegrationTest {
 
         mockMvc.perform(get("/api/categorias")
                 .header("Authorization", "Bearer " + nonAdminToken))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("Preflight CORS permite únicamente el origen configurado")
+    void corsPreflightAllowsConfiguredOrigin() throws Exception {
+        mockMvc.perform(options("/api/archivos/subir-imagen")
+                .header("Origin", "http://localhost:4200")
+                .header("Access-Control-Request-Method", "POST")
+                .header("Access-Control-Request-Headers", "authorization,content-type"))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Access-Control-Allow-Origin", "http://localhost:4200"))
+                .andExpect(header().doesNotExist("Access-Control-Allow-Credentials"));
+    }
+
+    @Test
+    @DisplayName("Preflight CORS rechaza un origen no configurado")
+    void corsPreflightRejectsUnknownOrigin() throws Exception {
+        mockMvc.perform(options("/api/archivos/subir-imagen")
+                .header("Origin", "https://attacker.example")
+                .header("Access-Control-Request-Method", "POST"))
+                .andExpect(status().isForbidden())
+                .andExpect(header().doesNotExist("Access-Control-Allow-Origin"));
+    }
+
+    @Test
+    @DisplayName("Login API no exige token CSRF porque usa autenticación stateless")
+    void apiLoginDoesNotRequireCsrfToken() throws Exception {
+        mockMvc.perform(post("/api/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{}"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("Una futura ruta web no API conserva protección CSRF")
+    void nonApiPostRemainsCsrfProtected() throws Exception {
+        mockMvc.perform(post("/future-web-form"))
                 .andExpect(status().isForbidden());
     }
 
