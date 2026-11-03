@@ -1,9 +1,9 @@
 {
-    "generatedAt":  "2026-11-03T05:32:55.0921288Z",
+    "generatedAt":  "2026-11-03T05:47:10.5702283Z",
     "algorithm":  "SHA-256",
     "root":  "docs/sonarqube-evidencias",
     "fileCount":  1300,
-    "totalBytes":  84125662,
+    "totalBytes":  84121354,
     "files":  [
                   {
                       "path":  "docs/sonarqube-evidencias/antes/AaCdT219j7PCqTSvAO4g.json",
@@ -6487,8 +6487,8 @@
                   },
                   {
                       "path":  "docs/sonarqube-evidencias/preparacion-despues.md",
-                      "bytes":  17036,
-                      "sha256":  "487c8836933a06649e5f95fe75d261f27128749cd89cbae66e770b15070ccee2"
+                      "bytes":  12728,
+                      "sha256":  "8ad16e7be610e09a7243389cd5ecea2d6b57e6082200a9030fff7bf3b512abb6"
                   },
                   {
                       "path":  "docs/sonarqube-evidencias/README.md",

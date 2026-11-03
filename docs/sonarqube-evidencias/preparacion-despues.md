@@ -1,184 +1,234 @@
 # Preparación del análisis final y evidencias DESPUÉS
 
-Fecha de revisión: 2026-11-02 (America/Lima).  
-Esta revisión es únicamente preparatoria: no se ejecutó SonarScanner, no se publicó código y no se modificaron Java, SQL, migraciones ni evidencias ANTES.
+Fecha de revisión: 2026-11-03 (America/Lima).
 
-## 1. Estado local
+Esta fase es únicamente preparatoria. No se ejecutó SonarScanner, no se publicaron resultados, no se
+hicieron migraciones y no se generaron capturas DESPUÉS.
 
-- Rama activa: `fix/sonarqube-quality`.
-- `HEAD`: `8ade3af0b38cfb81842c84f16580125d5eaf3088`.
-- `develop` local apunta también a `8ade3af0b38cfb81842c84f16580125d5eaf3088`; no fue modificada.
-- `origin/develop` apunta a `73615cec38bbd6051dd9aad7a2ef9de06a5e3f93`, revisión del análisis original.
-- La rama activa no contiene seis commits presentes en `origin/develop`. Las correcciones y la documentación P0–P4 están en el árbol de trabajo, no en un commit; por ello todavía no existe una revisión Git exacta que represente el resultado.
-- Estado expandido: 65 archivos versionados modificados y 1.314 archivos nuevos, 1.379 entradas en total. La mayoría de los nuevos archivos son las evidencias y expedientes (`docs`: 1.298 entradas); también existen cambios/nuevos archivos en `src`, `tools`, `.gitignore`, `README.md` y `sonarqube-issues.json`.
-- Expedientes disponibles: P0 (8 + resumen), P1 (22 + resumen), P2 (104 + resumen), P3 (54 + resumen) y P4 (221 + resumen).
+## 1. Revisión Git
 
-Esta divergencia debe resolverse antes del análisis. En el árbol actual faltan 13 archivos referenciados por la clasificación original, que concentran 49 incidencias: 12 P2, 11 P3 y 26 P4. Entre ellos están `Pedido`, `DireccionCliente`, `Catalogo`, sus servicios/pruebas y las migraciones V13/V14. Analizar ahora asociaría un árbol sucio a `8ade3af…` y produciría falsas desapariciones por código ausente, no por correcciones demostradas.
+- Rama: `fix/sonarqube-quality`.
+- HEAD revisado: `3edef0f8ee9fdbde744a479b78012887f912fa27`.
+- Merge integrado: `dac299598226c80f250804332a0af8b33e737968`.
+- Commit original analizado: `73615cec38bbd6051dd9aad7a2ef9de06a5e3f93`.
+- `develop` local permanece en `8ade3af0b38cfb81842c84f16580125d5eaf3088`.
+- Los 70 commits anteriores, las 409 documentaciones y las 129 correcciones documentadas están
+  contenidos en la rama.
 
-## 2. Sistema de compilación y ejecución anterior
+La edición de este informe deja un cambio documental local. Antes del análisis debe existir una revisión
+Git limpia y auditable: registrar de nuevo `git rev-parse HEAD`, comprobar `git status --porcelain` vacío
+y usar ese SHA como revisión esperada. No debe analizarse un árbol con cambios de aplicación sin commit.
 
-El proyecto es Maven de un solo módulo:
+## 2. Riesgo Flyway V8–V10
 
-- Maven Wrapper: `mvnw` y `mvnw.cmd`.
-- Coordenadas: `com.isanorte:constructora-api:0.0.1-SNAPSHOT`.
-- Empaquetado Maven predeterminado: JAR.
-- Spring Boot `4.1.1` y Java `21`.
-- Compilación: `./mvnw compile` o `.\mvnw.cmd compile`.
-- Pruebas: `./mvnw test` o `.\mvnw.cmd test`.
-- No hay plugin Sonar ni JaCoCo configurado en `pom.xml`.
+El merge incorporó tres renombrados. Git los detecta como renombres al 100 % y los blobs antes/después
+son idénticos; no cambió el SQL:
 
-Sobre el análisis original se comprobó lo siguiente:
+| Nombre anterior | Nombre integrado | Blob Git idéntico | SHA-256 actual |
+|---|---|---|---|
+| `V8__create_resenas_producto.sql` | `V10__create_resenas_producto.sql` | `c5ae21b89bb740b24da9fb76b6286ca0f91dd687` | `4348e5a2deab0ae760b546e192a005c39a4f4c0a38f70ef53b39e2c1c9e55839` |
+| `V9__cuentas_clientes.sql` | `V8__cuentas_clientes.sql` | `bd108727f76ddab8ed95861240fe7da2b84e44b1` | `31b3eaa95cb71b801787d3c19f8ae754d93c3fd2bc5870042deb50682e4b7cd2` |
+| `V10__carrito_cliente.sql` | `V9__carrito_cliente.sql` | `29746678d19b45ca366139df2f120cc2a79e1e9f` | `b8f6af9ff37e737015bb58a6a1f2973bf02d1a99ea307dc15e6c0e49fce280f7` |
 
-- GitHub devuelve **cero** ejecuciones de Actions para el repositorio.
-- No existen workflows en el árbol actual, `HEAD`, `origin/develop` ni el historial revisado.
-- El commit `73615cec…` tiene un check `SonarCloud Code Analysis` de la app oficial, iniciado a las `2026-11-02T17:19:42Z`, con Quality Gate fallido y enlace a la rama `develop`.
-- Ese check demuestra la integración/decoration de la app con GitHub, pero no identifica qué scanner subió el análisis.
-- El análisis contiene reglas Java y PL/SQL. La documentación actual de SonarQube Cloud indica que PL/SQL no está soportado por Automatic Analysis. Sumado a la ausencia de workflows, la explicación compatible es una ejecución de SonarScanner desde una terminal local u otro CI externo al repositorio. El comando exacto y su versión no quedaron registrados y no deben inventarse.
+### Compatibilidad
 
-Por ello, el nuevo análisis debe registrar explícitamente scanner, parámetros, log, SHA y fecha; no se puede afirmar que se está “repitiendo el mismo comando” anterior.
+Que el contenido sea idéntico no garantiza compatibilidad con una base ya migrada. Flyway identifica
+cada migración por versión, descripción, tipo y checksum guardados en `flyway_schema_history`.
 
-## 3. Configuración SonarQube Cloud encontrada
+- Una base vacía es compatible con el conjunto integrado; las pruebas focalizadas validaron 23
+  migraciones y alcanzaron la versión de prueba `2.7`.
+- Una base que ya registró la secuencia antigua puede asociar V8 a reseñas, V9 a cuentas y V10 a carrito.
+  El árbol integrado presenta V8 cuentas, V9 carrito y V10 reseñas. Flyway puede informar checksum o
+  descripción distintos, migraciones faltantes o versiones ya aplicadas con otro contenido.
+- No se ejecutó `migrate`, `repair`, `baseline` ni acceso a una base real. Tampoco se modificó SQL.
 
-- Proyecto: `Nilber1124_ISANORTE-Backend`.
+La compatibilidad solo puede confirmarse leyendo, con acceso autorizado y de solo lectura, como mínimo:
+
+```sql
+SELECT installed_rank, version, description, type, script, checksum, success
+FROM flyway_schema_history
+WHERE version IN ('8', '9', '10')
+ORDER BY installed_rank;
+```
+
+Si existen registros antiguos, no debe ejecutarse `repair` automáticamente ni editar migraciones
+aplicadas. La decisión exige respaldo de la base y un plan aprobado por el responsable de datos; puede
+requerir restaurar los nombres históricos y crear migraciones nuevas para la evolución posterior.
+
+## 3. Estado verificado de SonarQube Cloud
+
 - Organización: `nilber1124`.
-- Visibilidad informada por la API oficial: pública.
-- Rama principal en SonarQube Cloud: `develop`.
-- Último análisis: `2026-11-02T17:19:42+0000`, revisión `73615cec38bbd6051dd9aad7a2ef9de06a5e3f93`.
-- La API `api/project_branches/list` devuelve únicamente `develop`; `fix/sonarqube-quality` todavía no tiene análisis registrado.
-- No existe `sonar-project.properties`, `.sonarcloud.properties`, configuración Sonar en `pom.xml` ni directorio `.github/workflows`. Tampoco aparecen workflows Sonar en `HEAD`, `origin/develop` o el historial consultado.
-- El reporte original contiene Java y PL/SQL. SonarQube Cloud indica que PL/SQL requiere análisis basado en CI/scanner; el análisis automático de GitHub no cubre PL/SQL. Por tanto, debe conservarse un análisis basado en SonarScanner.
+- Proyecto: `Nilber1124_ISANORTE-Backend`.
+- La API oficial `api/project_branches/list` devuelve únicamente `develop`.
+- Rama principal: `develop`.
+- Último análisis visible: `2026-11-02T17:19:42+0000`.
+- Revisión analizada: `73615cec38bbd6051dd9aad7a2ef9de06a5e3f93`.
+- Quality Gate: `ERROR`; resumen de la rama: 13 bugs, 1 vulnerabilidad y 378 code smells.
+- `fix/sonarqube-quality` todavía no existe como rama analizada.
 
-La API pública no expone el plan de suscripción. La documentación vigente indica que el plan Free admite únicamente la rama principal, mientras Team y OSS admiten análisis de ramas. La presencia actual de una sola rama no demuestra ni descarta la licencia. Antes del escaneo, un administrador debe comprobar en SonarQube Cloud que la organización permite branch analysis para `fix/sonarqube-quality`. No debe probarse enviando un análisis a `develop`.
+La API pública de organización confirma la organización, pero no expone su plan. La documentación
+oficial vigente establece:
+
+- Free: solo análisis de la rama principal.
+- Team y Enterprise: análisis de ramas ilimitado.
+- OSS: análisis de ramas y Pull Requests ilimitado para organizaciones admitidas.
+
+Por tanto, la capacidad de analizar `fix/sonarqube-quality` **no está confirmada**. La existencia de un
+proyecto público o de una sola rama no permite inferir el plan. Un administrador debe revisar el plan en
+SonarQube Cloud y confirmar que `sonar.branch.name=fix/sonarqube-quality` está permitido. No se debe
+probar enviando un análisis accidental a `develop`.
 
 Referencias oficiales:
 
 - [Planes y disponibilidad de branch analysis](https://docs.sonarsource.com/sonarqube-cloud/administering-sonarcloud/managing-subscription/subscription-plans)
-- [Conceptos de análisis automático, CI y ramas](https://docs.sonarsource.com/sonarqube-cloud/analyzing-source-code/concepts)
-- [Parámetros de proyecto y rama](https://docs.sonarsource.com/sonarqube-cloud/analyzing-source-code/analysis-parameters/parameters-not-settable-in-ui)
-- [SonarScanner para Maven](https://docs.sonarsource.com/sonarqube-server/analyzing-source-code/scanners/sonarscanner-for-maven)
+- [Parámetros de rama y proyecto](https://docs.sonarsource.com/sonarqube-cloud/analyzing-source-code/analysis-parameters/parameters-not-settable-in-ui)
+- [Scanners soportados](https://docs.sonarsource.com/sonarqube-cloud/analyzing-source-code/scanners)
+- [Análisis de Java y necesidad de bytecode](https://docs.sonarsource.com/sonarqube-cloud/advanced-setup/languages/java)
+- [SonarScanner for Maven](https://docs.sonarsource.com/sonarqube-server/analyzing-source-code/scanners/sonarscanner-for-maven)
 
-## 4. Revisión de los seis commits faltantes
+## 4. Requisitos del scanner
 
-Los commits, en orden, son:
+El proyecto es Maven de un solo módulo y usa Java 21:
 
-1. `47bb831` — actualización de migraciones y configuración.
-2. `6f28a29` — merge de `feature/migracion` en `develop`.
-3. `47b68a1` — paginación del catálogo público.
-4. `91859ec` — entidad y API de catálogos.
-5. `9c949ab` — pedidos, direcciones, inventario y migraciones relacionadas.
-6. `73615ce` — `trigger sonar`, revisión analizada.
+- `pom.xml`: `<java.version>21</java.version>`.
+- Wrapper: versión `3.3.4`, distribución Maven `3.9.16`, modo `only-script`.
+- SonarScanner for Maven fijado en `5.5.0.6356` para evitar cambios implícitos de versión.
+- Java 21 activo; la documentación oficial requiere Maven 3.2.5+ y Java 21 cuando no se usa
+  autoprovisionamiento de JRE.
+- Se requiere un token temporal cuyo usuario tenga `Execute Analysis`. Debe proporcionarse únicamente
+  mediante `SONAR_TOKEN`, nunca como argumento, archivo o log.
+- Se requiere acceso HTTPS a `https://sonarcloud.io` y al repositorio Maven para resolver el plugin si
+  no está en caché.
+- El árbol debe estar limpio y los binarios Java deben corresponder al mismo HEAD.
 
-Se agregan pedidos/direcciones, catálogos, paginación, stock y bloqueo optimista; se incorporan V13/V14; se renombran migraciones V8–V10; cambia el objetivo Flyway de pruebas de `2.5` a `2.7`; y se añaden pruebas y contratos OpenAPI. No son prescindibles para la comparación porque forman parte del código que originó las 409 incidencias.
+No hay `sonar-project.properties`, configuración Sonar en `pom.xml` ni workflow de GitHub Actions. El
+análisis original incluyó Java y SQL/PLSQL, por lo que se propone un análisis local con Maven que incluya
+`src/main` y no Automatic Analysis.
 
-Hay siete rutas modificadas tanto localmente como en esos commits:
+### Limitación local del wrapper
 
-- `.gitignore`: remoto ignora `.env`; local ignora `application.properties`. Deben conservarse ambas protecciones.
-- `SecurityConfig.java`: remoto protege el endpoint de pedidos; local mantiene correcciones de CSRF y la constante de roles. Deben combinarse.
-- `ArchivoController.java`: remoto añade carga PDF y centraliza la subida; local retira `@CrossOrigin("*")`. La versión integrada debe conservar ambos cambios.
-- `PublicContentController.java`: remoto usa `UUID` para pedidos y añade paginación; local elimina un import que en la base antigua estaba sin uso. Tras integrar, `UUID` vuelve a ser necesario.
-- `Producto.java`: remoto añade stock, `@Version` y su callback; local usa `BusinessTime`. Deben coexistir.
-- `UnidadNegocio.java`: remoto añade la relación con `Catalogo`; local introduce `BusinessTime` y una constante de mensaje. Deben coexistir.
-- `application-test.properties`: remoto eleva Flyway a `2.7`; local añade `cors.allowed-origins`. Deben conservarse ambos valores.
-
-Además, `src/main/resources/application.properties` existe localmente como archivo ignorado y puede contener configuración sensible, mientras el commit remoto lo incorpora como archivo versionado. Esto puede bloquear la integración o reintroducir secretos. Debe respaldarse fuera del repositorio, revisarse y reconciliarse con `application.example.properties`; nunca debe añadirse al commit por accidente.
-
-## 5. Estrategia recomendada para una revisión auditable
-
-**Sí es necesario actualizar la rama de trabajo antes del análisis.** Técnicamente el scanner podría procesar el árbol actual, pero el resultado no sería comparable con el análisis original: omitiría 49 incidencias porque sus archivos no existen y asociaría cambios sin commit al SHA equivocado.
-
-La estrategia más conservadora es preservar primero el estado actual y después integrar el commit exacto analizado, siempre sobre `fix/sonarqube-quality`:
-
-1. Generar un manifiesto SHA-256 de `docs/sonarqube-evidencias/antes/` y de los expedientes P0–P4, más una copia de respaldo fuera del repositorio. No usar `git clean` ni depender solo de `stash` para 1.314 archivos nuevos.
-2. Revisar archivos nuevos y modificados para excluir credenciales, `application.properties`, temporales y artefactos. Respaldar la configuración local sensible fuera del repositorio.
-3. Con autorización, crear un **commit de salvaguarda** en `fix/sonarqube-quality` con las correcciones, pruebas, scripts y evidencias intencionales. Este commit hace recuperable el trabajo antes de resolver la divergencia.
-4. Con autorización separada, integrar en la rama de trabajo el commit exacto `73615cec38bbd6051dd9aad7a2ef9de06a5e3f93`. Para máxima trazabilidad se recomienda un merge explícito de ese SHA en la rama de trabajo, no `git pull`: preserva el commit de salvaguarda y no reescribe su identidad. Un rebase lineal es posible, pero tiene mayor riesgo y reescribe el commit local.
-5. Resolver únicamente las rutas solapadas indicadas arriba, sin modificar `develop`. Verificar que los 409 expedientes, las capturas ANTES y sus hashes siguen intactos.
-6. Revisar de forma focalizada las 49 incidencias cuyos archivos hoy faltan. No hace falta repetir las 409 auditorías, pero estas 49 no pueden darse por corregidas o históricas hasta examinarlas sobre la base real. Las migraciones aplicadas se conservan sin editar.
-7. Ejecutar una compilación y solo las pruebas focalizadas que correspondan a los conflictos o correcciones recuperadas. Registrar resultados reales.
-8. Crear, con autorización, el commit final de resolución/correcciones focalizadas. Registrar `git rev-parse HEAD`, fecha UTC y comprobar un árbol limpio. Ese SHA será la revisión auditable DESPUÉS.
-
-Después, el método de menor impacto es un análisis local autorizado con SonarScanner for Maven 5.5.0.6356 y `sonar.branch.name=fix/sonarqube-quality`. No requiere crear un workflow, pero sí permiso `Execute Analysis`, un token temporal y soporte de branch analysis.
-
-Antes de ejecutar el scanner:
-
-1. Confirmar que el SHA final contiene `73615cec…` como ancestro y que el árbol está limpio.
-2. Confirmar en Administración/Suscripción de SonarQube Cloud que está habilitado el análisis de ramas y que `develop` seguirá siendo la principal.
-3. Introducir `SONAR_TOKEN` mediante un prompt seguro o secreto temporal; no escribirlo en el comando, archivos, logs ni historial.
-
-Comando propuesto, a ejecutar solo tras autorización:
+En este Windows, `mvnw.cmd` descarga/selecciona correctamente Maven 3.9.16, pero actualmente falla antes
+de iniciar Maven con un error interno `icm` del script del wrapper. La compilación y las pruebas se
+ejecutaron con la distribución 3.9.16 descargada por el propio wrapper. Antes del scanner debe verificarse:
 
 ```powershell
-.\mvnw.cmd -B -DskipTests clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:5.5.0.6356:sonar `
+java -version
+.\mvnw.cmd -version
+```
+
+Si el segundo comando continúa fallando, no debe interpretarse como un fallo de SonarQube. Puede usarse
+`mvn.cmd` 3.9.16 ya instalado/descargado, tras verificar `mvn.cmd -version`, o corregirse el entorno del
+wrapper en una tarea separada. No se modificó el wrapper durante esta preparación.
+
+## 5. Comando propuesto, no ejecutado
+
+Solo después de confirmar branch analysis, disponer del token temporal y tener un árbol limpio:
+
+```powershell
+$EXPECTED_SHA = git rev-parse HEAD
+if (git status --porcelain) { throw "El árbol no está limpio" }
+
+.\mvnw.cmd -B -DskipTests clean verify `
+  org.sonarsource.scanner.maven:sonar-maven-plugin:5.5.0.6356:sonar `
   -Dsonar.host.url=https://sonarcloud.io `
   -Dsonar.organization=nilber1124 `
   -Dsonar.projectKey=Nilber1124_ISANORTE-Backend `
   -Dsonar.branch.name=fix/sonarqube-quality `
   -Dsonar.branch.target=develop `
   -Dsonar.sources=src/main `
-  -Dsonar.tests=src/test
+  -Dsonar.tests=src/test `
+  -Dsonar.sourceEncoding=UTF-8
 ```
 
-`SONAR_TOKEN` debe existir solo en el entorno del proceso y eliminarse al terminar. `-DskipTests` evita repetir la batería, pero `clean verify` recompila el árbol y elimina binarios obsoletos. No debe usarse el comando sin `sonar.branch.name`: podría actualizar la rama principal de SonarQube Cloud.
+`SONAR_TOKEN` debe existir solo en el entorno del proceso y eliminarse al terminar. `-DskipTests` evita
+repetir las pruebas ya ejecutadas, mientras `clean verify` reconstruye bytecode coherente y evita recursos
+obsoletos por los renombrados Flyway. Si se usa el Maven 3.9.16 descargado en lugar del wrapper, los
+objetivos y parámetros deben ser exactamente los mismos.
 
-GitHub Actions no es el método inmediato porque no existe workflow ni configuración en el repositorio. Elegirlo requeriría añadir un workflow, guardar `SONAR_TOKEN` como secret, realizar commit y push de la rama. Si no hay branch analysis, la alternativa técnicamente soportada sería un análisis de Pull Request contra la rama principal, pero requiere push y crear PR; ambas acciones están fuera de la autorización actual.
+No omitir `sonar.branch.name`: hacerlo podría enviar el análisis como rama principal. Tras el comando,
+el SHA devuelto por la API debe coincidir con `$EXPECTED_SHA`; si no coincide, no deben iniciarse capturas.
 
-## 6. Registro verificable del nuevo análisis
+## 6. Registro obligatorio del análisis
 
-Cuando termine el escaneo:
+Crear `docs/sonarqube-evidencias/despues/analisis.json` sin secretos, con:
 
-1. Guardar el SHA limpio analizado, fecha UTC, rama, versión del scanner y resultado de la tarea de Compute Engine en `docs/sonarqube-evidencias/despues/analisis.json`.
-2. Consultar y conservar las respuestas JSON de:
-   - `api/project_analyses/search?project=Nilber1124_ISANORTE-Backend&branch=fix%2Fsonarqube-quality&ps=1`;
-   - `api/project_branches/list?project=Nilber1124_ISANORTE-Backend`;
-   - `api/issues/search?componentKeys=Nilber1124_ISANORTE-Backend&branch=fix%2Fsonarqube-quality&ps=500`, paginando si fuera necesario.
-3. Verificar que revisión y fecha de la API coincidan con el SHA registrado. Si no coinciden, no iniciar capturas.
-4. Verificar que Java y los SQL de `src/main/resources/db/migration` estén incluidos en el nuevo análisis. Una alerta ausente en un archivo no analizado no demuestra corrección.
+- proyecto, organización y rama;
+- SHA esperado y SHA informado por SonarQube Cloud;
+- fecha UTC de inicio y fin;
+- Java, Maven y versión fijada del scanner;
+- comando con el token omitido;
+- URL/ID de la tarea de Compute Engine;
+- estado final de la tarea y Quality Gate;
+- cantidad de incidencias devueltas y archivos/lenguajes analizados.
+
+Consultar y conservar las respuestas JSON de:
+
+```text
+api/project_analyses/search?project=Nilber1124_ISANORTE-Backend&branch=fix%2Fsonarqube-quality&ps=1
+api/project_branches/list?project=Nilber1124_ISANORTE-Backend
+api/issues/search?componentKeys=Nilber1124_ISANORTE-Backend&branch=fix%2Fsonarqube-quality&ps=500
+```
+
+Las consultas deben paginarse si el total supera el tamaño de página. No iniciar Playwright hasta que la
+tarea de Compute Engine termine y revisión/rama/fecha coincidan.
 
 ## 7. Comparación de las 409 incidencias
 
-Construir un inventario DESPUÉS sin reemplazar `sonarqube-issues.json`:
+No sobrescribir `sonarqube-issues.json`. Crear un inventario DESPUÉS independiente y comparar:
 
-1. Relacionar primero por ID exacto.
-2. Si Sonar asigna otro ID en la rama, relacionar por regla + archivo + hash de ubicación; como respaldo, usar regla + archivo + mensaje normalizado + línea próxima.
-3. Clasificar cada incidencia original como:
-   - `PRESENTE_MISMO_ID`;
-   - `PRESENTE_ID_NUEVO_O_REUBICADA`;
-   - `ESTADO_CAMBIADO`;
-   - `AUSENTE_EN_ANALISIS_NUEVO`;
-   - `NO_VERIFICABLE_ARCHIVO_NO_ANALIZADO`.
-4. Para una incidencia ausente, revisar su expediente P0–P4 y el diff entre los dos commits. Solo proponer `CORREGIDA` cuando el cambio y el análisis lo sustenten. Los falsos positivos P4 y las recomendaciones conservadas pueden seguir presentes y deben registrarse como resultado esperado, no como fallo del proceso.
-5. Conservar ID original y, si corresponde, ID nuevo. La rama puede generar claves distintas; no debe forzarse una igualdad inexistente.
+1. **Persistente por ID:** el mismo ID aparece en la rama nueva; registrar estado, regla, archivo, línea y mensaje.
+2. **Persistente movida:** el ID cambió, pero coinciden regla, componente y mensaje/contexto; documentar ambos IDs sin asumir corrección.
+3. **Ausente en el análisis nuevo:** no aparece por ID ni por regla/componente; verificar que el archivo y lenguaje sí fueron analizados.
+4. **Histórica:** el archivo o construcción tampoco existe en la revisión integrada; conservar la justificación previa.
+5. **Justificada/conservada:** falsos positivos PostgreSQL, recomendaciones o riesgos pendientes que se espera que permanezcan.
+6. **Nueva:** no pertenece a las 409 originales; registrarla por separado, sin reutilizar IDs.
 
-## 8. Capturas reales DESPUÉS
+Una alerta ausente no demuestra por sí sola que fue corregida: debe relacionarse con el diff, el expediente,
+la presencia del archivo en el alcance y el SHA exacto analizado.
 
-El script actual `tools/sonarqube-evidencias/capturar-incidencia.cjs` está limitado a `antes/`, consulta solo `OPEN/CONFIRMED` y no añade el parámetro de rama. Antes de usarlo para DESPUÉS debe incorporarse un modo separado que:
+## 8. Capturas DESPUÉS con Playwright
 
+El script actual `tools/sonarqube-evidencias/capturar-incidencia.cjs` está diseñado para ANTES. Antes de
+ejecutarlo se debe implementar y revisar un modo `despues` que:
+
+- use una sola sesión manual autorizada y no almacene credenciales;
+- exija `branch=fix/sonarqube-quality` en API y URL de interfaz;
 - escriba exclusivamente en `docs/sonarqube-evidencias/despues/`;
-- use `branch=fix/sonarqube-quality` tanto en API como en las URL de la interfaz;
-- cargue el inventario comparado, no vuelva a tratar el JSON original como si todas las incidencias siguieran abiertas;
-- conserve la disambiguación de nombres de Windows y el ID original en los metadatos;
-- valide rama visible, revisión del análisis, regla, archivo, línea, mensaje e ID actual cuando exista;
-- reutilice una sola sesión autorizada, con reanudación y progreso por lotes;
-- nunca sobrescriba `antes/` ni una captura DESPUÉS ya validada con una defectuosa.
+- nunca sobrescriba `docs/sonarqube-evidencias/antes/`;
+- valide ID, rama, regla, archivo, línea, mensaje y código renderizado;
+- espere dinámicamente el visor, con dos intentos y máximo 30 segundos por intento;
+- conserve una evidencia válida si un intento posterior falla;
+- registre fallidas, no disponibles y pendientes sin inventar capturas;
+- muestre progreso por lotes de 50 y permita reanudación.
 
-Para alertas presentes, la captura debe mostrar la rama, incidencia, regla, archivo, línea, mensaje y código cargado. Para alertas ausentes no existe una página de incidencia que capturar: debe guardarse una captura real de la búsqueda en la rama con filtros de regla y archivo mostrando cero coincidencias, acompañada por el JSON de la consulta, revisión y fecha. Esa evidencia demuestra ausencia en ese análisis, no por sí sola la causa de la ausencia.
+### Alertas persistentes
 
-## 9. Riesgos, límites y autorizaciones pendientes
+Guardar `despues/ID.png` y `despues/ID.json`. La captura debe mostrar rama, incidencia, regla, archivo,
+línea, mensaje y código cargado.
 
-- **Bloqueo actual:** no hay commit del código corregido, la rama parte de una revisión seis commits anterior y faltan archivos asociados a 49 incidencias originales.
-- **Capacidad no verificable públicamente:** falta confirmar el plan y branch analysis en la interfaz administrativa.
-- **Token:** se requiere un token con `Execute Analysis`, proporcionado temporalmente por el usuario; no debe almacenarse.
-- **Acciones que requieren autorización expresa, por separado:**
-  1. Crear manifiestos/copias de respaldo y mover temporalmente la configuración local sensible fuera del repositorio.
-  2. Crear el commit de salvaguarda en `fix/sonarqube-quality`.
-  3. Integrar `73615cec…` mediante merge explícito o, si se prefiere historia lineal, rebase; resolver los siete solapamientos.
-  4. Modificar Java/pruebas solo donde sea necesario para reconciliar los conflictos y las 49 incidencias recuperadas; no editar migraciones aplicadas.
-  5. Ejecutar compilación y pruebas focalizadas posteriores a la integración.
-  6. Crear el commit final auditable y, si se desea trazabilidad GitHub completa, hacer push únicamente de `fix/sonarqube-quality`.
-  7. Confirmar branch analysis y proporcionar temporalmente un token con `Execute Analysis`.
-  8. Ejecutar el scanner, acción que publica resultados en SonarQube Cloud.
-  9. Adaptar el script al modo DESPUÉS, abrir una sesión Playwright si caducó y capturar las evidencias reales.
-  10. Solo si branch analysis no está disponible: crear workflow/secret y/o Pull Request como alternativa; ninguna de estas acciones está autorizada ahora.
-- No se recomienda analizar el árbol sucio, enviar resultados a `develop`, crear un proyecto Sonar alternativo ni interpretar la ausencia de una alerta como corrección automática.
+### Alertas ausentes
 
-Hasta recibir esas autorizaciones, el proceso debe detenerse aquí.
+No existe una página de incidencia que capturar. Guardar una captura real de la búsqueda de incidencias
+en la rama, filtrada por regla y componente, mostrando cero coincidencias; acompañarla con la respuesta
+JSON, SHA, fecha y filtros. Usar un nombre disambiguado como `ID-ausencia.png`. Esta evidencia demuestra
+ausencia en ese análisis, no automáticamente la causa.
+
+### Expedientes
+
+Actualizar cada expediente P0–P4 con enlaces relativos a la evidencia DESPUÉS, revisión analizada,
+resultado de comparación y limitaciones. No cambiar retrospectivamente la captura ANTES ni afirmar
+“corregida” cuando el resultado solo demuestre ausencia sin contexto.
+
+## 9. Acciones pendientes que requieren autorización
+
+1. Acceso administrativo de solo lectura para confirmar el plan y branch analysis.
+2. Dejar la rama en un HEAD limpio y registrar el SHA definitivo tras este informe.
+3. Proporcionar temporalmente un token con `Execute Analysis`, sin compartirlo ni persistirlo.
+4. Ejecutar SonarScanner; esta acción publica un análisis en SonarQube Cloud.
+5. Adaptar/revisar el script Playwright al modo DESPUÉS.
+6. Iniciar sesión manualmente si la sesión del navegador expiró y ejecutar las capturas.
+7. Acceso de solo lectura a `flyway_schema_history` para confirmar compatibilidad de una base real.
+
+Si el plan es Free y no admite ramas, detenerse. Las alternativas serían migrar a Team/Enterprise/OSS o
+realizar análisis de Pull Request contra la principal; esta última requiere push y PR y no está autorizada.
+Nunca debe usarse `develop` como sustituto para evitar la limitación del plan.
