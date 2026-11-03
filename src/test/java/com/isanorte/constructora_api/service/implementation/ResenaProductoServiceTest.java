@@ -80,9 +80,10 @@ class ResenaProductoServiceTest {
     void rechazaCuentaInactivaSinGuardarResena() {
         when(clienteRepository.findById(clienteId)).thenReturn(Optional.of(Cliente.builder()
                 .id(clienteId).nombre("Ana").activo(false).build()));
+        CrearResenaRequest request = new CrearResenaRequest(4, null, "Comentario");
 
         assertThrows(AccessDeniedException.class, () -> service.createPublicReview(
-                "isanorte", "isadecor", "panel", clienteId, new CrearResenaRequest(4, null, "Comentario")));
+                "isanorte", "isadecor", "panel", clienteId, request));
         verify(resenaRepository, never()).saveAndFlush(any());
     }
 }

@@ -58,8 +58,8 @@ class AuthServiceTest {
     @Test
     void respondeIgualCuandoElCorreoNoExiste() {
         when(users.loadUserByUsername(anyString())).thenThrow(new UsernameNotFoundException("no existe"));
-        assertThrows(CredencialesInvalidasException.class,
-                () -> service.login(new LoginRequest("unknown@example.test", "provided-password")));
+        LoginRequest request = new LoginRequest("unknown@example.test", "provided-password");
+        assertThrows(CredencialesInvalidasException.class, () -> service.login(request));
         verify(encoder).matches("provided-password", "dummy-hash");
     }
 }

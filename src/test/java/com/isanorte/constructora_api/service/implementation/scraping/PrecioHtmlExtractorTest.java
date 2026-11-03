@@ -1,6 +1,7 @@
 package com.isanorte.constructora_api.service.implementation.scraping;
 
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import java.time.Duration;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -65,15 +66,15 @@ class PrecioHtmlExtractorTest {
     }
 
     @Test void precioDeEnvioEnMicrodatosNoEsPrecioDeProducto() {
-        assertEquals(PRICE_NOT_FOUND, assertThrows(ScrapingPrecioException.class,
-                () -> extractor.extraer(Jsoup.parse("""
+        Document document = Jsoup.parse("""
                 <div itemscope itemtype="https://schema.org/Product">
                   <div itemscope itemtype="https://schema.org/DeliveryChargeSpecification">
                     <meta itemprop="price" content="20">
                     <meta itemprop="priceCurrency" content="PEN">
                   </div>
                 </div>
-                """))).getEstado());
+                """);
+        assertPriceNotFound(document);
     }
 
     @ParameterizedTest
@@ -93,18 +94,15 @@ class PrecioHtmlExtractorTest {
     }
 
     @Test void exclusionUnicodeIgnoraEnvioEnMayusculas() {
-        assertEquals(PRICE_NOT_FOUND, assertThrows(ScrapingPrecioException.class,
-                () -> extractor.extraer(Jsoup.parse(
-                        "<main><div class='product-price ENVÍO'>S/ 20</div></main>"))).getEstado());
+        Document document = Jsoup.parse("<main><div class='product-price ENVÍO'>S/ 20</div></main>");
+        assertPriceNotFound(document);
     }
 
     @Test void estiloLargoSeEvaluaSinBacktrackingSuperlineal() {
         String style = "color:red;".repeat(20_000) + "display:none";
-        assertTimeoutPreemptively(Duration.ofSeconds(1), () ->
-                assertEquals(PRICE_NOT_FOUND, assertThrows(ScrapingPrecioException.class,
-                        () -> extractor.extraer(Jsoup.parse(
-                                "<main><div class='product-price' style='" + style + "'>S/ 20</div></main>")))
-                        .getEstado()));
+        Document document = Jsoup.parse(
+                "<main><div class='product-price' style='" + style + "'>S/ 20</div></main>");
+        assertTimeoutPreemptively(Duration.ofSeconds(1), () -> assertPriceNotFound(document));
     }
 
     @ParameterizedTest
@@ -117,8 +115,8 @@ class PrecioHtmlExtractorTest {
         "<main><div class='product-price'>S/ 20 S/ 30</div></main>"
     })
     void noConfundeNumerosConPrecio(String html) {
-        assertEquals(PRICE_NOT_FOUND, assertThrows(ScrapingPrecioException.class,
-                () -> extractor.extraer(Jsoup.parse(html))).getEstado());
+        Document document = Jsoup.parse(html);
+        assertPriceNotFound(document);
     }
 
     @Test void dolarSinPaisNoDeterminaMoneda() {
@@ -127,10 +125,19 @@ class PrecioHtmlExtractorTest {
     }
 
     @Test void variasOfertasDiferentesNoSonComparables() {
-        assertEquals(NOT_COMPARABLE, assertThrows(ScrapingPrecioException.class, () -> extractor.extraer(Jsoup.parse("""
+        Document document = Jsoup.parse("""
             <script type="application/ld+json">{"@type":"Product","offers":[
             {"@type":"Offer","price":"50","priceCurrency":"PEN"},
             {"@type":"Offer","price":"80","priceCurrency":"PEN"}]}</script>
-            """))).getEstado());
+            """);
+        ScrapingPrecioException exception = assertThrows(ScrapingPrecioException.class,
+                () -> extractor.extraer(document));
+        assertEquals(NOT_COMPARABLE, exception.getEstado());
+    }
+
+    private void assertPriceNotFound(Document document) {
+        ScrapingPrecioException exception = assertThrows(ScrapingPrecioException.class,
+                () -> extractor.extraer(document));
+        assertEquals(PRICE_NOT_FOUND, exception.getEstado());
     }
 }

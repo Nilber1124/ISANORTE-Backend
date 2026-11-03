@@ -71,8 +71,9 @@ class PaginaExternaClientTest {
         var response = new BasicClassicHttpResponse(200);
         response.setEntity(new InputStreamEntity(new ByteArrayInputStream(new byte[0]),
                 PaginaExternaClient.MAX_BYTES + 1, ContentType.TEXT_HTML));
+        var request = new HttpGet("https://tienda.example/p");
         assertEquals(UNSUPPORTED_CONTENT, assertThrows(ScrapingPrecioException.class,
-                () -> PaginaExternaClient.leerRespuesta(response, new HttpGet("https://tienda.example/p"))).getEstado());
+                () -> PaginaExternaClient.leerRespuesta(response, request)).getEstado());
     }
 
     @Test void htmlControladoEsAceptado() throws Exception {
@@ -84,9 +85,10 @@ class PaginaExternaClientTest {
     }
 
     @Test void errorHttpEsEstadoEsperado() {
+        var response = new BasicClassicHttpResponse(403);
+        var request = new HttpGet("https://tienda.example/p");
         assertEquals(SITE_UNREACHABLE, assertThrows(ScrapingPrecioException.class,
-                () -> PaginaExternaClient.leerRespuesta(new BasicClassicHttpResponse(403),
-                        new HttpGet("https://tienda.example/p"))).getEstado());
+                () -> PaginaExternaClient.leerRespuesta(response, request)).getEstado());
     }
 }
 

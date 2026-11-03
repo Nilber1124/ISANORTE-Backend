@@ -223,9 +223,10 @@ class DynamicContentPersistenceIntegrationTest {
         ConfiguracionSitio sitio = persistedSite("contenido-unico");
         contenidoPaginaRepository.saveAndFlush(ContenidoPagina.builder()
                 .pagina(TipoPaginaPublica.CONTACTO).configuracionSitio(sitio).build());
+        ContenidoPagina duplicado = ContenidoPagina.builder()
+                .pagina(TipoPaginaPublica.CONTACTO).configuracionSitio(sitio).build();
 
-        assertThatThrownBy(() -> contenidoPaginaRepository.saveAndFlush(ContenidoPagina.builder()
-                .pagina(TipoPaginaPublica.CONTACTO).configuracionSitio(sitio).build()))
+        assertThatThrownBy(() -> contenidoPaginaRepository.saveAndFlush(duplicado))
                 .isInstanceOf(DataIntegrityViolationException.class);
     }
 
@@ -233,9 +234,10 @@ class DynamicContentPersistenceIntegrationTest {
     void normalizaEImpideClaveDeSitioDuplicada() {
         persistedSite("clave-unica");
         Empresa otraEmpresa = persistedCompany("otra-clave");
+        ConfiguracionSitio duplicado = ConfiguracionSitio.builder()
+                .clave("  ISANORTE CLAVE ÚNICA  ").empresa(otraEmpresa).build();
 
-        assertThatThrownBy(() -> configuracionSitioRepository.saveAndFlush(ConfiguracionSitio.builder()
-                .clave("  ISANORTE CLAVE ÚNICA  ").empresa(otraEmpresa).build()))
+        assertThatThrownBy(() -> configuracionSitioRepository.saveAndFlush(duplicado))
                 .isInstanceOf(DataIntegrityViolationException.class);
     }
 
@@ -252,10 +254,11 @@ class DynamicContentPersistenceIntegrationTest {
         UUID id = seoPaginaRepository.saveAndFlush(seoUnidad).getId();
         assertThat(seoPaginaRepository.findById(id)).get()
                 .extracting(SeoPagina::getUnidadNegocio).isEqualTo(unidad);
-
-        assertThatThrownBy(() -> seoPaginaRepository.saveAndFlush(SeoPagina.builder()
+        SeoPagina seoInvalido = SeoPagina.builder()
                 .tipoPagina(TipoPaginaSeo.HOME).title("Home").description("Descripción")
-                .configuracionSitio(sitio).unidadNegocio(unidad).build()))
+                .configuracionSitio(sitio).unidadNegocio(unidad).build();
+
+        assertThatThrownBy(() -> seoPaginaRepository.saveAndFlush(seoInvalido))
                 .isInstanceOf(DataIntegrityViolationException.class);
     }
 

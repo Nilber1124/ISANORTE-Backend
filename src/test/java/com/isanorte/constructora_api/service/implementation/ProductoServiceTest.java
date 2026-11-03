@@ -55,9 +55,9 @@ class ProductoServiceTest {
         ProductoMapper mapper = mock(ProductoMapper.class);
         when(repository.findById(id)).thenReturn(Optional.empty());
         ProductoService service = service(repository, mapper);
+        DestacadoProductoRequest request = new DestacadoProductoRequest(true, 0);
 
-        assertThrows(ModelNotFoundException.class,
-                () -> service.updateDestacado(id, new DestacadoProductoRequest(true, 0)));
+        assertThrows(ModelNotFoundException.class, () -> service.updateDestacado(id, request));
 
         verify(repository, never()).saveAndFlush(org.mockito.ArgumentMatchers.any());
     }
