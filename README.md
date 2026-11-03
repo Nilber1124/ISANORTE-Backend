@@ -40,32 +40,26 @@ GRANT ALL PRIVILEGES ON DATABASE isanorte_db TO isanorte_user;
 export SPRING_DATASOURCE_URL="jdbc:postgresql://<host>/<db>?sslmode=require"   # debe empezar con jdbc:postgresql://
 export SPRING_DATASOURCE_USERNAME="tu_usuario"
 export SPRING_DATASOURCE_PASSWORD="tu_contraseña"
-export CORS_ALLOWED_ORIGINS="https://tu-frontend.vercel.app"   # opcional; por defecto incluye localhost y Vercel
+export CORS_ALLOWED_ORIGINS="https://tu-frontend.vercel.app"   # lista separada por comas; solo orígenes exactos, sin comodines
 export PORT=8080   # Render la inyecta automáticamente; en local por defecto es 8080
 ```
 Si no se definen `SPRING_DATASOURCE_URL` y `SPRING_DATASOURCE_USERNAME`, la aplicación usa `jdbc:postgresql://localhost:5432/isanorte_db` y el usuario `isanorte_user`. **No hay contraseña por defecto**: `SPRING_DATASOURCE_PASSWORD` debe definirse siempre.
+
+`src/main/resources/application.properties` está excluido de Git porque puede contener configuración local sensible. Usa `application.example.properties` como plantilla y conserva las credenciales exclusivamente en variables de entorno o en un gestor de secretos. Si una credencial llegó a versionarse, eliminarla del archivo no es suficiente: debe revocarse y rotarse en el proveedor correspondiente.
 
 ---
 
 ### 2. Credenciales de Cloudinary
 El almacenamiento de fotografías del catálogo se realiza externamente en Cloudinary. La API necesita tus llaves para autorizar la subida de archivos. 
 
-Puedes configurar estas credenciales de dos maneras:
-
-**Opción A: Variables de entorno (Recomendado)**
+Configura estas credenciales mediante variables de entorno:
 ```bash
 export CLOUDINARY_CLOUD_NAME="tu_nombre_de_cloud"
 export CLOUDINARY_API_KEY="tu_api_key"
 export CLOUDINARY_API_SECRET="tu_api_secret"
 ```
 
-**Opción B: Editando `application.properties` (Para desarrollo local)**
-En `src/main/resources/application.properties`:
-```properties
-cloudinary.cloud-name=${CLOUDINARY_CLOUD_NAME:tu_nombre_de_cloud}
-cloudinary.api-key=${CLOUDINARY_API_KEY:tu_api_key}
-cloudinary.api-secret=${CLOUDINARY_API_SECRET:tu_api_secret}
-```
+La plantilla `src/main/resources/application.example.properties` referencia estas variables sin valores sensibles predeterminados. No copies claves reales al README ni a archivos versionados.
 
 ---
 
@@ -83,10 +77,12 @@ La API cuenta con autenticación basada en **JSON Web Tokens (JWT)** y control d
 | `JWT_EXPIRATION` | `app.jwt.expiration` | Formato ISO-8601 (ej: `PT8H`) | Tiempo de validez del token (por defecto 8 horas). |
 | `ADMIN_ROLE` | `app.auth.admin-role` | Nombre de rol (por defecto `ADMINISTRADOR`) | Nombre del rol con permisos administrativos. |
 | `SEED_DEMO_HOME_ISADECOR` | `app.seed.demo-home-isadecor` | `true` o `false` (por defecto `false`) | Inserta una sola vez contenido demostrativo administrable del Home ISADECOR. No activar en producción. |
+| `CORS_ALLOWED_ORIGINS` | `cors.allowed-origins` | Lista de orígenes `http://` o `https://` exactos, separados por comas; no admite `*` ni rutas | Frontends autorizados para llamadas desde navegador. |
 
 > **⚠️ Importante:** 
 > - Si `JWT_SECRET` tiene menos de 32 caracteres, la aplicación arrojará una excepción al iniciar y se detendrá.
 > - Al iniciar la aplicación por primera vez con `ADMIN_EMAIL` y `ADMIN_PASSWORD` configurados, el componente `AdminInitializer` creará automáticamente el administrador inicial en la base de datos. Si el usuario ya existe, no se modificará.
+> - `SPRING_DATASOURCE_PASSWORD`, `ADMIN_PASSWORD`, `JWT_SECRET` y las credenciales de Cloudinary no deben tener valores sensibles por defecto ni almacenarse en Git.
 
 #### Cómo configurarlo:
 
@@ -97,14 +93,18 @@ export ADMIN_EMAIL="admin@isanorte.com"
 export ADMIN_PASSWORD="AdminPasswordSeguro123!"
 ```
 
-**Opción B: En `application.properties` (Para desarrollo local)**
+**Plantilla local segura:**
+
+Haz una copia local de `src/main/resources/application.example.properties` como `application.properties`. El archivo resultante está ignorado por Git y mantiene las referencias a variables sin incluir secretos:
 ```properties
 app.auth.admin-role=ADMINISTRADOR
-app.auth.initial-email=${ADMIN_EMAIL:admin@isanorte.com}
-app.auth.initial-password=${ADMIN_PASSWORD:AdminPasswordSeguro123!}
-app.jwt.secret=${JWT_SECRET:tu_clave_secreta_super_segura_de_mas_de_32_bytes}
+app.auth.initial-email=${ADMIN_EMAIL}
+app.auth.initial-password=${ADMIN_PASSWORD}
+app.jwt.secret=${JWT_SECRET}
 app.jwt.expiration=${JWT_EXPIRATION:PT8H}
 ```
+
+La API es stateless y autentica mediante `Authorization: Bearer`; no usa cookies de autenticación. CSRF se excluye únicamente para `/api/**` y permanece activo para rutas web no API. CORS se centraliza en `CorsConfig` y rechaza comodines, rutas y esquemas distintos de HTTP/HTTPS.
 
 ---
 
@@ -159,8 +159,8 @@ Envía una petición `POST` a `/api/auth/login`:
 curl -X POST http://localhost:8080/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "admin@isanorte.com",
-    "password": "AdminPasswordSeguro123!"
+    "email": "<ADMIN_EMAIL>",
+    "password": "<ADMIN_PASSWORD>"
   }'
 ```
 
