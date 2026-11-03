@@ -12,7 +12,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/archivos")
-@CrossOrigin(origins = "*") // Para desarrollo local temporalmente
 public class ArchivoController {
 
     private final CloudinaryService cloudinaryService;
