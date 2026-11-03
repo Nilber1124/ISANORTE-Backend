@@ -1,5 +1,7 @@
 package com.isanorte.constructora_api.service.implementation;
 
+import com.isanorte.constructora_api.util.BusinessTime;
+
 import java.time.LocalDateTime;
 import java.util.Locale;
 import java.util.Set;
@@ -56,7 +58,7 @@ public class AuthService implements IAuthService {
         var admin = repository.findByEmailIgnoreCase(email).orElseThrow(CredencialesInvalidasException::new);
         Set<String> roles = admin.getRoles().stream().filter(role -> Boolean.TRUE.equals(role.getActivo()))
                 .map(role -> role.getNombre().toUpperCase(Locale.ROOT)).collect(Collectors.toUnmodifiableSet());
-        admin.setUltimoAcceso(LocalDateTime.now());
+        admin.setUltimoAcceso(BusinessTime.now());
         repository.save(admin);
         var issued = jwtService.emitir(admin, roles);
         return new LoginResponse(issued.valor(), "Bearer", issued.expiracion(),
