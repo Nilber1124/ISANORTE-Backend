@@ -1,5 +1,7 @@
 package com.isanorte.constructora_api.model;
 
+import com.isanorte.constructora_api.util.BusinessTime;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -76,7 +78,7 @@ public class RecursoUnidadNegocio {
 
     @PrePersist
     protected void onCreate() {
-        fechaCreacion = LocalDateTime.now();
+        fechaCreacion = BusinessTime.now();
         fechaActualizacion = fechaCreacion;
         if (orden == null) orden = 0;
         if (activo == null) activo = true;
@@ -84,6 +86,6 @@ public class RecursoUnidadNegocio {
 
     @PreUpdate
     protected void onUpdate() {
-        fechaActualizacion = LocalDateTime.now();
+        fechaActualizacion = BusinessTime.now();
     }
 }

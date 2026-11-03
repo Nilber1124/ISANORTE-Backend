@@ -35,9 +35,7 @@ public class ScrapingPrecioService implements IScrapingPrecioService {
                 var pagina = client.obtener(destino);
                 if (REDIRECTS.contains(pagina.status())) {
                     if (redirects >= MAX_REDIRECTS || pagina.location() == null) throw unreachable();
-                    URI next;
-                    try { next = destino.uri().resolve(pagina.location()); }
-                    catch (IllegalArgumentException ex) { throw unreachable(); }
+                    URI next = resolveRedirect(destino.uri(), pagina.location());
                     if (destino.uri().getScheme().equalsIgnoreCase("https")
                             && next.getScheme().equalsIgnoreCase("http")) {
                         throw new ScrapingPrecioException(BLOCKED_URL,
@@ -58,6 +56,14 @@ public class ScrapingPrecioService implements IScrapingPrecioService {
             throw unreachable();
         } finally {
             slots.release();
+        }
+    }
+
+    private static URI resolveRedirect(URI current, String location) {
+        try {
+            return current.resolve(location);
+        } catch (IllegalArgumentException exception) {
+            throw unreachable();
         }
     }
 

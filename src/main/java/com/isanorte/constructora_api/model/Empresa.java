@@ -1,5 +1,7 @@
 package com.isanorte.constructora_api.model;
 
+import com.isanorte.constructora_api.util.BusinessTime;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -202,12 +204,12 @@ public class Empresa {
 
     @PrePersist
     protected void onCreate() {
-        fechaCreacion = LocalDateTime.now();
-        fechaActualizacion = LocalDateTime.now();
+        fechaCreacion = BusinessTime.now();
+        fechaActualizacion = BusinessTime.now();
     }
 
     @PreUpdate
     protected void onUpdate() {
-        fechaActualizacion = LocalDateTime.now();
+        fechaActualizacion = BusinessTime.now();
     }
 }

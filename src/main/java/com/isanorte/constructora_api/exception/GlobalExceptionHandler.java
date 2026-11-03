@@ -1,5 +1,7 @@
 package com.isanorte.constructora_api.exception;
 
+import com.isanorte.constructora_api.util.BusinessTime;
+
 import java.time.OffsetDateTime;
 import java.util.stream.Collectors;
 
@@ -71,7 +73,7 @@ public class GlobalExceptionHandler {
     private ResponseEntity<ApiErrorResponse> build(
             HttpStatus status, String message, HttpServletRequest request) {
         ApiErrorResponse response = new ApiErrorResponse(
-                OffsetDateTime.now(), status.value(), status.getReasonPhrase(), message, request.getRequestURI());
+                BusinessTime.nowOffset(), status.value(), status.getReasonPhrase(), message, request.getRequestURI());
         return ResponseEntity.status(status).body(response);
     }
 }

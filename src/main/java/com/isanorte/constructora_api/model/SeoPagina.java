@@ -1,5 +1,7 @@
 package com.isanorte.constructora_api.model;
 
+import com.isanorte.constructora_api.util.BusinessTime;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -78,13 +80,13 @@ public class SeoPagina {
 
     @PrePersist
     protected void onCreate() {
-        fechaCreacion = LocalDateTime.now();
+        fechaCreacion = BusinessTime.now();
         fechaActualizacion = fechaCreacion;
         if (robots == null) robots = RobotsSeo.INDEX_FOLLOW;
     }
 
     @PreUpdate
     protected void onUpdate() {
-        fechaActualizacion = LocalDateTime.now();
+        fechaActualizacion = BusinessTime.now();
     }
 }

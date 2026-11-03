@@ -1,5 +1,7 @@
 package com.isanorte.constructora_api.service.implementation;
 
+import com.isanorte.constructora_api.util.BusinessTime;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
@@ -257,7 +259,7 @@ public class CotizacionService extends GenericService<Cotizacion, UUID> implemen
     }
 
     private String generateCodigo() {
-        return "COT-" + LocalDate.now().toString().replace("-", "") + "-"
+        return "COT-" + BusinessTime.today().toString().replace("-", "") + "-"
                 + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
     }
 

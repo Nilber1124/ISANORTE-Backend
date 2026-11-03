@@ -1,7 +1,6 @@
 package com.isanorte.constructora_api.service.implementation;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -38,6 +37,7 @@ import com.isanorte.constructora_api.repository.PedidoRepository;
 import com.isanorte.constructora_api.repository.ProductoRepository;
 import com.isanorte.constructora_api.repository.UnidadNegocioRepository;
 import com.isanorte.constructora_api.service.IPedidoService;
+import com.isanorte.constructora_api.util.BusinessTime;
 
 import lombok.RequiredArgsConstructor;
 
@@ -299,7 +299,7 @@ public class PedidoService extends GenericService<Pedido, UUID> implements IPedi
     }
 
     private String generateCodigo() {
-        return "PED-" + LocalDate.now().toString().replace("-", "") + "-"
+        return "PED-" + BusinessTime.today().toString().replace("-", "") + "-"
                 + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
     }
 

@@ -16,6 +16,32 @@ class UrlExternaPolicyTest {
         }
     };
 
+    @Test void destinoComparaContenidoYProtegeLasDirecciones() throws Exception {
+        URI uri = URI.create("https://tienda.example/producto");
+        InetAddress[] source = {InetAddress.getByName("93.184.216.34")};
+        var first = new UrlExternaPolicy.Destino(uri, source);
+        var second = new UrlExternaPolicy.Destino(uri,
+                new InetAddress[]{InetAddress.getByName("93.184.216.34")});
+
+        source[0] = InetAddress.getByName("127.0.0.1");
+        InetAddress[] exposed = first.direcciones();
+        exposed[0] = InetAddress.getByName("127.0.0.1");
+
+        assertEquals(first, second);
+        assertEquals(first.hashCode(), second.hashCode());
+        assertEquals("93.184.216.34", first.direcciones()[0].getHostAddress());
+        assertTrue(first.toString().contains("93.184.216.34"));
+        assertNotEquals(first, new UrlExternaPolicy.Destino(uri,
+                new InetAddress[]{InetAddress.getByName("93.184.216.35")}));
+    }
+
+    @Test void destinoAdmiteDireccionesNulasSinExponerEstadoMutable() {
+        var destination = new UrlExternaPolicy.Destino(URI.create("https://tienda.example/producto"), null);
+        assertNull(destination.direcciones());
+        assertDoesNotThrow(destination::hashCode);
+        assertTrue(destination.toString().contains("direcciones=null"));
+    }
+
     @ParameterizedTest
     @ValueSource(strings = {"", "no es una url", "file:///etc/passwd", "ftp://tienda.example/p",
             "jar:https://tienda.example/p", "data:text/html,1", "javascript:alert(1)",

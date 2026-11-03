@@ -2,7 +2,9 @@ package com.isanorte.constructora_api.service.implementation.scraping;
 
 import java.io.*;
 import java.net.*;
+import java.util.Arrays;
 import java.util.Locale;
+import java.util.Objects;
 import org.apache.hc.client5.http.DnsResolver;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.config.ConnectionConfig;
@@ -20,7 +22,37 @@ import static com.isanorte.constructora_api.enums.EstadoComparacionPrecio.*;
 public class PaginaExternaClient {
     static final int MAX_BYTES = 1_048_576;
     private static final Timeout TIMEOUT = Timeout.ofSeconds(5);
-    public record Pagina(int status, String location, byte[] html, String charset) {}
+    public record Pagina(int status, String location, byte[] html, String charset) {
+        public Pagina {
+            html = html == null ? null : html.clone();
+        }
+
+        @Override
+        public byte[] html() {
+            return html == null ? null : html.clone();
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            return this == other || other instanceof Pagina page
+                    && status == page.status
+                    && Objects.equals(location, page.location)
+                    && Arrays.equals(html, page.html)
+                    && Objects.equals(charset, page.charset);
+        }
+
+        @Override
+        public int hashCode() {
+            int result = Objects.hash(status, location, charset);
+            return 31 * result + Arrays.hashCode(html);
+        }
+
+        @Override
+        public String toString() {
+            return "Pagina[status=" + status + ", location=" + location
+                    + ", html=" + Arrays.toString(html) + ", charset=" + charset + "]";
+        }
+    }
 
     public Pagina obtener(UrlExternaPolicy.Destino destino) throws IOException {
         // No second DNS lookup: the socket uses exactly the validated addresses.

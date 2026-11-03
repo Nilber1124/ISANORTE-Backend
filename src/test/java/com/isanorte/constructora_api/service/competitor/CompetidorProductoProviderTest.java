@@ -3,6 +3,7 @@ package com.isanorte.constructora_api.service.competitor;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.util.Map;
 import org.jsoup.Jsoup;
 import org.junit.jupiter.api.Test;
@@ -12,6 +13,21 @@ import com.isanorte.constructora_api.service.implementation.scraping.SitioOficia
 class CompetidorProductoProviderTest {
     private static final ProductoReferencia SILLA = new ProductoReferencia(
             "Silla Ergonómica Presidente New Dubai Black", "Sillas", null, "PEN", null, Map.of());
+
+    @Test
+    void limpiaMarcaSufijoSinAlterarGuionesDelNombre() {
+        assertEquals("Piso SPC Roble-Natural",
+                AbstractHtmlCompetidorProvider.limpiarTitulo("Piso SPC Roble-Natural | Pisopak"));
+        assertEquals("Mesa", AbstractHtmlCompetidorProvider.limpiarTitulo("Mesa – Decorplas catálogo"));
+        assertEquals("Producto sin nombre", AbstractHtmlCompetidorProvider.limpiarTitulo(null));
+    }
+
+    @Test
+    void limpiaTituloAdversarioEnTiempoLineal() {
+        String title = "Producto" + " ".repeat(200_000) + "| Pisopak";
+        assertTimeoutPreemptively(Duration.ofSeconds(1),
+                () -> assertEquals("Producto", AbstractHtmlCompetidorProvider.limpiarTitulo(title)));
+    }
 
     @Test
     void decorplasUsaCatalogoYDescubreLaRutaCanonicaDelCasoControl() {

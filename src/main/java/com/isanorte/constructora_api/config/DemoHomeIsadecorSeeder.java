@@ -25,6 +25,9 @@ import lombok.RequiredArgsConstructor;
 public class DemoHomeIsadecorSeeder implements ApplicationRunner {
     private static final Logger log = LoggerFactory.getLogger(DemoHomeIsadecorSeeder.class);
     private static final String PREFIX = "DEMO-HOME-";
+    private static final String EXPLORE = "Explorar";
+    private static final String CATALOG_PATH = "/isadecor/catalogo";
+    private static final String LEFT_IMAGE = "/images/isadecor-left-2.jpg";
     private final AnuncioRepository anuncioRepository;
 
     @Override
@@ -49,15 +52,15 @@ public class DemoHomeIsadecorSeeder implements ApplicationRunner {
 
     private List<DemoItem> items() {
         return List.of(
-                item("CINTA-WPC", "Paneles WPC", "Acabados decorativos para muros.", "/images/isadecor-left-1.jpg", null, UbicacionAnuncio.CINTA_HOME, TipoAccionAnuncio.CATEGORIA, "wall-panels", "Explorar", 0),
-                item("CINTA-SPC", "Mármol SPC", "Superficies contemporáneas de demostración.", "/images/isadecor-left-2.jpg", null, UbicacionAnuncio.CINTA_HOME, TipoAccionAnuncio.CATEGORIA, "revestimientos", "Explorar", 1),
-                item("PROMO-PRINCIPAL", "Texturas que definen el ambiente", "Composición de muestra para presentar colecciones ISADECOR.", "/images/isadecor-fondo.jpg", null, UbicacionAnuncio.PROMOCION_PRINCIPAL, TipoAccionAnuncio.RUTA_INTERNA, "/isadecor/catalogo", "Ver catálogo", 0),
-                item("PROMO-SEC-1", "Superficies contemporáneas", "Espacio demostrativo para novedades de acabados.", "/images/isadecor-left-2.jpg", null, UbicacionAnuncio.PROMOCION_SECUNDARIA, TipoAccionAnuncio.RUTA_INTERNA, "/isadecor/catalogo", "Ver colección", 0),
-                item("PROMO-SEC-2", "Detalles para cada proyecto", "Presentación visual reemplazable desde administración.", "/images/proyectos-showroom-isadecor.jpg", null, UbicacionAnuncio.PROMOCION_SECUNDARIA, TipoAccionAnuncio.RUTA_INTERNA, "/isadecor/catalogo", "Descubrir", 1),
-                item("ANUNCIO-1", "Descubre acabados en detalle", "Colecciones, novedades y asesoría para elegir materiales.", "/images/recorrido-sala.jpg", null, UbicacionAnuncio.ANUNCIOS_HOME, TipoAccionAnuncio.RUTA_INTERNA, "/isadecor/catalogo", "Conocer más", 0),
-                item("ANUNCIO-2", "Materiales para cada proyecto", "Soluciones decorativas para espacios residenciales y comerciales.", "/images/recorrido-cocina.jpg", null, UbicacionAnuncio.ANUNCIOS_HOME, TipoAccionAnuncio.RUTA_INTERNA, "/isadecor/catalogo", "Explorar", 1),
+                item("CINTA-WPC", "Paneles WPC", "Acabados decorativos para muros.", "/images/isadecor-left-1.jpg", null, UbicacionAnuncio.CINTA_HOME, TipoAccionAnuncio.CATEGORIA, "wall-panels", EXPLORE, 0),
+                item("CINTA-SPC", "Mármol SPC", "Superficies contemporáneas de demostración.", LEFT_IMAGE, null, UbicacionAnuncio.CINTA_HOME, TipoAccionAnuncio.CATEGORIA, "revestimientos", EXPLORE, 1),
+                item("PROMO-PRINCIPAL", "Texturas que definen el ambiente", "Composición de muestra para presentar colecciones ISADECOR.", "/images/isadecor-fondo.jpg", null, UbicacionAnuncio.PROMOCION_PRINCIPAL, TipoAccionAnuncio.RUTA_INTERNA, CATALOG_PATH, "Ver catálogo", 0),
+                item("PROMO-SEC-1", "Superficies contemporáneas", "Espacio demostrativo para novedades de acabados.", LEFT_IMAGE, null, UbicacionAnuncio.PROMOCION_SECUNDARIA, TipoAccionAnuncio.RUTA_INTERNA, CATALOG_PATH, "Ver colección", 0),
+                item("PROMO-SEC-2", "Detalles para cada proyecto", "Presentación visual reemplazable desde administración.", "/images/proyectos-showroom-isadecor.jpg", null, UbicacionAnuncio.PROMOCION_SECUNDARIA, TipoAccionAnuncio.RUTA_INTERNA, CATALOG_PATH, "Descubrir", 1),
+                item("ANUNCIO-1", "Descubre acabados en detalle", "Colecciones, novedades y asesoría para elegir materiales.", "/images/recorrido-sala.jpg", null, UbicacionAnuncio.ANUNCIOS_HOME, TipoAccionAnuncio.RUTA_INTERNA, CATALOG_PATH, "Conocer más", 0),
+                item("ANUNCIO-2", "Materiales para cada proyecto", "Soluciones decorativas para espacios residenciales y comerciales.", "/images/recorrido-cocina.jpg", null, UbicacionAnuncio.ANUNCIOS_HOME, TipoAccionAnuncio.RUTA_INTERNA, CATALOG_PATH, EXPLORE, 1),
                 category("CAT-WPC", "Wall Panel WPC", "Textura y calidez para muros.", "/images/isadecor-left-1.jpg", "/images/recorrido-sala.jpg", "wall-panels", 0),
-                category("CAT-MARMOL", "Planchas SPC Mármol", "Superficies de gran formato.", "/images/isadecor-left-2.jpg", "/images/recorrido-cocina.jpg", "revestimientos", 1),
+                category("CAT-MARMOL", "Planchas SPC Mármol", "Superficies de gran formato.", LEFT_IMAGE, "/images/recorrido-cocina.jpg", "revestimientos", 1),
                 category("CAT-CIELO", "Cielo Raso PVC", "Sistemas prácticos para techos.", "/images/isadecor-top.jpg", "/images/recorrido-bano.jpg", "paneles-decorativos", 2),
                 category("CAT-PISOS", "Pisos y Molduras", "Terminaciones para completar el ambiente.", "/images/isadecor-fondo.jpg", "/images/recorrido-dormitorio.jpg", "pisos", 3));
     }

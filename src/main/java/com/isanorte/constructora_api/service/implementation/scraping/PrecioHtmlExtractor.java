@@ -1,5 +1,7 @@
 package com.isanorte.constructora_api.service.implementation.scraping;
 
+import com.isanorte.constructora_api.util.BusinessTime;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
@@ -17,11 +19,20 @@ import static com.isanorte.constructora_api.enums.EstadoComparacionPrecio.*;
 @Component
 public class PrecioHtmlExtractor {
     public record Precio(BigDecimal precio, String moneda, String nombre) {}
+    private static final String SALE_PRICE_AMOUNT = "product:sale_price:amount";
+    private static final String CONTENT_ATTRIBUTE = "content";
+    private static final String PRICE_CURRENCY = "priceCurrency";
     private final JsonMapper json = JsonMapper.builder().build();
-    private static final Pattern EXCLUDED = Pattern.compile(
-            "(?i)(cuota|installment|mensual|monthly|env[ií]o|shipping|descuento|discount|"
-            + "old.?price|price.?old|regular.?price|list.?price|original.?price|tachado|compare.?at|"
-            + "precio.?anterior|precio.?normal|recommended|related|recomendado|relacionado)");
+    private static final int CASE_INSENSITIVE_UNICODE = Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE;
+    private static final Pattern EXCLUDED_PAYMENT_OR_SHIPPING = Pattern.compile(
+            "cuota|installment|mensual|monthly|env[ií]o|shipping", CASE_INSENSITIVE_UNICODE);
+    private static final Pattern EXCLUDED_OLD_PRICE = Pattern.compile(
+            "descuento|discount|old.?price|price.?old|regular.?price|list.?price|original.?price|"
+                    + "tachado|compare.?at|precio.?anterior|precio.?normal", CASE_INSENSITIVE_UNICODE);
+    private static final Pattern EXCLUDED_RELATED = Pattern.compile(
+            "recommended|related|recomendado|relacionado", CASE_INSENSITIVE_UNICODE);
+    private static final Pattern HIDDEN_STYLE = Pattern.compile(
+            "display\\s*:\\s*none|line-through", Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
     private static final Pattern ISO = Pattern.compile(
             "(?i)\\b(PEN|USD|EUR|GBP|CLP|COP|MXN|ARS|BRL|CAD|AUD|JPY|CNY|CHF|BOB|UYU)\\b");
 
@@ -53,16 +64,16 @@ public class PrecioHtmlExtractor {
         String title = meta(document, "og:title");
         if (title == null) title = document.select("main h1").size() == 1
                 ? document.selectFirst("main h1").text() : null;
-        for (String key : List.of("product:sale_price:amount", "product:price:amount", "og:price:amount", "og:product:price:amount")) {
+        for (String key : List.of(SALE_PRICE_AMOUNT, "product:price:amount", "og:price:amount", "og:product:price:amount")) {
             String prefix = key.substring(0, key.lastIndexOf(':'));
             String currency = meta(document, prefix + ":currency");
-            if (currency == null && key.equals("product:sale_price:amount")) {
+            if (currency == null && key.equals(SALE_PRICE_AMOUNT)) {
                 currency = meta(document, "product:price:currency");
             }
             for (Element element : document.select("meta[property=\"" + key + "\"],meta[name=\"" + key + "\"]")) {
-                add(candidates, element.attr("content"), currency, title, true);
+                add(candidates, element.attr(CONTENT_ATTRIBUTE), currency, title, true);
             }
-            if (key.equals("product:sale_price:amount") && !candidates.isEmpty()) return unique(candidates);
+            if (key.equals(SALE_PRICE_AMOUNT) && !candidates.isEmpty()) return unique(candidates);
         }
         price = unique(candidates);
         if (price != null) return price;
@@ -76,9 +87,9 @@ public class PrecioHtmlExtractor {
                 Element scope = element.closest("[itemscope]");
                 if (scope != null && scope != product && !scope.attr("itemtype").endsWith("/Offer")) continue;
                 if (scope == null) scope = product;
-                Element currency = scope.selectFirst("[itemprop=priceCurrency]");
+                Element currency = scope.selectFirst("[itemprop=" + PRICE_CURRENCY + "]");
                 add(candidates, value(element), currency == null ? null : value(currency),
-                        name == null ? title : value(name), element.hasAttr("content"));
+                        name == null ? title : value(name), element.hasAttr(CONTENT_ATTRIBUTE));
             }
         }
         price = unique(candidates);
@@ -137,11 +148,11 @@ public class PrecioHtmlExtractor {
         }
         String until = text(node, "priceValidUntil");
         if (until != null) {
-            try { if (LocalDate.parse(until).isBefore(LocalDate.now())) return; }
+            try { if (LocalDate.parse(until).isBefore(BusinessTime.today())) return; }
             catch (java.time.format.DateTimeParseException ignored) { return; }
         }
         String amount = text(node, "price");
-        String currency = text(node, "priceCurrency");
+        String currency = text(node, PRICE_CURRENCY);
         if (amount != null) {
             add(results, amount, currency, name, true);
         } else {
@@ -152,8 +163,8 @@ public class PrecioHtmlExtractor {
                     && text(specification, "billingIncrement") == null
                     && text(specification, "unitCode") == null) {
                 add(results, text(specification, "price"),
-                        text(specification, "priceCurrency") == null ? currency
-                                : text(specification, "priceCurrency"), name, true);
+                        text(specification, PRICE_CURRENCY) == null ? currency
+                                : text(specification, PRICE_CURRENCY), name, true);
             }
         }
     }
@@ -180,11 +191,11 @@ public class PrecioHtmlExtractor {
 
     private static String meta(Document doc, String key) {
         Element element = doc.selectFirst("meta[property=\"" + key + "\"],meta[name=\"" + key + "\"]");
-        return element == null ? null : element.attr("content");
+        return element == null ? null : element.attr(CONTENT_ATTRIBUTE);
     }
 
     private static String value(Element element) {
-        return element.hasAttr("content") ? element.attr("content") : element.text();
+        return element.hasAttr(CONTENT_ATTRIBUTE) ? element.attr(CONTENT_ATTRIBUTE) : element.text();
     }
 
     private static boolean excluded(Element element) {
@@ -192,10 +203,10 @@ public class PrecioHtmlExtractor {
                 current = current.parent()) {
             if (Set.of("del", "s", "strike", "nav", "footer", "aside").contains(current.tagName())
                     || current.hasAttr("hidden") || current.attr("aria-hidden").equals("true")
-                    || EXCLUDED.matcher(current.className() + " " + current.id()).find()
-                    || current.attr("style").matches("(?i).*(display\\s*:\\s*none|line-through).*")) return true;
+                    || isExcludedText(current.className() + " " + current.id())
+                    || HIDDEN_STYLE.matcher(current.attr("style")).find()) return true;
         }
-        return EXCLUDED.matcher(element.text()).find();
+        return isExcludedText(element.text());
     }
 
     private static void add(List<Precio> prices, String raw, String explicitCurrency, String name, boolean machine) {
@@ -222,7 +233,7 @@ public class PrecioHtmlExtractor {
     }
 
     static BigDecimal normalizarPrecio(String raw, boolean machine) {
-        if (raw == null || raw.length() > 100 || EXCLUDED.matcher(raw).find() || raw.contains("%")) return null;
+        if (raw == null || raw.length() > 100 || isExcludedText(raw) || raw.contains("%")) return null;
         String value = raw.replace('\u00a0', ' ').trim()
                 .replaceAll("(?i)\\b(PEN|USD|EUR|GBP|CLP|COP|MXN|ARS|BRL|CAD|AUD|JPY|CNY|CHF|BOB|UYU|soles)\\b", "")
                 .replaceAll("(?i)US\\s*\\$|S\\s*/\\.?", "").replaceAll("[€£$]", "").trim();
@@ -249,6 +260,12 @@ public class PrecioHtmlExtractor {
             BigDecimal result = new BigDecimal(value).setScale(2, RoundingMode.UNNECESSARY);
             return result.precision() <= 12 && result.signum() >= 0 ? result : null;
         } catch (ArithmeticException | NumberFormatException ex) { return null; }
+    }
+
+    private static boolean isExcludedText(String value) {
+        return EXCLUDED_PAYMENT_OR_SHIPPING.matcher(value).find()
+                || EXCLUDED_OLD_PRICE.matcher(value).find()
+                || EXCLUDED_RELATED.matcher(value).find();
     }
 
     private static Precio unique(List<Precio> prices) {

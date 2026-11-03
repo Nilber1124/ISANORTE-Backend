@@ -1,5 +1,7 @@
 package com.isanorte.constructora_api.model;
 
+import com.isanorte.constructora_api.util.BusinessTime;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +42,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UnidadNegocio {
+    private static final String NULL_PRODUCT_MESSAGE = "El producto no puede ser null";
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -111,7 +114,7 @@ public class UnidadNegocio {
      * @throws NullPointerException si {@code producto} es {@code null}
      */
     public void addProducto(Producto producto) {
-        Objects.requireNonNull(producto, "El producto no puede ser null");
+        Objects.requireNonNull(producto, NULL_PRODUCT_MESSAGE);
         if (producto.getUnidadNegocio() != null && producto.getUnidadNegocio() != this) {
             throw new IllegalStateException("El producto ya pertenece a otra unidad de negocio");
         }
@@ -119,12 +122,12 @@ public class UnidadNegocio {
     }
 
     void agregarProductoReferencia(Producto producto) {
-        Objects.requireNonNull(producto, "El producto no puede ser null");
+        Objects.requireNonNull(producto, NULL_PRODUCT_MESSAGE);
         this.productos.add(producto);
     }
 
     void removerProductoReferencia(Producto producto) {
-        Objects.requireNonNull(producto, "El producto no puede ser null");
+        Objects.requireNonNull(producto, NULL_PRODUCT_MESSAGE);
         this.productos.remove(producto);
     }
 
@@ -158,8 +161,8 @@ public class UnidadNegocio {
 
     @PrePersist
     protected void onCreate() {
-        fechaCreacion = LocalDateTime.now();
-        fechaActualizacion = LocalDateTime.now();
+        fechaCreacion = BusinessTime.now();
+        fechaActualizacion = BusinessTime.now();
 
         if (activo == null) {
             activo = true;
@@ -174,6 +177,6 @@ public class UnidadNegocio {
 
     @PreUpdate
     protected void onUpdate() {
-        fechaActualizacion = LocalDateTime.now();
+        fechaActualizacion = BusinessTime.now();
     }
 }

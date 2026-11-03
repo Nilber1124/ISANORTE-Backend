@@ -59,9 +59,9 @@ class PedidoServiceTest {
         Pedido pedido = Pedido.builder().id(id).estado(EstadoPedido.CANCELADO).build();
         when(pedidoRepository.findById(id)).thenReturn(Optional.of(pedido));
         PedidoService service = service(pedidoRepository, mapper, mock(ProductoRepository.class));
+        EstadoPedidoRequest request = new EstadoPedidoRequest(EstadoPedido.EN_PREPARACION);
 
-        assertThrows(IllegalStateException.class,
-                () -> service.updateEstado(id, new EstadoPedidoRequest(EstadoPedido.EN_PREPARACION)));
+        assertThrows(IllegalStateException.class, () -> service.updateEstado(id, request));
         verify(pedidoRepository, never()).saveAndFlush(any());
     }
 
@@ -126,9 +126,9 @@ class PedidoServiceTest {
 
         PublicPedidoRequest request = new PublicPedidoRequest(null, null, "calle", "distrito", "ciudad", null,
                 "999999999", null, null, List.of());
+        UUID clienteId = UUID.randomUUID();
 
-        assertThrows(IllegalStateException.class,
-                () -> service.createPublic("site", "unit", request, UUID.randomUUID()));
+        assertThrows(IllegalStateException.class, () -> service.createPublic("site", "unit", request, clienteId));
     }
 
     private PedidoResponse dummyResponse() {

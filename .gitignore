@@ -34,3 +34,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Configuración local: puede contener credenciales. Usar application.example.properties como plantilla.
+src/main/resources/application.properties

@@ -27,12 +27,14 @@ import jakarta.persistence.criteria.Subquery;
  * de Hibernate; la hidratación de esas colecciones se hace aparte, por página, en el service.
  */
 public final class ProductoCatalogSpecifications {
+    private static final String FIELD_BUSINESS_UNIT = "unidadNegocio";
+    private static final String FIELD_NAME = "nombre";
 
     private ProductoCatalogSpecifications() {
     }
 
     public static Specification<Producto> perteneceAUnidad(UUID unidadId) {
-        return (root, query, cb) -> cb.equal(root.get("unidadNegocio").get("id"), unidadId);
+        return (root, query, cb) -> cb.equal(root.get(FIELD_BUSINESS_UNIT).get("id"), unidadId);
     }
 
     public static Specification<Producto> estado(EstadoPublicacion estado) {
@@ -51,8 +53,8 @@ public final class ProductoCatalogSpecifications {
             subquery.where(cb.and(
                     cb.equal(categoria.get("slug"), slug),
                     cb.isTrue(categoria.get("activo")),
-                    cb.or(cb.isNull(categoria.get("unidadNegocio")),
-                            cb.equal(categoria.get("unidadNegocio").get("id"), unidadId))));
+                    cb.or(cb.isNull(categoria.get(FIELD_BUSINESS_UNIT)),
+                            cb.equal(categoria.get(FIELD_BUSINESS_UNIT).get("id"), unidadId))));
             return cb.exists(subquery);
         };
     }
@@ -64,7 +66,7 @@ public final class ProductoCatalogSpecifications {
         String patron = "%" + termino.trim().toLowerCase() + "%";
         return (root, query, cb) -> {
             Predicate coincideEnCampos = cb.or(
-                    cb.like(cb.lower(root.get("nombre")), patron),
+                    cb.like(cb.lower(root.get(FIELD_NAME)), patron),
                     cb.like(cb.lower(root.get("sku")), patron),
                     cb.like(cb.lower(cb.coalesce(root.get("resumen"), "")), patron),
                     cb.like(cb.lower(root.get("descripcion")), patron));
@@ -73,7 +75,7 @@ public final class ProductoCatalogSpecifications {
             Root<Producto> correlatedRoot = subquery.correlate(root);
             Join<Producto, CategoriaProducto> categoria = correlatedRoot.join("categorias");
             subquery.select(correlatedRoot.get("id"));
-            subquery.where(cb.like(cb.lower(categoria.get("nombre")), patron));
+            subquery.where(cb.like(cb.lower(categoria.get(FIELD_NAME)), patron));
             Predicate coincideEnCategoria = cb.exists(subquery);
 
             return cb.or(coincideEnCampos, coincideEnCategoria);
@@ -117,7 +119,7 @@ public final class ProductoCatalogSpecifications {
     }
 
     private static List<Order> buildOrders(OrdenCatalogoProducto orden, Root<Producto> root, CriteriaBuilder cb) {
-        Path<String> nombre = root.get("nombre");
+        Path<String> nombre = root.get(FIELD_NAME);
         Path<UUID> id = root.get("id");
         Path<BigDecimal> precioBase = root.get("precioBase");
         return switch (orden) {

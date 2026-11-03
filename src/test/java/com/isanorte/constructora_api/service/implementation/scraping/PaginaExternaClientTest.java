@@ -13,6 +13,32 @@ import static org.junit.jupiter.api.Assertions.*;
 import static com.isanorte.constructora_api.enums.EstadoComparacionPrecio.*;
 
 class PaginaExternaClientTest {
+    @Test void paginaComparaContenidoYProtegeElArray() {
+        byte[] source = {1, 2, 3};
+        var first = new PaginaExternaClient.Pagina(200, null, source, "UTF-8");
+        var second = new PaginaExternaClient.Pagina(200, null, new byte[]{1, 2, 3}, "UTF-8");
+
+        source[0] = 9;
+        byte[] exposed = first.html();
+        exposed[1] = 9;
+
+        assertEquals(first, second);
+        assertEquals(first.hashCode(), second.hashCode());
+        assertArrayEquals(new byte[]{1, 2, 3}, first.html());
+        assertTrue(first.toString().contains("[1, 2, 3]"));
+    }
+
+    @Test void paginaDistingueContenidoDiferenteYAdmiteArrayNulo() {
+        var first = new PaginaExternaClient.Pagina(200, null, new byte[]{1}, null);
+        var different = new PaginaExternaClient.Pagina(200, null, new byte[]{2}, null);
+        var empty = new PaginaExternaClient.Pagina(302, "/otra", null, null);
+
+        assertNotEquals(first, different);
+        assertNull(empty.html());
+        assertDoesNotThrow(empty::hashCode);
+        assertTrue(empty.toString().contains("html=null"));
+    }
+
     @Test void dnsFijadoNoVuelveAResolverYNoAdmiteOtroHost() throws Exception {
         var addresses = new InetAddress[]{InetAddress.getByName("93.184.216.34")};
         var dns = PaginaExternaClient.dnsFijado(

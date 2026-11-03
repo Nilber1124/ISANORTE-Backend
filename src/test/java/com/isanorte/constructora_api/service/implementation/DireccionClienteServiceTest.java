@@ -3,6 +3,7 @@ package com.isanorte.constructora_api.service.implementation;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -49,9 +50,11 @@ class DireccionClienteServiceTest {
         DireccionCliente direccion = DireccionCliente.builder().id(direccionId).cliente(otroCliente).build();
         when(direccionRepository.findById(direccionId)).thenReturn(Optional.of(direccion));
         DireccionClienteService service = new DireccionClienteService(direccionRepository, clienteRepository);
+        UUID clienteId = UUID.randomUUID();
+        DireccionClienteRequest request = new DireccionClienteRequest(
+                null, "Calle", "Distrito", "Ciudad", null, "999999999", false);
 
-        assertThrows(IllegalArgumentException.class, () -> service.update(UUID.randomUUID(), direccionId,
-                new DireccionClienteRequest(null, "Calle", "Distrito", "Ciudad", null, "999999999", false)));
+        assertThrows(IllegalArgumentException.class, () -> service.update(clienteId, direccionId, request));
     }
 
     @Test
@@ -61,8 +64,9 @@ class DireccionClienteServiceTest {
         UUID direccionId = UUID.randomUUID();
         when(direccionRepository.findById(direccionId)).thenReturn(Optional.empty());
         DireccionClienteService service = new DireccionClienteService(direccionRepository, clienteRepository);
+        UUID clienteId = UUID.randomUUID();
 
-        assertThrows(ModelNotFoundException.class, () -> service.delete(UUID.randomUUID(), direccionId));
-        verify(direccionRepository, org.mockito.Mockito.never()).delete(org.mockito.ArgumentMatchers.any());
+        assertThrows(ModelNotFoundException.class, () -> service.delete(clienteId, direccionId));
+        verify(direccionRepository, never()).delete(org.mockito.ArgumentMatchers.any());
     }
 }

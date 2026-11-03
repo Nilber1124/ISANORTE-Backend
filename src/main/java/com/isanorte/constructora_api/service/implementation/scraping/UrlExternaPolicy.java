@@ -1,7 +1,9 @@
 package com.isanorte.constructora_api.service.implementation.scraping;
 
 import java.net.*;
+import java.util.Arrays;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.concurrent.*;
 import jakarta.annotation.PreDestroy;
 import org.springframework.stereotype.Component;
@@ -12,7 +14,33 @@ import static com.isanorte.constructora_api.enums.EstadoComparacionPrecio.*;
 public class UrlExternaPolicy {
     private final ExecutorService dnsExecutor = new ThreadPoolExecutor(0, 4, 30, TimeUnit.SECONDS,
             new SynchronousQueue<>(), Thread.ofPlatform().daemon().name("price-dns-", 0).factory());
-    public record Destino(URI uri, InetAddress[] direcciones) {}
+    public record Destino(URI uri, InetAddress[] direcciones) {
+        public Destino {
+            direcciones = direcciones == null ? null : direcciones.clone();
+        }
+
+        @Override
+        public InetAddress[] direcciones() {
+            return direcciones == null ? null : direcciones.clone();
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            return this == other || other instanceof Destino destination
+                    && Objects.equals(uri, destination.uri)
+                    && Arrays.equals(direcciones, destination.direcciones);
+        }
+
+        @Override
+        public int hashCode() {
+            return 31 * Objects.hashCode(uri) + Arrays.hashCode(direcciones);
+        }
+
+        @Override
+        public String toString() {
+            return "Destino[uri=" + uri + ", direcciones=" + Arrays.toString(direcciones) + "]";
+        }
+    }
 
     public Destino validar(String value) {
         URI uri;
@@ -78,7 +106,9 @@ public class UrlExternaPolicy {
                 || address.isSiteLocalAddress() || address.isMulticastAddress()) return false;
         byte[] bytes = address.getAddress();
         if (bytes.length == 4) {
-            int a = bytes[0] & 255, b = bytes[1] & 255, c = bytes[2] & 255;
+            int a = bytes[0] & 255;
+            int b = bytes[1] & 255;
+            int c = bytes[2] & 255;
             return !(a == 0 || a == 10 || a == 127 || a >= 224
                     || (a == 100 && b >= 64 && b <= 127)
                     || (a == 169 && b == 254) || (a == 172 && b >= 16 && b <= 31)
@@ -89,7 +119,10 @@ public class UrlExternaPolicy {
         }
         if (bytes.length != 16) return false;
         // Only global unicast 2000::/3; exclude special-purpose, documentation and transition ranges.
-        int a = bytes[0] & 255, b = bytes[1] & 255, c = bytes[2] & 255, d = bytes[3] & 255;
+        int a = bytes[0] & 255;
+        int b = bytes[1] & 255;
+        int c = bytes[2] & 255;
+        int d = bytes[3] & 255;
         return (a & 0xe0) == 0x20
                 && !(a == 0x20 && b == 0x01 && c < 2) // 2001::/23 (Teredo, benchmarking, ORCHID...)
                 && !(a == 0x20 && b == 0x01 && c == 0x0d && d == 0xb8)

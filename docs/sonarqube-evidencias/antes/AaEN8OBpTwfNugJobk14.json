@@ -1,0 +1,49 @@
+{
+  "capturedAt": null,
+  "phase": "antes",
+  "issue": {
+    "key": "AaEN8OBpTwfNugJobk14",
+    "rule": "java:S8989",
+    "component": "src/main/java/com/isanorte/constructora_api/config/DemoProductSeeder.java",
+    "line": null,
+    "message": "Specify rollback behavior for checked exceptions using \"rollbackFor\" or \"noRollbackFor\" attributes.",
+    "originalStatus": "FIXED",
+    "analysisUuid": "f1aaf36f-0a62-4365-b5a7-7bd4c1eb7da8"
+  },
+  "fileStem": "AaEN8OBpTwfNugJobk14",
+  "sourceUrl": "https://sonarcloud.io/project/issues?issueStatuses=OPEN%2CCONFIRMED&id=Nilber1124_ISANORTE-Backend&open=AaEN8OBpTwfNugJobk14",
+  "screenshot": null,
+  "analysisRevision": {
+    "available": true,
+    "analysisUuid": "f1aaf36f-0a62-4365-b5a7-7bd4c1eb7da8",
+    "revision": "73615cec38bbd6051dd9aad7a2ef9de06a5e3f93",
+    "date": "2026-11-02T17:19:42+0000",
+    "projectVersion": "not provided",
+    "gitCommitAvailable": true
+  },
+  "validationResult": "PENDIENTE_NO_DISPONIBLE",
+  "evidenceStatus": "pendiente",
+  "captureOrigin": null,
+  "previousCaptureReview": {
+    "order": 85,
+    "issueId": "AaEN8OBpTwfNugJobk14",
+    "fileStem": "AaEN8OBpTwfNugJobk14",
+    "rule": "java:S8989",
+    "component": "src/main/java/com/isanorte/constructora_api/config/DemoProductSeeder.java",
+    "line": null,
+    "classification": "PENDIENTE",
+    "reason": "No existe una captura previa.",
+    "pngExists": false,
+    "metadataExists": true,
+    "visualMetrics": null
+  },
+  "verification": null,
+  "failureReason": "La incidencia ya no figura como OPEN o CONFIRMED en SonarQube Cloud.",
+  "metadata": "docs/sonarqube-evidencias/antes/AaEN8OBpTwfNugJobk14.json",
+  "existingCaptureReview": {
+    "reviewedAt": "2026-11-02T21:33:24.542Z",
+    "classification": "PENDIENTE",
+    "reason": "No existe una captura previa.",
+    "visualMetrics": null
+  }
+}

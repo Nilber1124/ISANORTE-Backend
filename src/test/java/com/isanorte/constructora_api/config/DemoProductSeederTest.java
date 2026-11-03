@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -58,7 +59,7 @@ class DemoProductSeederTest {
         seeder.run(mock(ApplicationArguments.class));
 
         ArgumentCaptor<Producto> captor = ArgumentCaptor.forClass(Producto.class);
-        verify(productoRepository, org.mockito.Mockito.times(26)).save(captor.capture());
+        verify(productoRepository, times(26)).save(captor.capture());
         List<Producto> products = captor.getAllValues();
         assertThat(products).allMatch(product -> product.getEstado() == EstadoPublicacion.PUBLICADO);
         assertThat(products).allMatch(product -> product.getUnidadNegocio() == unit);
