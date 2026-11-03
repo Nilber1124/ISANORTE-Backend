@@ -141,9 +141,9 @@ la carga Cloudinary existente en `POST /api/archivos/subir-imagen`.
 - Son independientes de los administradores: tabla `clientes`, token con rol `CLIENTE` y sin acceso a `/api/**` administrativo.
 - `POST /api/publico/cuenta/registro` exige `aceptaTratamientoDatos: true` y una contraseña de al menos 8 caracteres. Un correo repetido responde `409`.
 - El token expira según `app.jwt.expiration`. Tras expirar, el frontend debe pedir un nuevo inicio de sesión.
-- Migración `V8__cuentas_clientes.sql`: crea `clientes` y agrega `cotizaciones.cliente_id`.
-- Migración `V9__carrito_cliente.sql`: crea `carritos_cliente`, un carrito por cuenta.
-- Migración `V10__create_resenas_producto.sql`: incorpora reseñas persistidas de productos.
+- Migración `V8__create_resenas_producto.sql`: incorpora reseñas persistidas de productos.
+- Migración `V9__cuentas_clientes.sql`: crea `clientes` y agrega `cotizaciones.cliente_id`.
+- Migración `V10__carrito_cliente.sql`: crea `carritos_cliente`, un carrito por cuenta.
 - Migraciones `V13__create_catalogos.sql` y `V14__create_pedidos_direcciones.sql`: incorporan catálogos, inventario, pedidos y direcciones.
 
 ### Anuncios públicos
