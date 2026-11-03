@@ -1,5 +1,7 @@
 package com.isanorte.constructora_api.service.implementation;
 
+import com.isanorte.constructora_api.util.BusinessTime;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -73,7 +75,7 @@ public class AnuncioService implements IAnuncioService {
         if (destino == DestinoAnuncio.AMBOS) {
             throw new IllegalArgumentException("El destino público debe ser ISANORTE o ISADECOR");
         }
-        return anuncioRepository.findPublicosVigentes(destino, ubicacion, LocalDateTime.now()).stream()
+        return anuncioRepository.findPublicosVigentes(destino, ubicacion, BusinessTime.now()).stream()
                 .map(this::toResponse)
                 .toList();
     }
