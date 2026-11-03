@@ -17,7 +17,17 @@ Los estados `FIXED` solo se registran cuando el usuario confirma un análisis re
 
 ## Pendientes y bloqueos
 
-- Continúan pendientes las correcciones A/E seguras de pruebas y mantenibilidad.
-- Las 11 incidencias `java:S6809` requieren comprobar fronteras transaccionales antes de refactorizar; no se consideran aceptadas.
+- `AaGdRnta97lfKRteM0Yu` (`PedidoService`, S3776): el método controla stock, variantes, dirección y transacción con reintentos; requiere pruebas de caracterización concurrente antes de dividirlo.
+- `AaES7WZe-6tQcR7a5P5P` (`CotizacionService`, S3776): calcula precios, variantes y subtotales; requiere matriz funcional de precios incompletos antes del refactor.
+- `AaEN8OgrTwfNugJobk2m` (`SeccionLandingService`, S3776): valida compatibilidad, enlaces y límites de acciones; requiere pruebas específicas de todas las combinaciones.
+- `AaGdRnt197lfKRteM0Yx` (`IPublicContentService`, S107): cambiar el contrato de catálogo afecta controlador, implementación y consumidores; se recomienda un objeto de criterios después de verificar compatibilidad API.
+- Las 11 incidencias `java:S6809` (`AaEN8OkrTwfNugJobk2u`, `AaEN8OmWTwfNugJobk2v`, `AaCdT25Pj7PCqTSvAO4q`, `AaCdT247j7PCqTSvAO4o`, `AaCdT24dj7PCqTSvAO4k`, `AaCdT24Bj7PCqTSvAO4j`, `AaCdT23wj7PCqTSvAO4h`, `AaCdT25Fj7PCqTSvAO4p`, `AaCdT24xj7PCqTSvAO4n`, `AaCdT25Xj7PCqTSvAO4r`, `AaCdT24nj7PCqTSvAO4m`) requieren comprobar propagación y rollback antes de extraer colaboradores; no se consideran aceptadas.
 - `java:S4502` permanece como alerta justificada por JWT Bearer stateless sin cookies; no se cambia seguridad sin validación adicional.
 - No se modifican V11 ni otras migraciones Flyway aplicadas.
+
+## Cierre de la ronda automática
+
+- Corregidas y publicadas en los lotes 1–10: **36 incidencias**.
+- Pendientes por riesgo técnico: **4 incidencias A** y **11 incidencias F**.
+- Falsos positivos y riesgos documentados C/D: sin cambios de código ni de estado remoto.
+- Todas las correcciones publicadas quedan pendientes de confirmación en un análisis SonarQube, salvo los lotes 1 y 2 confirmados por el usuario.
