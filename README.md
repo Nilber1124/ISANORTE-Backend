@@ -86,13 +86,14 @@ La API cuenta con autenticación basada en **JSON Web Tokens (JWT)** y control d
 | `ADMIN_ROLE` | `app.auth.admin-role` | Nombre de rol (por defecto `ADMINISTRADOR`) | Nombre del rol con permisos administrativos. |
 | `SEED_DEMO_HOME_ISADECOR` | `app.seed.demo-home-isadecor` | `true` o `false` (por defecto `false`) | Inserta una sola vez contenido demostrativo administrable del Home ISADECOR. No activar en producción. |
 | `CORS_ALLOWED_ORIGINS` | `cors.allowed-origins` | Lista de orígenes `http://` o `https://` exactos, separados por comas; no admite `*` ni rutas | Frontends autorizados para llamadas desde navegador. |
-| — | `spring.servlet.multipart.max-file-size` | `10MB` | Tamaño máximo por archivo subido a Cloudinary. |
-| — | `spring.servlet.multipart.max-request-size` | `15MB` | Tamaño máximo total de una petición multipart. |
+| `MULTIPART_MAX_FILE_SIZE` | `spring.servlet.multipart.max-file-size` | Tamaño de Spring (`7MB` por defecto; no superar `8MB` sin evaluación) | Tamaño máximo por archivo subido a Cloudinary. |
+| `MULTIPART_MAX_REQUEST_SIZE` | `spring.servlet.multipart.max-request-size` | Tamaño de Spring (`8MB` por defecto y mayor que el límite de archivo) | Tamaño máximo total de una petición multipart. |
 
 > **⚠️ Importante:** 
 > - Si `JWT_SECRET` tiene menos de 32 caracteres, la aplicación arrojará una excepción al iniciar y se detendrá.
 > - Al iniciar la aplicación por primera vez con `ADMIN_EMAIL` y `ADMIN_PASSWORD` configurados, el componente `AdminInitializer` creará automáticamente el administrador inicial en la base de datos. Si el usuario ya existe, no se modificará.
 > - `SPRING_DATASOURCE_PASSWORD`, `ADMIN_PASSWORD`, `JWT_SECRET` y las credenciales de Cloudinary no deben tener valores sensibles por defecto ni almacenarse en Git.
+> - Los límites multipart predeterminados dejan margen para la envoltura de una petición con un archivo de hasta 7 MB. Amplíalos solo si existe un requisito funcional verificado y se han evaluado la memoria disponible, las cuotas y el control de frecuencia, ya que la carga actual se materializa en memoria antes de enviarse a Cloudinary.
 
 #### Cómo configurarlo:
 
