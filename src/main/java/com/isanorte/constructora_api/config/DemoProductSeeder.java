@@ -47,7 +47,7 @@ public class DemoProductSeeder implements ApplicationRunner {
     private final ObjectMapper objectMapper;
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = IOException.class)
     public void run(ApplicationArguments args) throws IOException {
         DemoCatalog catalog = readCatalog(resourceLoader.getResource(DATA_RESOURCE));
         UnidadNegocio unit = unidadRepository.findBySlug(catalog.businessUnitSlug())
