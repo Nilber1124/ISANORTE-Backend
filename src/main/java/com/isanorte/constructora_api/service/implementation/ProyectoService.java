@@ -1,7 +1,6 @@
 package com.isanorte.constructora_api.service.implementation;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -24,6 +23,7 @@ import com.isanorte.constructora_api.repository.ProyectoRepository;
 import com.isanorte.constructora_api.repository.ServicioRepository;
 import com.isanorte.constructora_api.service.CloudinaryService;
 import com.isanorte.constructora_api.service.IProyectoService;
+import com.isanorte.constructora_api.util.BusinessTime;
 
 import lombok.RequiredArgsConstructor;
 
@@ -158,7 +158,7 @@ public class ProyectoService extends GenericService<Proyecto, UUID> implements I
         if (!proyectoRepository.existsById(id)) {
             throw new ModelNotFoundException("Proyecto no encontrado con ID: " + id);
         }
-        proyectoRepository.updateActivoById(id, request.activo(), LocalDateTime.now());
+        proyectoRepository.updateActivoById(id, request.activo(), BusinessTime.now());
         Proyecto proyecto = super.findById(id);
         initializeForResponse(proyecto);
         return proyectoMapper.toResponse(proyecto);
