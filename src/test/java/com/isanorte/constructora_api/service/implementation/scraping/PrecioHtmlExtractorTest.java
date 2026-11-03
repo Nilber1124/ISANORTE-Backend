@@ -1,6 +1,7 @@
 package com.isanorte.constructora_api.service.implementation.scraping;
 
 import org.jsoup.Jsoup;
+import java.time.Duration;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -89,6 +90,21 @@ class PrecioHtmlExtractorTest {
             <span class="sale-price">S/ 850</span><span class="installment price">S/ 50</span></div></main>
             """));
         assertEquals("850.00", result.precio().toPlainString());
+    }
+
+    @Test void exclusionUnicodeIgnoraEnvioEnMayusculas() {
+        assertEquals(PRICE_NOT_FOUND, assertThrows(ScrapingPrecioException.class,
+                () -> extractor.extraer(Jsoup.parse(
+                        "<main><div class='product-price ENVÍO'>S/ 20</div></main>"))).getEstado());
+    }
+
+    @Test void estiloLargoSeEvaluaSinBacktrackingSuperlineal() {
+        String style = "color:red;".repeat(20_000) + "display:none";
+        assertTimeoutPreemptively(Duration.ofSeconds(1), () ->
+                assertEquals(PRICE_NOT_FOUND, assertThrows(ScrapingPrecioException.class,
+                        () -> extractor.extraer(Jsoup.parse(
+                                "<main><div class='product-price' style='" + style + "'>S/ 20</div></main>")))
+                        .getEstado()));
     }
 
     @ParameterizedTest

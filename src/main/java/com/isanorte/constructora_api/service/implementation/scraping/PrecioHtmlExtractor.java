@@ -18,10 +18,16 @@ import static com.isanorte.constructora_api.enums.EstadoComparacionPrecio.*;
 public class PrecioHtmlExtractor {
     public record Precio(BigDecimal precio, String moneda, String nombre) {}
     private final JsonMapper json = JsonMapper.builder().build();
-    private static final Pattern EXCLUDED = Pattern.compile(
-            "(?i)(cuota|installment|mensual|monthly|env[ií]o|shipping|descuento|discount|"
-            + "old.?price|price.?old|regular.?price|list.?price|original.?price|tachado|compare.?at|"
-            + "precio.?anterior|precio.?normal|recommended|related|recomendado|relacionado)");
+    private static final int CASE_INSENSITIVE_UNICODE = Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE;
+    private static final Pattern EXCLUDED_PAYMENT_OR_SHIPPING = Pattern.compile(
+            "cuota|installment|mensual|monthly|env[ií]o|shipping", CASE_INSENSITIVE_UNICODE);
+    private static final Pattern EXCLUDED_OLD_PRICE = Pattern.compile(
+            "descuento|discount|old.?price|price.?old|regular.?price|list.?price|original.?price|"
+                    + "tachado|compare.?at|precio.?anterior|precio.?normal", CASE_INSENSITIVE_UNICODE);
+    private static final Pattern EXCLUDED_RELATED = Pattern.compile(
+            "recommended|related|recomendado|relacionado", CASE_INSENSITIVE_UNICODE);
+    private static final Pattern HIDDEN_STYLE = Pattern.compile(
+            "display\\s*:\\s*none|line-through", Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
     private static final Pattern ISO = Pattern.compile(
             "(?i)\\b(PEN|USD|EUR|GBP|CLP|COP|MXN|ARS|BRL|CAD|AUD|JPY|CNY|CHF|BOB|UYU)\\b");
 
@@ -192,10 +198,10 @@ public class PrecioHtmlExtractor {
                 current = current.parent()) {
             if (Set.of("del", "s", "strike", "nav", "footer", "aside").contains(current.tagName())
                     || current.hasAttr("hidden") || current.attr("aria-hidden").equals("true")
-                    || EXCLUDED.matcher(current.className() + " " + current.id()).find()
-                    || current.attr("style").matches("(?i).*(display\\s*:\\s*none|line-through).*")) return true;
+                    || isExcludedText(current.className() + " " + current.id())
+                    || HIDDEN_STYLE.matcher(current.attr("style")).find()) return true;
         }
-        return EXCLUDED.matcher(element.text()).find();
+        return isExcludedText(element.text());
     }
 
     private static void add(List<Precio> prices, String raw, String explicitCurrency, String name, boolean machine) {
@@ -222,7 +228,7 @@ public class PrecioHtmlExtractor {
     }
 
     static BigDecimal normalizarPrecio(String raw, boolean machine) {
-        if (raw == null || raw.length() > 100 || EXCLUDED.matcher(raw).find() || raw.contains("%")) return null;
+        if (raw == null || raw.length() > 100 || isExcludedText(raw) || raw.contains("%")) return null;
         String value = raw.replace('\u00a0', ' ').trim()
                 .replaceAll("(?i)\\b(PEN|USD|EUR|GBP|CLP|COP|MXN|ARS|BRL|CAD|AUD|JPY|CNY|CHF|BOB|UYU|soles)\\b", "")
                 .replaceAll("(?i)US\\s*\\$|S\\s*/\\.?", "").replaceAll("[€£$]", "").trim();
@@ -249,6 +255,12 @@ public class PrecioHtmlExtractor {
             BigDecimal result = new BigDecimal(value).setScale(2, RoundingMode.UNNECESSARY);
             return result.precision() <= 12 && result.signum() >= 0 ? result : null;
         } catch (ArithmeticException | NumberFormatException ex) { return null; }
+    }
+
+    private static boolean isExcludedText(String value) {
+        return EXCLUDED_PAYMENT_OR_SHIPPING.matcher(value).find()
+                || EXCLUDED_OLD_PRICE.matcher(value).find()
+                || EXCLUDED_RELATED.matcher(value).find();
     }
 
     private static Precio unique(List<Precio> prices) {
