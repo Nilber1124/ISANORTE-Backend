@@ -40,7 +40,7 @@ public class AdminInitializer implements ApplicationRunner {
             log.info("El administrador inicial ya existe; no se modificó su contraseña ni sus roles.");
             return;
         }
-        if (!email.matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$") || password.length() < 12
+        if (!isValidEmail(email) || password.length() < 12
                 || password.getBytes(StandardCharsets.UTF_8).length > 72) {
             throw new IllegalStateException(
                     "ADMIN_EMAIL debe ser válido y ADMIN_PASSWORD debe tener entre 12 y 72 bytes.");
@@ -65,5 +65,15 @@ public class AdminInitializer implements ApplicationRunner {
 
     private static String value(String value) {
         return value == null ? "" : value.trim();
+    }
+
+    private static boolean isValidEmail(String email) {
+        int at = email.indexOf('@');
+        int lastDot = email.lastIndexOf('.');
+        if (at <= 0 || at != email.lastIndexOf('@')
+                || lastDot <= at + 1 || lastDot == email.length() - 1) {
+            return false;
+        }
+        return email.chars().noneMatch(Character::isWhitespace);
     }
 }
