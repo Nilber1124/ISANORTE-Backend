@@ -266,12 +266,19 @@ public class SeccionLandingService extends GenericService<SeccionLanding, UUID> 
                 .filter(action -> Boolean.TRUE.equals(action.getActivo()))
                 .filter(action -> currentId == null || !Objects.equals(action.getId(), currentId))
                 .count();
-        int maximum = section.getTipo() == TipoSeccionLanding.HERO ? 2
-                : section.getTipo() == TipoSeccionLanding.CTA ? 1 : Integer.MAX_VALUE;
+        int maximum = maximumActiveActions(section.getTipo());
         if (count >= maximum) {
             throw new IllegalArgumentException("La sección " + section.getTipo()
                     + " admite como máximo " + maximum + " acciones activas");
         }
+    }
+
+    private static int maximumActiveActions(TipoSeccionLanding type) {
+        return switch (type) {
+            case HERO -> 2;
+            case CTA -> 1;
+            default -> Integer.MAX_VALUE;
+        };
     }
 
     private void initializeForResponse(SeccionLanding seccion) {
