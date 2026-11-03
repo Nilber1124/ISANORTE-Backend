@@ -31,17 +31,21 @@ import com.isanorte.constructora_api.dto.response.SolicitudContactoPublicRespons
 import com.isanorte.constructora_api.dto.response.ProductoRecomendadoResponse;
 import com.isanorte.constructora_api.dto.response.ResenaProductoResponse;
 import com.isanorte.constructora_api.dto.response.ResumenResenasResponse;
+import com.isanorte.constructora_api.enums.OrdenCatalogoProducto;
 import com.isanorte.constructora_api.enums.OrdenResena;
 import com.isanorte.constructora_api.enums.TipoPaginaPublica;
 import com.isanorte.constructora_api.service.IPublicContentService;
 import com.isanorte.constructora_api.service.IComparacionPrecioService;
 import com.isanorte.constructora_api.service.IComparacionCompetidoresService;
 import com.isanorte.constructora_api.service.ICotizacionService;
+import com.isanorte.constructora_api.service.IPedidoService;
 import com.isanorte.constructora_api.dto.request.ComparacionPrecioRequest;
 import com.isanorte.constructora_api.dto.request.PublicCotizacionRequest;
+import com.isanorte.constructora_api.dto.request.PublicPedidoRequest;
 import com.isanorte.constructora_api.dto.response.ComparacionPrecioResponse;
 import com.isanorte.constructora_api.dto.response.ComparacionCompetidoresResponse;
 import com.isanorte.constructora_api.dto.response.PublicCotizacionResponse;
+import com.isanorte.constructora_api.dto.response.PublicPedidoResponse;
 import com.isanorte.constructora_api.service.ISolicitudContactoService;
 import com.isanorte.constructora_api.service.IResenaProductoService;
 
@@ -57,6 +61,7 @@ public class PublicContentController {
     private final IComparacionPrecioService comparacionPrecioService;
     private final IComparacionCompetidoresService comparacionCompetidoresService;
     private final ICotizacionService cotizacionService;
+    private final IPedidoService pedidoService;
     private final IResenaProductoService resenaProductoService;
 
     @GetMapping("/sitios/{clave}/unidades/{unidadSlug}/productos/{productoSlug}/recomendados")
@@ -143,8 +148,17 @@ public class PublicContentController {
 
     @GetMapping("/sitios/{clave}/unidades/{unidadSlug}/catalogo")
     public ResponseEntity<PublicProductCatalogResponse> findProductCatalog(
-            @PathVariable String clave, @PathVariable String unidadSlug) {
-        return ResponseEntity.ok(publicContentService.findProductCatalog(clave, unidadSlug));
+            @PathVariable String clave, @PathVariable String unidadSlug,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "12") int size,
+            @RequestParam(required = false) String categoria,
+            @RequestParam(required = false) String q,
+            @RequestParam(defaultValue = "false") boolean soloDescuento,
+            @RequestParam(defaultValue = "false") boolean soloDisponible,
+            @RequestParam(defaultValue = "false") boolean soloDestacados,
+            @RequestParam(defaultValue = "DESTACADOS") OrdenCatalogoProducto orden) {
+        return ResponseEntity.ok(publicContentService.findProductCatalog(
+                clave, unidadSlug, page, size, categoria, q, soloDescuento, soloDisponible, soloDestacados, orden));
     }
 
     @GetMapping("/sitios/{clave}/unidades/{unidadSlug}/productos/{productoSlug}")
@@ -161,6 +175,16 @@ public class PublicContentController {
             @AuthenticationPrincipal Jwt jwt) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(cotizacionService.createPublic(siteKey, unitSlug, request, UUID.fromString(jwt.getSubject())));
+    }
+
+    @PostMapping("/sitios/{siteKey}/unidades/{unitSlug}/pedidos")
+    public ResponseEntity<PublicPedidoResponse> createPublicPedido(
+            @PathVariable String siteKey,
+            @PathVariable String unitSlug,
+            @Valid @RequestBody PublicPedidoRequest request,
+            @AuthenticationPrincipal Jwt jwt) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(pedidoService.createPublic(siteKey, unitSlug, request, UUID.fromString(jwt.getSubject())));
     }
 
     private ClientIdentity authenticatedClient(Authentication authentication) {

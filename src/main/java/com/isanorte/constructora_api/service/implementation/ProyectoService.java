@@ -1,5 +1,7 @@
 package com.isanorte.constructora_api.service.implementation;
 
+import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -20,6 +22,7 @@ import com.isanorte.constructora_api.model.Servicio;
 import com.isanorte.constructora_api.repository.IGenericRepository;
 import com.isanorte.constructora_api.repository.ProyectoRepository;
 import com.isanorte.constructora_api.repository.ServicioRepository;
+import com.isanorte.constructora_api.service.CloudinaryService;
 import com.isanorte.constructora_api.service.IProyectoService;
 
 import lombok.RequiredArgsConstructor;
@@ -31,6 +34,7 @@ public class ProyectoService extends GenericService<Proyecto, UUID> implements I
     private final ProyectoRepository proyectoRepository;
     private final ServicioRepository servicioRepository;
     private final ProyectoMapper proyectoMapper;
+    private final CloudinaryService cloudinaryService;
 
     @Override
     protected IGenericRepository<Proyecto, UUID> getRepo() {
@@ -151,9 +155,31 @@ public class ProyectoService extends GenericService<Proyecto, UUID> implements I
     @Override
     @Transactional
     public ProyectoResponse updateActivo(UUID id, ActivoRequest request) {
+        if (!proyectoRepository.existsById(id)) {
+            throw new ModelNotFoundException("Proyecto no encontrado con ID: " + id);
+        }
+        proyectoRepository.updateActivoById(id, request.activo(), LocalDateTime.now());
         Proyecto proyecto = super.findById(id);
-        proyecto.setActivo(request.activo());
-        return proyectoMapper.toResponse(proyectoRepository.saveAndFlush(proyecto));
+        initializeForResponse(proyecto);
+        return proyectoMapper.toResponse(proyecto);
+    }
+
+    @Override
+    @Transactional
+    public void delete(UUID id) {
+        Proyecto proyecto = super.findById(id);
+        String imagenUrl = proyecto.getImagenUrl();
+        proyectoRepository.delete(proyecto);
+        proyectoRepository.flush();
+        if (imagenUrl != null) {
+            cloudinaryService.extractPublicId(imagenUrl).ifPresent(publicId -> {
+                try {
+                    cloudinaryService.deleteFile(publicId);
+                } catch (IOException e) {
+                    // La imagen en Cloudinary queda huérfana pero la eliminación en BD ya se confirmó
+                }
+            });
+        }
     }
 
     private Proyecto findProyectoParaAdministracion(UUID proyectoId) {

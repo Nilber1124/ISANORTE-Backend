@@ -1,17 +1,20 @@
 package com.isanorte.constructora_api.repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.stereotype.Repository;
 import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 import com.isanorte.constructora_api.enums.EstadoPublicacion;
 import com.isanorte.constructora_api.model.Producto;
 
 @Repository
-public interface ProductoRepository extends IGenericRepository<Producto, UUID> {
+public interface ProductoRepository extends IGenericRepository<Producto, UUID>,
+        JpaSpecificationExecutor<Producto> {
 
     Optional<Producto> findBySlug(String slug);
 
@@ -23,6 +26,9 @@ public interface ProductoRepository extends IGenericRepository<Producto, UUID> {
 
     @EntityGraph(attributePaths = { "imagenes", "categorias", "categorias.unidadNegocio" })
     List<Producto> findByUnidadNegocioIdAndEstadoOrderByNombreAscIdAsc(UUID unidadNegocioId, EstadoPublicacion estado);
+
+    @EntityGraph(attributePaths = { "imagenes", "categorias", "categorias.unidadNegocio" })
+    List<Producto> findByIdIn(Collection<UUID> ids);
 
     @EntityGraph(attributePaths = { "categorias", "categorias.unidadNegocio" })
     Optional<Producto> findByUnidadNegocioIdAndSlugAndEstado(

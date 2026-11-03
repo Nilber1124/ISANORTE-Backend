@@ -10,6 +10,7 @@ import com.isanorte.constructora_api.dto.response.PublicProductDetailResponse;
 import com.isanorte.constructora_api.dto.response.PublicProjectResponse;
 import com.isanorte.constructora_api.dto.response.PublicSiteResponse;
 import com.isanorte.constructora_api.dto.response.ProductoRecomendadoResponse;
+import com.isanorte.constructora_api.enums.OrdenCatalogoProducto;
 import com.isanorte.constructora_api.enums.TipoPaginaPublica;
 
 public interface IPublicContentService {
@@ -18,7 +19,9 @@ public interface IPublicContentService {
     PublicPageResponse findPage(String clave, TipoPaginaPublica pagina);
     PublicProjectResponse findPublicProject(String clave, String proyectoSlug);
     PublicBusinessUnitResponse findBusinessUnit(String clave, String slug);
-    PublicProductCatalogResponse findProductCatalog(String clave, String unidadSlug);
+    PublicProductCatalogResponse findProductCatalog(
+            String clave, String unidadSlug, int page, int size, String categoriaSlug, String q,
+            boolean soloDescuento, boolean soloDisponible, boolean soloDestacados, OrdenCatalogoProducto orden);
     PublicProductDetailResponse findPublicProduct(String clave, String unidadSlug, String productoSlug);
     List<ProductoRecomendadoResponse> findRecommendedProducts(
             String clave, String unidadSlug, String productoSlug);

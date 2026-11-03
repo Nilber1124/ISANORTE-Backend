@@ -78,6 +78,8 @@ La API cuenta con autenticación basada en **JSON Web Tokens (JWT)** y control d
 | `ADMIN_ROLE` | `app.auth.admin-role` | Nombre de rol (por defecto `ADMINISTRADOR`) | Nombre del rol con permisos administrativos. |
 | `SEED_DEMO_HOME_ISADECOR` | `app.seed.demo-home-isadecor` | `true` o `false` (por defecto `false`) | Inserta una sola vez contenido demostrativo administrable del Home ISADECOR. No activar en producción. |
 | `CORS_ALLOWED_ORIGINS` | `cors.allowed-origins` | Lista de orígenes `http://` o `https://` exactos, separados por comas; no admite `*` ni rutas | Frontends autorizados para llamadas desde navegador. |
+| — | `spring.servlet.multipart.max-file-size` | `10MB` | Tamaño máximo por archivo subido a Cloudinary. |
+| — | `spring.servlet.multipart.max-request-size` | `15MB` | Tamaño máximo total de una petición multipart. |
 
 > **⚠️ Importante:** 
 > - Si `JWT_SECRET` tiene menos de 32 caracteres, la aplicación arrojará una excepción al iniciar y se detendrá.
@@ -131,6 +133,7 @@ la carga Cloudinary existente en `POST /api/archivos/subir-imagen`.
   - `GET /api/publico/cuenta/me` y `GET /api/publico/cuenta/cotizaciones`.
   - `GET` y `PUT /api/publico/cuenta/carrito`: carrito guardado en la cuenta (se reemplaza completo en cada `PUT`, máximo 50 líneas).
   - `POST /api/publico/sitios/{clave}/unidades/{unidadSlug}/cotizaciones`: la cotización queda vinculada a la cuenta.
+  - `POST /api/publico/sitios/{clave}/unidades/{unidadSlug}/pedidos`: crea un pedido vinculado a la cuenta y su dirección.
   - `POST .../productos/{productoSlug}/comparar-precio` y `GET .../productos/{productoSlug}/comparacion-competidores`.
 
 ### Cuentas de cliente
@@ -138,8 +141,10 @@ la carga Cloudinary existente en `POST /api/archivos/subir-imagen`.
 - Son independientes de los administradores: tabla `clientes`, token con rol `CLIENTE` y sin acceso a `/api/**` administrativo.
 - `POST /api/publico/cuenta/registro` exige `aceptaTratamientoDatos: true` y una contraseña de al menos 8 caracteres. Un correo repetido responde `409`.
 - El token expira según `app.jwt.expiration`. Tras expirar, el frontend debe pedir un nuevo inicio de sesión.
-- Migración `V9__cuentas_clientes.sql`: crea `clientes` y agrega `cotizaciones.cliente_id`.
-- Migración `V10__carrito_cliente.sql`: crea `carritos_cliente`, un carrito por cuenta.
+- Migración `V8__cuentas_clientes.sql`: crea `clientes` y agrega `cotizaciones.cliente_id`.
+- Migración `V9__carrito_cliente.sql`: crea `carritos_cliente`, un carrito por cuenta.
+- Migración `V10__create_resenas_producto.sql`: incorpora reseñas persistidas de productos.
+- Migraciones `V13__create_catalogos.sql` y `V14__create_pedidos_direcciones.sql`: incorporan catálogos, inventario, pedidos y direcciones.
 
 ### Anuncios públicos
 
@@ -250,4 +255,4 @@ O para ejecutar un test específico:
 - `src/main/java/.../controller/`: Controladores REST (ej: `AuthController.java`, `ArchivoController.java`).
 - `src/main/java/.../service/`: Servicios y lógica de negocio.
 - `src/main/resources/db/migration/`: Scripts SQL gestionados por Flyway para la evolución de la base de datos.
-- `src/main/resources/application.properties`: Archivo principal de configuración.
+- `src/main/resources/application.example.properties`: plantilla versionada sin secretos; copiar localmente como `application.properties`, que permanece ignorado por Git.

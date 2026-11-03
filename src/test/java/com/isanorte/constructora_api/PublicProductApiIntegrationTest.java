@@ -163,22 +163,23 @@ class PublicProductApiIntegrationTest {
         mockMvc.perform(get("/api/publico/sitios/{key}/unidades/{unit}/catalogo", site.getClave(), unitA.getSlug()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.unidad.nombre").value(unitA.getNombre()))
-                .andExpect(jsonPath("$.productos.length()").value(2))
-                .andExpect(jsonPath("$.productos[0].slug").value(productA.getSlug()))
-                .andExpect(jsonPath("$.productos[1].slug").value(laterProductA.getSlug()))
-                .andExpect(jsonPath("$.productos[0].imagen.url").value("/cover.webp"))
-                .andExpect(jsonPath("$.productos[0].categorias[*].slug", hasItem(global.getSlug())))
-                .andExpect(jsonPath("$.productos[0].categorias[*].slug", hasItem(scopedA.getSlug())))
-                .andExpect(jsonPath("$.productos[0].categorias[*].slug", not(hasItem(scopedB.getSlug()))))
+                .andExpect(jsonPath("$.productos.totalElementos").value(2))
+                .andExpect(jsonPath("$.productos.contenido.length()").value(2))
+                .andExpect(jsonPath("$.productos.contenido[0].slug").value(productA.getSlug()))
+                .andExpect(jsonPath("$.productos.contenido[1].slug").value(laterProductA.getSlug()))
+                .andExpect(jsonPath("$.productos.contenido[0].imagen.url").value("/cover.webp"))
+                .andExpect(jsonPath("$.productos.contenido[0].categorias[*].slug", hasItem(global.getSlug())))
+                .andExpect(jsonPath("$.productos.contenido[0].categorias[*].slug", hasItem(scopedA.getSlug())))
+                .andExpect(jsonPath("$.productos.contenido[0].categorias[*].slug", not(hasItem(scopedB.getSlug()))))
                 .andExpect(jsonPath("$.categorias[*].slug", not(hasItem(inactiveCategory.getSlug()))))
-                .andExpect(jsonPath("$.productos[*].slug", not(hasItem(draftA.getSlug()))))
-                .andExpect(jsonPath("$.productos[*].slug", not(hasItem(productB.getSlug()))))
-                .andExpect(jsonPath("$.productos[0].id").doesNotExist())
-                .andExpect(jsonPath("$.productos[0].estado").doesNotExist())
-                .andExpect(jsonPath("$.productos[0].destacado").value(false))
-                .andExpect(jsonPath("$.productos[0].ordenDestacado").value(0))
-                .andExpect(jsonPath("$.productos[0].fechaCreacion").doesNotExist())
-                .andExpect(jsonPath("$.productos[0].unidadNegocioId").doesNotExist());
+                .andExpect(jsonPath("$.productos.contenido[*].slug", not(hasItem(draftA.getSlug()))))
+                .andExpect(jsonPath("$.productos.contenido[*].slug", not(hasItem(productB.getSlug()))))
+                .andExpect(jsonPath("$.productos.contenido[0].id").doesNotExist())
+                .andExpect(jsonPath("$.productos.contenido[0].estado").doesNotExist())
+                .andExpect(jsonPath("$.productos.contenido[0].destacado").value(false))
+                .andExpect(jsonPath("$.productos.contenido[0].ordenDestacado").value(0))
+                .andExpect(jsonPath("$.productos.contenido[0].fechaCreacion").doesNotExist())
+                .andExpect(jsonPath("$.productos.contenido[0].unidadNegocioId").doesNotExist());
 
         mockMvc.perform(get("/api/publico/sitios/{key}/unidades/{unit}/catalogo", site.getClave(), inactive.getSlug()))
                 .andExpect(status().isNotFound());
@@ -190,9 +191,117 @@ class PublicProductApiIntegrationTest {
         UnidadNegocio empty = unit(site.getEmpresa(), "catalog-empty", true);
         mockMvc.perform(get("/api/publico/sitios/{key}/unidades/{unit}/catalogo", site.getClave(), empty.getSlug()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.productos").isArray())
-                .andExpect(jsonPath("$.productos.length()").value(0))
+                .andExpect(jsonPath("$.productos.contenido").isArray())
+                .andExpect(jsonPath("$.productos.contenido.length()").value(0))
+                .andExpect(jsonPath("$.productos.totalElementos").value(0))
                 .andExpect(jsonPath("$.categorias.length()").value(0));
+    }
+
+    @Test
+    void catalogoPublicoPaginaFiltraYOrdenaDesdeElBackend() throws Exception {
+        ConfiguracionSitio site = site("catalogo-paginado");
+        UnidadNegocio unit = unit(site.getEmpresa(), "catalog-page", true);
+        CategoriaProducto mural = category("mural", unit, true, 0);
+        CategoriaProducto piso = category("piso", unit, true, 1);
+
+        Producto barato = product(unit, "panel-economico", EstadoPublicacion.PUBLICADO);
+        barato.setPrecioBase(new BigDecimal("15.00"));
+        barato.setDisponibilidad(EstadoDisponibilidad.AGOTADO);
+        barato.addCategoria(mural);
+        productoRepository.saveAndFlush(barato);
+
+        Producto caro = product(unit, "panel-premium", EstadoPublicacion.PUBLICADO);
+        caro.setPrecioBase(new BigDecimal("500.00"));
+        caro.setDescuentoPorcentaje(new BigDecimal("10.00"));
+        caro.setDisponibilidad(EstadoDisponibilidad.DISPONIBLE);
+        caro.addCategoria(mural);
+        productoRepository.saveAndFlush(caro);
+
+        Producto sinPrecio = product(unit, "panel-a-consultar", EstadoPublicacion.PUBLICADO);
+        sinPrecio.setPrecioBase(null);
+        sinPrecio.setDisponibilidad(EstadoDisponibilidad.DISPONIBLE);
+        sinPrecio.addCategoria(piso);
+        productoRepository.saveAndFlush(sinPrecio);
+
+        String basePath = "/api/publico/sitios/{key}/unidades/{unit}/catalogo";
+
+        // Paginación: size=1 trae solo un elemento por página, pero el total refleja todo el catálogo.
+        mockMvc.perform(get(basePath, site.getClave(), unit.getSlug()).param("page", "0").param("size", "1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.productos.contenido.length()").value(1))
+                .andExpect(jsonPath("$.productos.totalElementos").value(3))
+                .andExpect(jsonPath("$.productos.totalPaginas").value(3))
+                .andExpect(jsonPath("$.productos.pagina").value(0));
+
+        // Precio ascendente con nulls al final.
+        mockMvc.perform(get(basePath, site.getClave(), unit.getSlug())
+                        .param("orden", "PRECIO_ASC").param("size", "10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.productos.contenido[0].slug").value(barato.getSlug()))
+                .andExpect(jsonPath("$.productos.contenido[1].slug").value(caro.getSlug()))
+                .andExpect(jsonPath("$.productos.contenido[2].slug").value(sinPrecio.getSlug()));
+
+        // Precio descendente también deja los nulls al final (no primero, como haría el default de Postgres).
+        mockMvc.perform(get(basePath, site.getClave(), unit.getSlug())
+                        .param("orden", "PRECIO_DESC").param("size", "10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.productos.contenido[0].slug").value(caro.getSlug()))
+                .andExpect(jsonPath("$.productos.contenido[1].slug").value(barato.getSlug()))
+                .andExpect(jsonPath("$.productos.contenido[2].slug").value(sinPrecio.getSlug()));
+
+        // Filtro por categoría.
+        mockMvc.perform(get(basePath, site.getClave(), unit.getSlug())
+                        .param("categoria", piso.getSlug()).param("size", "10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.productos.contenido.length()").value(1))
+                .andExpect(jsonPath("$.productos.contenido[0].slug").value(sinPrecio.getSlug()));
+
+        // Búsqueda de texto por nombre.
+        mockMvc.perform(get(basePath, site.getClave(), unit.getSlug())
+                        .param("q", "premium").param("size", "10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.productos.contenido.length()").value(1))
+                .andExpect(jsonPath("$.productos.contenido[0].slug").value(caro.getSlug()));
+
+        // Búsqueda sin coincidencias.
+        mockMvc.perform(get(basePath, site.getClave(), unit.getSlug())
+                        .param("q", "inexistente-xyz").param("size", "10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.productos.contenido.length()").value(0))
+                .andExpect(jsonPath("$.productos.totalElementos").value(0));
+
+        // Solo descuento / solo disponible.
+        mockMvc.perform(get(basePath, site.getClave(), unit.getSlug())
+                        .param("soloDescuento", "true").param("size", "10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.productos.contenido.length()").value(1))
+                .andExpect(jsonPath("$.productos.contenido[0].slug").value(caro.getSlug()));
+        mockMvc.perform(get(basePath, site.getClave(), unit.getSlug())
+                        .param("soloDisponible", "true").param("size", "10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.productos.contenido.length()").value(2))
+                .andExpect(jsonPath("$.productos.contenido[*].slug", not(hasItem(barato.getSlug()))));
+
+        // El conteo de categorías (facet) no cambia aunque haya un filtro activo.
+        mockMvc.perform(get(basePath, site.getClave(), unit.getSlug())
+                        .param("categoria", piso.getSlug()).param("size", "10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.categorias[?(@.slug=='" + mural.getSlug() + "')].cantidad").value(hasItem(2)))
+                .andExpect(jsonPath("$.categorias[?(@.slug=='" + piso.getSlug() + "')].cantidad").value(hasItem(1)));
+
+        // Página fuera de rango: 200 con contenido vacío, no error.
+        mockMvc.perform(get(basePath, site.getClave(), unit.getSlug()).param("page", "99").param("size", "10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.productos.contenido.length()").value(0))
+                .andExpect(jsonPath("$.productos.totalElementos").value(3));
+
+        // Parámetros de paginación inválidos.
+        mockMvc.perform(get(basePath, site.getClave(), unit.getSlug()).param("page", "-1"))
+                .andExpect(status().isBadRequest());
+        mockMvc.perform(get(basePath, site.getClave(), unit.getSlug()).param("size", "0"))
+                .andExpect(status().isBadRequest());
+        mockMvc.perform(get(basePath, site.getClave(), unit.getSlug()).param("size", "49"))
+                .andExpect(status().isBadRequest());
     }
 
     @Test

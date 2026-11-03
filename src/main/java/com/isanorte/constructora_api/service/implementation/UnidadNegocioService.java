@@ -19,8 +19,12 @@ import com.isanorte.constructora_api.model.RecursoUnidadNegocio;
 import com.isanorte.constructora_api.enums.TipoRecursoUnidadNegocio;
 import com.isanorte.constructora_api.dto.request.RecursoUnidadNegocioRequest;
 import com.isanorte.constructora_api.dto.response.RecursoUnidadNegocioResponse;
+import com.isanorte.constructora_api.dto.request.CatalogoRequest;
+import com.isanorte.constructora_api.dto.response.CatalogoResponse;
+import com.isanorte.constructora_api.model.Catalogo;
 import com.isanorte.constructora_api.mapper.DynamicContentMapper;
 import com.isanorte.constructora_api.repository.RecursoUnidadNegocioRepository;
+import com.isanorte.constructora_api.repository.CatalogoRepository;
 import com.isanorte.constructora_api.repository.EmpresaRepository;
 import com.isanorte.constructora_api.repository.IGenericRepository;
 import com.isanorte.constructora_api.repository.UnidadNegocioRepository;
@@ -37,6 +41,7 @@ public class UnidadNegocioService extends GenericService<UnidadNegocio, UUID> im
     private final UnidadNegocioMapper unidadNegocioMapper;
     private final DynamicContentMapper dynamicContentMapper;
     private final RecursoUnidadNegocioRepository recursoUnidadNegocioRepository;
+    private final CatalogoRepository catalogoRepository;
 
     @Override
     protected IGenericRepository<UnidadNegocio, UUID> getRepo() {
@@ -193,6 +198,37 @@ public class UnidadNegocioService extends GenericService<UnidadNegocio, UUID> im
         unidadNegocioRepository.flush();
     }
 
+    @Override
+    @Transactional
+    public CatalogoResponse createCatalogo(UUID unidadId, CatalogoRequest request) {
+        UnidadNegocio unidad = findUnidadAdmin(unidadId);
+        Catalogo catalogo = dynamicContentMapper.toEntity(request);
+        unidad.addCatalogo(catalogo);
+        return dynamicContentMapper.toResponse(catalogoRepository.saveAndFlush(catalogo));
+    }
+
+    @Override
+    @Transactional
+    public CatalogoResponse updateCatalogo(UUID unidadId, UUID catalogoId, CatalogoRequest request) {
+        UnidadNegocio unidad = findUnidadAdmin(unidadId);
+        Catalogo catalogo = catalogoRepository.findById(catalogoId)
+                .orElseThrow(() -> new ModelNotFoundException("Catálogo no encontrado con ID: " + catalogoId));
+        requireCatalogoOwnership(unidad, catalogo);
+        dynamicContentMapper.update(request, catalogo);
+        return dynamicContentMapper.toResponse(catalogoRepository.saveAndFlush(catalogo));
+    }
+
+    @Override
+    @Transactional
+    public void deleteCatalogo(UUID unidadId, UUID catalogoId) {
+        UnidadNegocio unidad = findUnidadAdmin(unidadId);
+        Catalogo catalogo = catalogoRepository.findById(catalogoId)
+                .orElseThrow(() -> new ModelNotFoundException("Catálogo no encontrado con ID: " + catalogoId));
+        requireCatalogoOwnership(unidad, catalogo);
+        unidad.removeCatalogo(catalogo);
+        unidadNegocioRepository.flush();
+    }
+
     private UnidadNegocio findUnidadAdmin(UUID id) {
         return unidadNegocioRepository.findById(id)
                 .orElseThrow(() -> new ModelNotFoundException("Unidad de negocio no encontrada con ID: " + id));
@@ -202,6 +238,13 @@ public class UnidadNegocioService extends GenericService<UnidadNegocio, UUID> im
         if (recurso.getUnidadNegocio() == null
                 || !Objects.equals(unidad.getId(), recurso.getUnidadNegocio().getId())) {
             throw new IllegalArgumentException("El recurso no pertenece a la unidad indicada");
+        }
+    }
+
+    private void requireCatalogoOwnership(UnidadNegocio unidad, Catalogo catalogo) {
+        if (catalogo.getUnidadNegocio() == null
+                || !Objects.equals(unidad.getId(), catalogo.getUnidadNegocio().getId())) {
+            throw new IllegalArgumentException("El catálogo no pertenece a la unidad indicada");
         }
     }
 
@@ -223,5 +266,6 @@ public class UnidadNegocioService extends GenericService<UnidadNegocio, UUID> im
     private void initializeForResponse(UnidadNegocio unidad) {
         unidad.getEmpresa().getNombreComercial();
         unidad.getRecursos().size();
+        unidad.getCatalogos().size();
     }
 }

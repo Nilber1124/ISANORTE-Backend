@@ -7,6 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -37,5 +38,20 @@ public class CloudinaryService {
 
     public Map<String, Object> deleteFile(String publicId) throws IOException {
         return cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
+    }
+
+    /**
+     * Extrae el public_id de Cloudinary a partir de una URL segura.
+     * Retorna vacío si la URL no pertenece a Cloudinary.
+     */
+    public Optional<String> extractPublicId(String url) {
+        if (url == null || !url.contains("res.cloudinary.com")) return Optional.empty();
+        int uploadIdx = url.indexOf("/upload/");
+        if (uploadIdx < 0) return Optional.empty();
+        String after = url.substring(uploadIdx + "/upload/".length());
+        after = after.replaceFirst("^v\\d+/", "");
+        int lastDot = after.lastIndexOf('.');
+        if (lastDot > 0) after = after.substring(0, lastDot);
+        return after.isBlank() ? Optional.empty() : Optional.of(after);
     }
 }

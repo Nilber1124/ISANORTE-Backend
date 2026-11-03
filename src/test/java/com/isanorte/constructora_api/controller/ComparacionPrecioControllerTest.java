@@ -20,7 +20,7 @@ class ComparacionPrecioControllerTest {
         var mvc = MockMvcBuilders.standaloneSetup(new PublicContentController(
                 mock(IPublicContentService.class), mock(ISolicitudContactoService.class), service,
                 mock(IComparacionCompetidoresService.class), mock(ICotizacionService.class),
-                mock(IResenaProductoService.class)))
+                mock(IPedidoService.class), mock(IResenaProductoService.class)))
                 .setControllerAdvice(new GlobalExceptionHandler()).build();
         mvc.perform(post("/api/publico/sitios/isanorte/unidades/isadecor/productos/mesa/comparar-precio")
                 .contentType("application/json").content("{\"urlExterna\":\"https://tienda.example/mesa\"}"))
