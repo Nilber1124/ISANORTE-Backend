@@ -12,7 +12,7 @@ import jakarta.validation.constraints.Size;
 
 public record ConfiguracionSitioRequest(
     @NotNull UUID empresaId,
-    @Pattern(regexp = "[a-z0-9]+(?:-[a-z0-9]+)*") @Size(max = 100) String clave,
+    @Pattern(regexp = "[a-z0-9]++(?:-[a-z0-9]++)*+") @Size(max = 100) String clave,
     String tituloSitio,
     String descripcionSitio,
     String logoUrl,
