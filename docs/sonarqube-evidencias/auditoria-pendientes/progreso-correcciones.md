@@ -11,6 +11,7 @@ Los estados `FIXED` solo se registran cuando el usuario confirma un análisis re
 | 5 | `AaEN8OthTwfNugJobk52` | Retirar parámetros sin uso del helper `projectImage` | `DynamicContentApiIntegrationTest` | Este commit; push a `develop` | Pendiente de verificar |
 | 6 | `AaEN8OttTwfNugJobk53` | Consolidar verificaciones repetidas con una aserción AssertJ por producto | `DemoProductSeederTest` | Este commit; push a `develop` | Pendiente de verificar |
 | 7 | `AaGg3zyhPtLvwDc7UMX0`, `AaGg3zymPtLvwDc7UMX1` | Usar record patterns Java 21 conservando igualdad profunda de arrays | `PaginaExternaClientTest`, `UrlExternaPolicyTest` | Este commit; push a `develop` | Pendiente de verificar |
+| 8 | `AaGg3zysPtLvwDc7UMX2`, `AaEN8OduTwfNugJobk2Y`, `AaEN8OduTwfNugJobk2T`, `AaEN8OduTwfNugJobk2Z`, `AaEN8OduTwfNugJobk2b` | Separar extracción por fuente, referencias JSON-LD, normalización y patrones de precios antiguos | `PrecioHtmlExtractorTest` | Este commit; push a `develop` | Pendiente de verificar |
 
 ## Pendientes y bloqueos
 
