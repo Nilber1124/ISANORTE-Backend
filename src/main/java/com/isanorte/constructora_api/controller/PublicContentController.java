@@ -42,6 +42,7 @@ import com.isanorte.constructora_api.service.IPedidoService;
 import com.isanorte.constructora_api.dto.request.ComparacionPrecioRequest;
 import com.isanorte.constructora_api.dto.request.PublicCotizacionRequest;
 import com.isanorte.constructora_api.dto.request.PublicPedidoRequest;
+import com.isanorte.constructora_api.dto.request.PublicProductCatalogQuery;
 import com.isanorte.constructora_api.dto.response.ComparacionPrecioResponse;
 import com.isanorte.constructora_api.dto.response.ComparacionCompetidoresResponse;
 import com.isanorte.constructora_api.dto.response.PublicCotizacionResponse;
@@ -157,8 +158,9 @@ public class PublicContentController {
             @RequestParam(defaultValue = "false") boolean soloDisponible,
             @RequestParam(defaultValue = "false") boolean soloDestacados,
             @RequestParam(defaultValue = "DESTACADOS") OrdenCatalogoProducto orden) {
-        return ResponseEntity.ok(publicContentService.findProductCatalog(
-                clave, unidadSlug, page, size, categoria, q, soloDescuento, soloDisponible, soloDestacados, orden));
+        var query = new PublicProductCatalogQuery(
+                page, size, categoria, q, soloDescuento, soloDisponible, soloDestacados, orden);
+        return ResponseEntity.ok(publicContentService.findProductCatalog(clave, unidadSlug, query));
     }
 
     @GetMapping("/sitios/{clave}/unidades/{unidadSlug}/productos/{productoSlug}")

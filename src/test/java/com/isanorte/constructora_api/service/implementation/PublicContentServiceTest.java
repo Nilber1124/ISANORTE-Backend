@@ -22,6 +22,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 
+import com.isanorte.constructora_api.dto.request.PublicProductCatalogQuery;
 import com.isanorte.constructora_api.dto.response.PublicProductCardResponse;
 import com.isanorte.constructora_api.dto.response.PublicProductCatalogCategoryResponse;
 import com.isanorte.constructora_api.dto.response.PublicProductCatalogResponse;
@@ -67,17 +68,20 @@ class PublicContentServiceTest {
 
     @Test
     void rechazaPaginaNegativa() {
+        var query = catalogQuery(-1, 12);
         assertThrows(IllegalArgumentException.class, () -> service.findProductCatalog(
-                "isanorte", "unidad", -1, 12, null, null, false, false, false, OrdenCatalogoProducto.DESTACADOS));
+                "isanorte", "unidad", query));
         verifyNoInteractions(configuracionRepository);
     }
 
     @Test
     void rechazaTamanoDePaginaFueraDeRango() {
+        var zeroSizeQuery = catalogQuery(0, 0);
+        var excessiveSizeQuery = catalogQuery(0, 49);
         assertThrows(IllegalArgumentException.class, () -> service.findProductCatalog(
-                "isanorte", "unidad", 0, 0, null, null, false, false, false, OrdenCatalogoProducto.DESTACADOS));
+                "isanorte", "unidad", zeroSizeQuery));
         assertThrows(IllegalArgumentException.class, () -> service.findProductCatalog(
-                "isanorte", "unidad", 0, 49, null, null, false, false, false, OrdenCatalogoProducto.DESTACADOS));
+                "isanorte", "unidad", excessiveSizeQuery));
         verifyNoInteractions(configuracionRepository);
     }
 
@@ -107,7 +111,7 @@ class PublicContentServiceTest {
                 .thenReturn(facet);
 
         PublicProductCatalogResponse response = service.findProductCatalog(
-                "isanorte", "unidad", 0, 12, null, null, false, false, false, OrdenCatalogoProducto.DESTACADOS);
+                "isanorte", "unidad", catalogQuery(0, 12));
 
         assertEquals("Unidad", response.unidad().nombre());
         assertEquals(facet, response.categorias());
@@ -118,5 +122,10 @@ class PublicContentServiceTest {
         assertEquals(1, response.productos().totalPaginas());
         verify(productoRepository).findAll(any(Specification.class), any(Pageable.class));
         verify(productoRepository, never()).findByUnidadNegocioIdAndEstadoOrderByNombreAscIdAsc(any(), any());
+    }
+
+    private PublicProductCatalogQuery catalogQuery(int page, int size) {
+        return new PublicProductCatalogQuery(
+                page, size, null, null, false, false, false, OrdenCatalogoProducto.DESTACADOS);
     }
 }

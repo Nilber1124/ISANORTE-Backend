@@ -19,6 +19,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.isanorte.constructora_api.dto.request.PublicProductCatalogQuery;
 import com.isanorte.constructora_api.dto.response.PublicBusinessUnitResponse;
 import com.isanorte.constructora_api.dto.response.PublicCompanyAboutResponse;
 import com.isanorte.constructora_api.dto.response.PublicCompanyStatisticResponse;
@@ -252,23 +253,23 @@ public class PublicContentService implements IPublicContentService {
 
     @Override @Transactional(readOnly = true)
     public PublicProductCatalogResponse findProductCatalog(
-            String clave, String unidadSlug, int page, int size, String categoriaSlug, String q,
-            boolean soloDescuento, boolean soloDisponible, boolean soloDestacados, OrdenCatalogoProducto orden) {
-        validateCatalogPagination(page, size);
+            String clave, String unidadSlug, PublicProductCatalogQuery query) {
+        validateCatalogPagination(query.page(), query.size());
         ConfiguracionSitio site = findSiteEntity(clave);
         UnidadNegocio unit = findPublicBusinessUnit(site, unidadSlug);
 
         Specification<Producto> spec = Specification
                 .where(ProductoCatalogSpecifications.perteneceAUnidad(unit.getId()))
                 .and(ProductoCatalogSpecifications.estado(EstadoPublicacion.PUBLICADO))
-                .and(ProductoCatalogSpecifications.categoriaSlug(categoriaSlug, unit.getId()))
-                .and(ProductoCatalogSpecifications.textoBusqueda(q))
-                .and(ProductoCatalogSpecifications.soloDescuento(soloDescuento))
-                .and(ProductoCatalogSpecifications.soloDisponible(soloDisponible))
-                .and(ProductoCatalogSpecifications.soloDestacados(soloDestacados))
-                .and(ProductoCatalogSpecifications.ordenadoPor(orden));
+                .and(ProductoCatalogSpecifications.categoriaSlug(query.categoriaSlug(), unit.getId()))
+                .and(ProductoCatalogSpecifications.textoBusqueda(query.texto()))
+                .and(ProductoCatalogSpecifications.soloDescuento(query.soloDescuento()))
+                .and(ProductoCatalogSpecifications.soloDisponible(query.soloDisponible()))
+                .and(ProductoCatalogSpecifications.soloDestacados(query.soloDestacados()))
+                .and(ProductoCatalogSpecifications.ordenadoPor(query.orden()));
 
-        Page<Producto> productPage = productoRepository.findAll(spec, PageRequest.of(page, size, Sort.unsorted()));
+        Page<Producto> productPage = productoRepository.findAll(
+                spec, PageRequest.of(query.page(), query.size(), Sort.unsorted()));
         List<UUID> orderedIds = productPage.getContent().stream().map(Producto::getId).toList();
 
         Map<UUID, Producto> hydratedById = productoRepository.findByIdIn(orderedIds).stream()

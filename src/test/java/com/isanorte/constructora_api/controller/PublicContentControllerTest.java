@@ -11,6 +11,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 
+import com.isanorte.constructora_api.dto.request.PublicProductCatalogQuery;
 import com.isanorte.constructora_api.dto.response.PublicProductCatalogResponse;
 import com.isanorte.constructora_api.dto.response.PublicProjectResponse;
 import com.isanorte.constructora_api.enums.OrdenCatalogoProducto;
@@ -60,9 +61,9 @@ class PublicContentControllerTest {
         PublicProductCatalogResponse catalog = new PublicProductCatalogResponse(
                 new PublicProductCatalogResponse.Unidad("Unidad", "unidad"), List.of(),
                 new PublicProductCatalogResponse.Pagina(List.of(), 0, 12, 0, 0));
-        when(service.findProductCatalog("isanorte", "unidad", 0, 12, "colectivo", "muro", true, true, true,
-                OrdenCatalogoProducto.PRECIO_ASC))
-                .thenReturn(catalog);
+        var query = new PublicProductCatalogQuery(
+                0, 12, "colectivo", "muro", true, true, true, OrdenCatalogoProducto.PRECIO_ASC);
+        when(service.findProductCatalog("isanorte", "unidad", query)).thenReturn(catalog);
         PublicContentController controller = controllerWith(service);
 
         var response = controller.findProductCatalog(
@@ -70,8 +71,7 @@ class PublicContentControllerTest {
 
         assertSame(HttpStatus.OK, response.getStatusCode());
         assertSame(catalog, response.getBody());
-        verify(service).findProductCatalog(
-                "isanorte", "unidad", 0, 12, "colectivo", "muro", true, true, true, OrdenCatalogoProducto.PRECIO_ASC);
+        verify(service).findProductCatalog("isanorte", "unidad", query);
     }
 
     private PublicContentController controllerWith(IPublicContentService service) {
