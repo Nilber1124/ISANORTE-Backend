@@ -187,48 +187,57 @@ public class PedidoService extends GenericService<Pedido, UUID> implements IPedi
                 .build();
         aplicarDireccion(pedido, request, clienteId);
 
-        BigDecimal total = BigDecimal.ZERO;
-        boolean precioIncompleto = false;
-        for (PublicPedidoRequest.DetallePublicoRequest item : request.detalles()) {
-            if (item.productoSlug() == null || item.productoSlug().isBlank()) {
-                throw new IllegalArgumentException("El slug del producto no puede estar vacío");
-            }
-            Producto producto = productoRepository.findByUnidadNegocioIdAndSlugAndEstado(
-                    unit.getId(), item.productoSlug().trim(), EstadoPublicacion.PUBLICADO)
-                    .orElseThrow(() -> new ModelNotFoundException(
-                            "Producto público no encontrado con slug: " + item.productoSlug().trim()
-                                    + " en la unidad " + unitSlug));
-
-            VarianteProducto variante = resolveVariante(producto, item.varianteSku());
-            int cantidad = item.cantidad() != null && item.cantidad() > 0 ? item.cantidad() : 1;
-
-            descontarStock(producto, cantidad);
-
-            BigDecimal precio = variante != null && variante.getPrecio() != null
-                    ? variante.getPrecio()
-                    : producto.getPrecioBase();
-            BigDecimal subtotal = precio == null ? null : precio.multiply(BigDecimal.valueOf(cantidad));
-            if (subtotal == null) {
-                precioIncompleto = true;
-            } else {
-                total = total.add(subtotal);
-            }
-
-            DetallePedido detalle = DetallePedido.builder()
-                    .producto(producto)
-                    .variante(variante)
-                    .nombreProducto(variante == null ? producto.getNombre() : producto.getNombre() + " - " + variante.getNombre())
-                    .sku(variante == null ? producto.getSku() : variante.getSku())
-                    .cantidad(cantidad)
-                    .precioUnitario(precio)
-                    .subtotal(subtotal)
-                    .build();
-            pedido.addDetalle(detalle);
-        }
-
-        pedido.setTotalPedido(precioIncompleto ? null : total);
+        PricingSummary pricing = addDetails(pedido, unit, request.detalles(), unitSlug);
+        pedido.setTotalPedido(pricing.incomplete() ? null : pricing.total());
         pedido.setStockDescontado(true);
         return pedidoMapper.toPublicResponse(pedidoRepository.saveAndFlush(pedido));
+    }
+
+    private PricingSummary addDetails(Pedido pedido, UnidadNegocio unit,
+            List<PublicPedidoRequest.DetallePublicoRequest> items, String unitSlug) {
+        BigDecimal total = BigDecimal.ZERO;
+        boolean incomplete = false;
+        for (PublicPedidoRequest.DetallePublicoRequest item : items) {
+            DetallePedido detalle = createDetail(unit, item, unitSlug);
+            pedido.addDetalle(detalle);
+            if (detalle.getSubtotal() == null) {
+                incomplete = true;
+            } else {
+                total = total.add(detalle.getSubtotal());
+            }
+        }
+        return new PricingSummary(total, incomplete);
+    }
+
+    private DetallePedido createDetail(
+            UnidadNegocio unit, PublicPedidoRequest.DetallePublicoRequest item, String unitSlug) {
+        if (item.productoSlug() == null || item.productoSlug().isBlank()) {
+            throw new IllegalArgumentException("El slug del producto no puede estar vacío");
+        }
+        Producto producto = productoRepository.findByUnidadNegocioIdAndSlugAndEstado(
+                        unit.getId(), item.productoSlug().trim(), EstadoPublicacion.PUBLICADO)
+                .orElseThrow(() -> new ModelNotFoundException(
+                        "Producto público no encontrado con slug: " + item.productoSlug().trim()
+                                + " en la unidad " + unitSlug));
+        VarianteProducto variante = resolveVariante(producto, item.varianteSku());
+        int cantidad = item.cantidad() != null && item.cantidad() > 0 ? item.cantidad() : 1;
+        descontarStock(producto, cantidad);
+        BigDecimal precio = variante != null && variante.getPrecio() != null
+                ? variante.getPrecio()
+                : producto.getPrecioBase();
+        BigDecimal subtotal = precio == null ? null : precio.multiply(BigDecimal.valueOf(cantidad));
+        return DetallePedido.builder()
+                .producto(producto)
+                .variante(variante)
+                .nombreProducto(variante == null ? producto.getNombre() : producto.getNombre() + " - " + variante.getNombre())
+                .sku(variante == null ? producto.getSku() : variante.getSku())
+                .cantidad(cantidad)
+                .precioUnitario(precio)
+                .subtotal(subtotal)
+                .build();
+    }
+
+    private record PricingSummary(BigDecimal total, boolean incomplete) {
     }
 
     @Override

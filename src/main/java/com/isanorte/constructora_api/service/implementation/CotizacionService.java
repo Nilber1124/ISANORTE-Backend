@@ -72,6 +72,10 @@ public class CotizacionService extends GenericService<Cotizacion, UUID> implemen
     @Override
     @Transactional
     public Cotizacion create(CotizacionRequest request) {
+        return createInternal(request);
+    }
+
+    private Cotizacion createInternal(CotizacionRequest request) {
         Cotizacion cotizacion = cotizacionMapper.toEntity(request);
         cotizacion.setCodigo(generateCodigo());
         cotizacion.setEstado(EstadoCotizacion.NUEVA);
@@ -153,7 +157,7 @@ public class CotizacionService extends GenericService<Cotizacion, UUID> implemen
     @Override
     @Transactional
     public CotizacionResponse createResponse(CotizacionRequest request) {
-        return cotizacionMapper.toResponse(create(request));
+        return cotizacionMapper.toResponse(createInternal(request));
     }
 
     @Override
@@ -184,43 +188,9 @@ public class CotizacionService extends GenericService<Cotizacion, UUID> implemen
         UnidadNegocio unit = unidadRepository.findByEmpresaIdAndSlugAndActivoTrue(site.getEmpresa().getId(), unitSlug)
                 .orElseThrow(() -> new ModelNotFoundException("Unidad pública activa no encontrada con slug: " + unitSlug));
 
-        List<PublicCotizacionRequest.DetallePublicoRequest> items = request.detalles();
-        if (items == null || items.isEmpty()) {
-            if (request.productoSlug() != null && !request.productoSlug().isBlank()) {
-                items = List.of(new PublicCotizacionRequest.DetallePublicoRequest(
-                        request.productoSlug().trim(),
-                        request.varianteSku(),
-                        request.cantidad() != null && request.cantidad() > 0 ? request.cantidad() : 1,
-                        request.notas()));
-            } else {
-                throw new IllegalArgumentException("Debe indicar al menos un producto para la cotización");
-            }
-        }
-
-        List<CotizacionRequest.DetalleRequest> internalDetalles = items.stream().map(item -> {
-            if (item.productoSlug() == null || item.productoSlug().isBlank()) {
-                throw new IllegalArgumentException("El slug del producto no puede estar vacío");
-            }
-            Producto producto = productoRepository.findByUnidadNegocioIdAndSlugAndEstado(
-                    unit.getId(), item.productoSlug().trim(), EstadoPublicacion.PUBLICADO)
-                    .orElseThrow(() -> new ModelNotFoundException(
-                            "Producto público no encontrado con slug: " + item.productoSlug().trim()
-                                    + " en la unidad " + unitSlug));
-
-            UUID varianteId = null;
-            if (item.varianteSku() != null && !item.varianteSku().isBlank()) {
-                String skuToFind = item.varianteSku().trim();
-                VarianteProducto variante = producto.getVariantes().stream()
-                        .filter(v -> v.getSku() != null && v.getSku().equalsIgnoreCase(skuToFind))
-                        .findFirst()
-                        .orElseThrow(() -> new IllegalArgumentException(
-                                "La variante con SKU '" + item.varianteSku() + "' no pertenece al producto " + producto.getNombre()));
-                varianteId = variante.getId();
-            }
-
-            int cantidad = item.cantidad() != null && item.cantidad() > 0 ? item.cantidad() : 1;
-            return new CotizacionRequest.DetalleRequest(producto.getId(), varianteId, cantidad, item.notas());
-        }).toList();
+        List<CotizacionRequest.DetalleRequest> internalDetalles = normalizeItems(request).stream()
+                .map(item -> toInternalDetail(item, unit, unitSlug))
+                .toList();
 
         CotizacionRequest internalRequest = new CotizacionRequest(
                 request.nombreCliente(),
@@ -234,9 +204,53 @@ public class CotizacionService extends GenericService<Cotizacion, UUID> implemen
 
         Cliente cliente = clienteRepository.findById(clienteId)
                 .orElseThrow(() -> new ModelNotFoundException("Cuenta de cliente no encontrada"));
-        Cotizacion cotizacion = create(internalRequest);
+        Cotizacion cotizacion = createInternal(internalRequest);
         cotizacion.setCliente(cliente);
         return cotizacionMapper.toPublicResponse(cotizacionRepository.save(cotizacion));
+    }
+
+    private List<PublicCotizacionRequest.DetallePublicoRequest> normalizeItems(PublicCotizacionRequest request) {
+        if (request.detalles() != null && !request.detalles().isEmpty()) {
+            return request.detalles();
+        }
+        if (request.productoSlug() == null || request.productoSlug().isBlank()) {
+            throw new IllegalArgumentException("Debe indicar al menos un producto para la cotización");
+        }
+        return List.of(new PublicCotizacionRequest.DetallePublicoRequest(
+                request.productoSlug().trim(), request.varianteSku(), positiveQuantity(request.cantidad()),
+                request.notas()));
+    }
+
+    private CotizacionRequest.DetalleRequest toInternalDetail(
+            PublicCotizacionRequest.DetallePublicoRequest item, UnidadNegocio unit, String unitSlug) {
+        if (item.productoSlug() == null || item.productoSlug().isBlank()) {
+            throw new IllegalArgumentException("El slug del producto no puede estar vacío");
+        }
+        Producto producto = productoRepository.findByUnidadNegocioIdAndSlugAndEstado(
+                        unit.getId(), item.productoSlug().trim(), EstadoPublicacion.PUBLICADO)
+                .orElseThrow(() -> new ModelNotFoundException(
+                        "Producto público no encontrado con slug: " + item.productoSlug().trim()
+                                + " en la unidad " + unitSlug));
+        return new CotizacionRequest.DetalleRequest(
+                producto.getId(), findVariantId(producto, item.varianteSku()), positiveQuantity(item.cantidad()),
+                item.notas());
+    }
+
+    private UUID findVariantId(Producto producto, String varianteSku) {
+        if (varianteSku == null || varianteSku.isBlank()) {
+            return null;
+        }
+        String skuToFind = varianteSku.trim();
+        return producto.getVariantes().stream()
+                .filter(variante -> variante.getSku() != null && variante.getSku().equalsIgnoreCase(skuToFind))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "La variante con SKU '" + varianteSku + "' no pertenece al producto " + producto.getNombre()))
+                .getId();
+    }
+
+    private int positiveQuantity(Integer cantidad) {
+        return cantidad != null && cantidad > 0 ? cantidad : 1;
     }
 
     @Override
