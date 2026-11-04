@@ -52,6 +52,10 @@ public class ProyectoService extends GenericService<Proyecto, UUID> implements I
     @Override
     @Transactional
     public Proyecto create(ProyectoRequest request) {
+        return createInternal(request);
+    }
+
+    private Proyecto createInternal(ProyectoRequest request) {
         if (proyectoRepository.existsBySlug(request.slug())) {
             throw new IllegalStateException("Ya existe un proyecto con slug: " + request.slug());
         }
@@ -91,7 +95,9 @@ public class ProyectoService extends GenericService<Proyecto, UUID> implements I
     @Override
     @Transactional(readOnly = true)
     public ProyectoResponse findByIdResponse(UUID id) {
-        return proyectoMapper.toResponse(findById(id));
+        Proyecto proyecto = super.findById(id);
+        initializeForResponse(proyecto);
+        return proyectoMapper.toResponse(proyecto);
     }
 
     @Override
@@ -118,7 +124,7 @@ public class ProyectoService extends GenericService<Proyecto, UUID> implements I
     @Override
     @Transactional
     public ProyectoResponse createResponse(ProyectoRequest request) {
-        return proyectoMapper.toResponse(create(request));
+        return proyectoMapper.toResponse(createInternal(request));
     }
 
     @Override

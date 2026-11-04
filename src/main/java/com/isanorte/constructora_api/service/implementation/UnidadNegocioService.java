@@ -66,6 +66,10 @@ public class UnidadNegocioService extends GenericService<UnidadNegocio, UUID> im
     @Override
     @Transactional
     public UnidadNegocio create(UnidadNegocioRequest request) {
+        return createInternal(request);
+    }
+
+    private UnidadNegocio createInternal(UnidadNegocioRequest request) {
         if (unidadNegocioRepository.findBySlug(request.slug()).isPresent()) {
             throw new IllegalStateException("Ya existe una unidad de negocio con slug: " + request.slug());
         }
@@ -132,7 +136,7 @@ public class UnidadNegocioService extends GenericService<UnidadNegocio, UUID> im
     @Override
     @Transactional
     public UnidadNegocioResponse createResponse(UnidadNegocioRequest request) {
-        return unidadNegocioMapper.toResponse(create(request));
+        return unidadNegocioMapper.toResponse(createInternal(request));
     }
 
     @Override

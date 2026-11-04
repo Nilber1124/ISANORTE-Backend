@@ -56,6 +56,10 @@ public class ServicioService extends GenericService<Servicio, UUID> implements I
     @Override
     @Transactional
     public Servicio create(ServicioRequest request) {
+        return createInternal(request);
+    }
+
+    private Servicio createInternal(ServicioRequest request) {
         if (servicioRepository.existsBySlug(request.slug())) {
             throw new IllegalStateException("Ya existe un servicio con esa ruta.");
         }
@@ -105,7 +109,7 @@ public class ServicioService extends GenericService<Servicio, UUID> implements I
     @Override
     @Transactional
     public ServicioResponse createResponse(ServicioRequest request) {
-        return servicioMapper.toResponse(create(request));
+        return servicioMapper.toResponse(createInternal(request));
     }
 
     @Override

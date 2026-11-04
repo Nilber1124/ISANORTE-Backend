@@ -54,6 +54,10 @@ public class CategoriaProductoService extends GenericService<CategoriaProducto, 
     @Override
     @Transactional
     public CategoriaProducto create(CategoriaProductoRequest request) {
+        return createInternal(request);
+    }
+
+    private CategoriaProducto createInternal(CategoriaProductoRequest request) {
         if (categoriaProductoRepository.existsBySlug(request.slug())) {
             throw new IllegalStateException("Ya existe una categoría con slug: " + request.slug());
         }
@@ -122,7 +126,7 @@ public class CategoriaProductoService extends GenericService<CategoriaProducto, 
     @Override
     @Transactional
     public CategoriaProductoResponse createResponse(CategoriaProductoRequest request) {
-        return categoriaProductoMapper.toResponse(create(request));
+        return categoriaProductoMapper.toResponse(createInternal(request));
     }
 
     @Override

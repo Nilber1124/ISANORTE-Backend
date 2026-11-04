@@ -18,10 +18,10 @@ Los estados `FIXED` solo se registran cuando el usuario confirma un análisis re
 | 12 | `AaEN8OgrTwfNugJobk2m` | Separar validación de enlaces landing en predicados por esquema | `DynamicContentApiIntegrationTest`: 22/22 | Este commit; push a `develop` | Pendiente de verificar |
 | 13 | `AaGdRnt197lfKRteM0Yx` | Encapsular criterios del catálogo en `PublicProductCatalogQuery` sin cambiar el contrato HTTP | `PublicContentControllerTest`, `PublicContentServiceTest`: 6/6 | Este commit; push a `develop` | Pendiente de verificar |
 | 14 | `AaGdRnta97lfKRteM0Yu`, `AaES7WZe-6tQcR7a5P5P`, `AaEN8OkrTwfNugJobk2u`, `AaCdT24dj7PCqTSvAO4k` | Extraer construcción de detalles de pedidos/cotizaciones y un núcleo transaccional sin autoinvocación | `PedidoServiceTest`, `PublicPedidoApiIntegrationTest`, `PublicCotizacionApiIntegrationTest`: 18/18 | Este commit; push a `develop` | Pendiente de verificar |
+| 15 | `AaEN8OmWTwfNugJobk2v`, `AaCdT25Pj7PCqTSvAO4q`, `AaCdT247j7PCqTSvAO4o`, `AaCdT24Bj7PCqTSvAO4j`, `AaCdT23wj7PCqTSvAO4h`, `AaCdT25Fj7PCqTSvAO4p`, `AaCdT24xj7PCqTSvAO4n`, `AaCdT25Xj7PCqTSvAO4r`, `AaCdT24nj7PCqTSvAO4m` | Sustituir autoinvocaciones por núcleos privados dentro de las mismas fronteras transaccionales públicas | 6 clases de prueba, 51/51 | Este commit; push a `develop` | Pendiente de verificar |
 
 ## Pendientes y bloqueos
 
-- Las 9 incidencias `java:S6809` (`AaEN8OmWTwfNugJobk2v`, `AaCdT25Pj7PCqTSvAO4q`, `AaCdT247j7PCqTSvAO4o`, `AaCdT24Bj7PCqTSvAO4j`, `AaCdT23wj7PCqTSvAO4h`, `AaCdT25Fj7PCqTSvAO4p`, `AaCdT24xj7PCqTSvAO4n`, `AaCdT25Xj7PCqTSvAO4r`, `AaCdT24nj7PCqTSvAO4m`) requieren comprobar propagación y rollback antes de extraer colaboradores; no se consideran aceptadas.
 - `java:S4502` permanece como alerta justificada por JWT Bearer stateless sin cookies; no se cambia seguridad sin validación adicional.
 - No se modifican V11 ni otras migraciones Flyway aplicadas.
 

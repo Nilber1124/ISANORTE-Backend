@@ -61,6 +61,10 @@ public class SeccionLandingService extends GenericService<SeccionLanding, UUID> 
     @Override
     @Transactional
     public SeccionLanding create(SeccionLandingRequest request) {
+        return createInternal(request);
+    }
+
+    private SeccionLanding createInternal(SeccionLandingRequest request) {
         ConfiguracionSitio configuracion = configuracionSitioRepository.findById(request.configuracionSitioId())
                 .orElseThrow(() -> new ModelNotFoundException(
                         "Configuración de sitio no encontrada con ID: " + request.configuracionSitioId()));
@@ -107,7 +111,7 @@ public class SeccionLandingService extends GenericService<SeccionLanding, UUID> 
     @Override
     @Transactional
     public SeccionLandingResponse createResponse(SeccionLandingRequest request) {
-        return seccionLandingMapper.toResponse(create(request));
+        return seccionLandingMapper.toResponse(createInternal(request));
     }
 
     @Override

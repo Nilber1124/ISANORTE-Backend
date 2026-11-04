@@ -86,6 +86,10 @@ public class ProductoService extends GenericService<Producto, UUID> implements I
     @Override
     @Transactional
     public Producto create(ProductoRequest request) {
+        return createInternal(request);
+    }
+
+    private Producto createInternal(ProductoRequest request) {
         if (productoRepository.existsBySku(request.sku())) {
             throw new IllegalStateException("Ya existe un producto con SKU: " + request.sku());
         }
@@ -196,7 +200,7 @@ public class ProductoService extends GenericService<Producto, UUID> implements I
     @Override
     @Transactional
     public ProductoResponse createResponse(ProductoRequest request) {
-        return productoMapper.toResponse(create(request));
+        return productoMapper.toResponse(createInternal(request));
     }
 
     @Override
