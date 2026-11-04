@@ -15,6 +15,7 @@ Los estados `FIXED` solo se registran cuando el usuario confirma un análisis re
 | 9 | `AaEN8Od6TwfNugJobk2f`, `AaEN8Od6TwfNugJobk2g` | Separar validación URI/DNS y clasificación IPv4/IPv6 | `UrlExternaPolicyTest` | Este commit; push a `develop` | Pendiente de verificar |
 | 10 | `AaGdRnsl97lfKRteM0Ys` | Eliminar el helper de diez parámetros y construir el record de datos directamente | `DemoHomeIsadecorSeederTest` | Este commit; push a `develop` | Pendiente de verificar |
 | 11 | `AaGjwrYsQjmWlr9u4hwf`, `AaGjvYmKad7z90yEgGjf`, `AaGjvYmKad7z90yEgGjh`, `AaGjvYmKad7z90yEgGjg`, `AaEN8OtNTwfNugJobk50`, `AaEN8OtNTwfNugJobk51` | Corregir regresiones del análisis `f497069`: nulabilidad, literales, complejidad IPv4/separadores y lambdas | 3 clases, 61/61 pruebas | Este commit; push a `develop` | Pendiente de verificar |
+| 12 | `AaEN8OgrTwfNugJobk2m` | Separar validación de enlaces landing en predicados por esquema | `DynamicContentApiIntegrationTest`: 22/22 | Este commit; push a `develop` | Pendiente de verificar |
 
 ## Pendientes y bloqueos
 

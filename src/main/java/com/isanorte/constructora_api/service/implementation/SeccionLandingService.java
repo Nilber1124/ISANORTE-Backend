@@ -232,27 +232,31 @@ public class SeccionLandingService extends GenericService<SeccionLanding, UUID> 
         String normalized = value.toLowerCase();
         boolean hasUnsafeCharacters = value.chars().anyMatch(Character::isISOControl)
                 || value.chars().anyMatch(Character::isWhitespace);
-        if (hasUnsafeCharacters) invalidLink();
+        if (hasUnsafeCharacters || !isAllowedLink(value, normalized)) invalidLink();
+    }
 
-        if (value.startsWith("/")) {
-            if (value.startsWith("//") || value.startsWith("/\\")) invalidLink();
-            return;
+    private static boolean isAllowedLink(String value, String normalized) {
+        return isInternalPath(value) || value.startsWith("#") || isContactLink(value, normalized)
+                || isSecureWebLink(value, normalized);
+    }
+
+    private static boolean isInternalPath(String value) {
+        return value.startsWith("/") && !value.startsWith("//") && !value.startsWith("/\\");
+    }
+
+    private static boolean isContactLink(String value, String normalized) {
+        boolean contactScheme = normalized.startsWith("mailto:") || normalized.startsWith("tel:");
+        return contactScheme && !value.substring(value.indexOf(':') + 1).isBlank();
+    }
+
+    private static boolean isSecureWebLink(String value, String normalized) {
+        if (!normalized.startsWith("https://")) return false;
+        try {
+            URI uri = new URI(value);
+            return "https".equalsIgnoreCase(uri.getScheme()) && uri.getHost() != null;
+        } catch (URISyntaxException exception) {
+            return false;
         }
-        if (value.startsWith("#")) return;
-        if (normalized.startsWith("mailto:") || normalized.startsWith("tel:")) {
-            if (value.substring(value.indexOf(':') + 1).isBlank()) invalidLink();
-            return;
-        }
-        if (normalized.startsWith("https://")) {
-            try {
-                URI uri = new URI(value);
-                if (!"https".equalsIgnoreCase(uri.getScheme()) || uri.getHost() == null) invalidLink();
-                return;
-            } catch (URISyntaxException exception) {
-                invalidLink();
-            }
-        }
-        invalidLink();
     }
 
     private void invalidLink() {
