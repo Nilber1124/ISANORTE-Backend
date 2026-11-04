@@ -79,8 +79,9 @@ class ProductCategoryUnitIntegrityIntegrationTest {
         ProductoUpdateRequest validCategoryUpdate = productUpdate(withScoped, unitA.getId(), Set.of(global.id()));
         assertDoesNotThrow(() -> productoService.update(withScoped.getId(), validCategoryUpdate));
         ProductoUpdateRequest invalidCategoryUpdate = productUpdate(withScoped, unitA.getId(), Set.of(scopedB.id()));
+        UUID withScopedId = withScoped.getId();
         IllegalStateException invalidCategoryChange = assertThrows(IllegalStateException.class,
-                () -> productoService.update(withScoped.getId(), invalidCategoryUpdate));
+                () -> productoService.update(withScopedId, invalidCategoryUpdate));
         assertEquals("La categoría seleccionada no pertenece a la unidad de negocio del producto.",
                 invalidCategoryChange.getMessage());
 
@@ -91,7 +92,7 @@ class ProductCategoryUnitIntegrityIntegrationTest {
 
         ProductoUpdateRequest invalidUnitUpdate = productUpdate(withScoped, unitB.getId(), Set.of(scopedA.id()));
         IllegalStateException invalidUnitChange = assertThrows(IllegalStateException.class,
-                () -> productoService.update(withScoped.getId(), invalidUnitUpdate));
+                () -> productoService.update(withScopedId, invalidUnitUpdate));
         assertEquals("La categoría seleccionada no pertenece a la unidad de negocio del producto.",
                 invalidUnitChange.getMessage());
     }

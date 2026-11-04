@@ -131,13 +131,23 @@ public class UrlExternaPolicy {
         int a = bytes[0] & 255;
         int b = bytes[1] & 255;
         int c = bytes[2] & 255;
-        return !(a == 0 || a == 10 || a == 127 || a >= 224
-                    || (a == 100 && b >= 64 && b <= 127)
-                    || (a == 169 && b == 254) || (a == 172 && b >= 16 && b <= 31)
-                    || (a == 192 && b == 168) || (a == 192 && b == 0 && (c == 0 || c == 2))
-                    || (a == 192 && b == 88 && c == 99)
-                    || (a == 198 && (b == 18 || b == 19 || (b == 51 && c == 100)))
-                    || (a == 203 && b == 0 && c == 113));
+        return !reservedFirstOctet(a) && !privateOrLinkLocal(a, b)
+                && !documentationOrBenchmark(a, b, c);
+    }
+
+    private static boolean reservedFirstOctet(int a) {
+        return a == 0 || a == 10 || a == 127 || a >= 224;
+    }
+
+    private static boolean privateOrLinkLocal(int a, int b) {
+        return (a == 100 && b >= 64 && b <= 127) || (a == 169 && b == 254)
+                || (a == 172 && b >= 16 && b <= 31) || (a == 192 && b == 168);
+    }
+
+    private static boolean documentationOrBenchmark(int a, int b, int c) {
+        return (a == 192 && b == 0 && (c == 0 || c == 2)) || (a == 192 && b == 88 && c == 99)
+                || (a == 198 && (b == 18 || b == 19 || (b == 51 && c == 100)))
+                || (a == 203 && b == 0 && c == 113);
     }
 
     private static boolean esIpv6Publica(byte[] bytes) {

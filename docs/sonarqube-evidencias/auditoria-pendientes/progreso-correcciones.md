@@ -14,6 +14,7 @@ Los estados `FIXED` solo se registran cuando el usuario confirma un análisis re
 | 8 | `AaGg3zysPtLvwDc7UMX2`, `AaEN8OduTwfNugJobk2Y`, `AaEN8OduTwfNugJobk2T`, `AaEN8OduTwfNugJobk2Z`, `AaEN8OduTwfNugJobk2b` | Separar extracción por fuente, referencias JSON-LD, normalización y patrones de precios antiguos | `PrecioHtmlExtractorTest` | Este commit; push a `develop` | Pendiente de verificar |
 | 9 | `AaEN8Od6TwfNugJobk2f`, `AaEN8Od6TwfNugJobk2g` | Separar validación URI/DNS y clasificación IPv4/IPv6 | `UrlExternaPolicyTest` | Este commit; push a `develop` | Pendiente de verificar |
 | 10 | `AaGdRnsl97lfKRteM0Ys` | Eliminar el helper de diez parámetros y construir el record de datos directamente | `DemoHomeIsadecorSeederTest` | Este commit; push a `develop` | Pendiente de verificar |
+| 11 | `AaGjwrYsQjmWlr9u4hwf`, `AaGjvYmKad7z90yEgGjf`, `AaGjvYmKad7z90yEgGjh`, `AaGjvYmKad7z90yEgGjg`, `AaEN8OtNTwfNugJobk50`, `AaEN8OtNTwfNugJobk51` | Corregir regresiones del análisis `f497069`: nulabilidad, literales, complejidad IPv4/separadores y lambdas | 3 clases, 61/61 pruebas | Este commit; push a `develop` | Pendiente de verificar |
 
 ## Pendientes y bloqueos
 
@@ -31,3 +32,9 @@ Los estados `FIXED` solo se registran cuando el usuario confirma un análisis re
 - Pendientes por riesgo técnico: **4 incidencias A** y **11 incidencias F**.
 - Falsos positivos y riesgos documentados C/D: sin cambios de código ni de estado remoto.
 - Todas las correcciones publicadas quedan pendientes de confirmación en un análisis SonarQube, salvo los lotes 1 y 2 confirmados por el usuario.
+
+## Análisis actualizado
+
+- Revisión analizada: `f497069f8b438e886f66be640fadc9f6b10a3cb7`.
+- Fecha SonarQube: `2026-11-03T23:36:43+0000`.
+- Incidencias activas al iniciar la nueva ronda: **247**.

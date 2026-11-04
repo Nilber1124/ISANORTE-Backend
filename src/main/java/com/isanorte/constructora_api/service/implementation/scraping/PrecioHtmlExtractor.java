@@ -20,6 +20,7 @@ import static com.isanorte.constructora_api.enums.EstadoComparacionPrecio.*;
 public class PrecioHtmlExtractor {
     public record Precio(BigDecimal precio, String moneda, String nombre) {}
     private static final String SALE_PRICE_AMOUNT = "product:sale_price:amount";
+    private static final String OPEN_GRAPH_TITLE = "og:title";
     private static final String CONTENT_ATTRIBUTE = "content";
     private static final String PRICE_CURRENCY = "priceCurrency";
     private final JsonMapper json = JsonMapper.builder().build();
@@ -76,7 +77,7 @@ public class PrecioHtmlExtractor {
     }
 
     private Precio metadataPrice(Document document, List<Precio> candidates) {
-        String title = meta(document, "og:title");
+        String title = meta(document, OPEN_GRAPH_TITLE);
         if (title == null) title = document.select("main h1").size() == 1
                 ? document.selectFirst("main h1").text() : null;
         for (String key : List.of(SALE_PRICE_AMOUNT, "product:price:amount", "og:price:amount", "og:product:price:amount")) {
@@ -94,7 +95,7 @@ public class PrecioHtmlExtractor {
     }
 
     private Precio microdataPrice(Document document, List<Precio> candidates) {
-        String title = meta(document, "og:title");
+        String title = meta(document, OPEN_GRAPH_TITLE);
         var microProducts = document.select("[itemscope][itemtype$='/Product']");
         if (microProducts.size() > 1) throw ambiguous();
         for (Element product : microProducts) {
@@ -118,7 +119,7 @@ public class PrecioHtmlExtractor {
     }
 
     private Precio visualPrice(Document document, List<Precio> candidates) {
-        String title = meta(document, "og:title");
+        String title = meta(document, OPEN_GRAPH_TITLE);
         // Only current-price elements in a product context, never arbitrary numbers in page text.
         // Prefer an explicit sale price. A .price container with multiple amounts is rejected.
         for (String selector : List.of(
@@ -170,6 +171,7 @@ public class PrecioHtmlExtractor {
     }
 
     private void addOffer(JsonNode node, String name, List<Precio> results) {
+        if (node == null) return;
         String amount = text(node, "price");
         String currency = text(node, PRICE_CURRENCY);
         if (amount != null) {
@@ -290,24 +292,26 @@ public class PrecioHtmlExtractor {
     }
 
     private static String normalizeSeparators(String value, boolean machine) {
-        if (value.contains(".") && value.contains(",")) {
-            char decimal = value.lastIndexOf('.') > value.lastIndexOf(',') ? '.' : ',';
-            String grouping = decimal == '.' ? "," : ".";
-            String pattern = "\\d{1,3}(?:" + Pattern.quote(grouping) + "\\d{3})+"
-                    + Pattern.quote(String.valueOf(decimal)) + "\\d{1,2}";
-            return value.matches(pattern) ? value.replace(grouping, "").replace(decimal, '.') : null;
-        }
-        if (value.contains(",") || value.contains(".")) {
-            char separator = value.contains(",") ? ',' : '.';
-            int digits = value.length() - value.lastIndexOf(separator) - 1;
-            long count = value.chars().filter(ch -> ch == separator).count();
-            if (count == 1 && digits >= 1 && digits <= 2) return value.replace(separator, '.');
-            if (!machine && value.matches("\\d{1,3}(?:" + Pattern.quote("" + separator) + "\\d{3})+")) {
-                return value.replace("" + separator, "");
-            }
-            return null; // Never round an ambiguous decimal/grouping representation.
-        }
+        if (value.contains(".") && value.contains(",")) return normalizeMixedSeparators(value);
+        if (value.contains(",") || value.contains(".")) return normalizeSingleSeparator(value, machine);
         return value;
+    }
+
+    private static String normalizeMixedSeparators(String value) {
+        char decimal = value.lastIndexOf('.') > value.lastIndexOf(',') ? '.' : ',';
+        String grouping = decimal == '.' ? "," : ".";
+        String pattern = "\\d{1,3}(?:" + Pattern.quote(grouping) + "\\d{3})+"
+                + Pattern.quote(String.valueOf(decimal)) + "\\d{1,2}";
+        return value.matches(pattern) ? value.replace(grouping, "").replace(decimal, '.') : null;
+    }
+
+    private static String normalizeSingleSeparator(String value, boolean machine) {
+        char separator = value.contains(",") ? ',' : '.';
+        int digits = value.length() - value.lastIndexOf(separator) - 1;
+        long count = value.chars().filter(ch -> ch == separator).count();
+        if (count == 1 && digits >= 1 && digits <= 2) return value.replace(separator, '.');
+        String grouped = "\\d{1,3}(?:" + Pattern.quote(String.valueOf(separator)) + "\\d{3})+";
+        return !machine && value.matches(grouped) ? value.replace(String.valueOf(separator), "") : null;
     }
 
     private static boolean isExcludedText(String value) {
