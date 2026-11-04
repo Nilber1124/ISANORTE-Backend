@@ -37,3 +37,17 @@ Los estados `FIXED` solo se registran cuando el usuario confirma un análisis re
 - Revisión analizada: `f497069f8b438e886f66be640fadc9f6b10a3cb7`.
 - Fecha SonarQube: `2026-11-03T23:36:43+0000`.
 - Incidencias activas al iniciar la nueva ronda: **247**.
+
+## Verificación definitiva del análisis `9a59e8a`
+
+- Revisión analizada por SonarQube Cloud: `9a59e8a198e09b10d01753f95dbdf84aab7d71e1`.
+- Fecha del análisis: `2026-11-04T05:57:33+0000`.
+- Incidencias activas: **226**; las **21** tratadas desde el análisis de 247 incidencias ya no aparecen activas.
+- Falsos positivos técnicamente sustentados que permanecen OPEN: **173**.
+  - **161** `plsql:VarcharUsageCheck`: recomienda `VARCHAR2`, tipo de Oracle que no es nativo de PostgreSQL.
+  - **7** `plsql:NullComparison`: interpreta comparaciones PostgreSQL contra cadena vacía (`<> ''`) como comparaciones con `NULL`; el SQL ya usa `IS NULL` correctamente donde corresponde.
+  - **5** Java: `S4502`, `S112`, `S1130`, `S1135` y `S1172`, con sustento individual en la auditoría.
+- Recomendaciones conservadas: **53** `plsql:S1192` en migraciones Flyway históricas. No son errores funcionales demostrados y alterar migraciones aplicadas invalidaría sus checksums.
+- Incidencias reales pendientes de modificar en código: **0**.
+- Quality Gate: **ERROR** porque los falsos positivos `NullComparison` mantienen la calificación de fiabilidad y `S4502` mantiene la calificación de seguridad mientras continúen OPEN.
+- No se cambiaron estados remotos: el entorno no dispone de `SONAR_TOKEN` ni de una sesión autenticada autorizada. No se modificaron reglas, perfiles ni umbrales para ocultar alertas.
