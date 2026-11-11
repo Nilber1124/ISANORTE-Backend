@@ -53,7 +53,7 @@ Si no se definen `SPRING_DATASOURCE_URL` y `SPRING_DATASOURCE_USERNAME`, la apli
 SPRING_PROFILES_ACTIVE=render
 ```
 
-El perfil escucha en `0.0.0.0` y usa el puerto proporcionado por `PORT`. Mantiene Flyway limitado temporalmente a V12, por lo que V13 y V14 no se ejecutarán hasta que se validen y autoricen por separado. Los archivos `.env`, `application.properties` y otros perfiles locales quedan excluidos del contexto Docker; solo se permiten expresamente las plantillas seguras `application.example.properties` y `application-render.properties`.
+El perfil escucha en `0.0.0.0` y usa el puerto proporcionado por `PORT`. Flyway ejecuta todas las migraciones, incluidas V13 (catálogos) y V14 (pedidos y direcciones), que crean las tablas que usan las entidades `Catalogo`, `Pedido`, `DetallePedido` y `DireccionCliente`. Los archivos `.env`, `application.properties` y otros perfiles locales quedan excluidos del contexto Docker; solo se permiten expresamente las plantillas seguras `application.example.properties` y `application-render.properties`.
 
 ---
 
