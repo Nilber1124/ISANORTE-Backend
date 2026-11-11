@@ -21,6 +21,7 @@ public record ProductoResponse(
     BigDecimal descuentoPorcentaje,
     EstadoDisponibilidad disponibilidad,
     Boolean destacado,
+    Integer ordenDestacado,
     Boolean retiroEnTienda,
     EstadoPublicacion estado,
     String tituloSeo,

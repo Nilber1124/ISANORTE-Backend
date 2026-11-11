@@ -110,8 +110,17 @@ public abstract class AbstractHtmlCompetidorProvider implements CompetidorProduc
         try { return java.net.URI.create(value).getHost().toLowerCase(Locale.ROOT); }
         catch (RuntimeException ex) { return ""; }
     }
-    private static String limpiarTitulo(String value) {
-        return value == null ? "Producto sin nombre" : value.replaceAll("\\s*[|–-]\\s*(Pisopak|Decorplas).*$", "").trim();
+    static String limpiarTitulo(String value) {
+        if (value == null) return "Producto sin nombre";
+        for (int index = 0; index < value.length(); index++) {
+            char character = value.charAt(index);
+            if (character != '|' && character != '–' && character != '-') continue;
+            String suffix = value.substring(index + 1).stripLeading();
+            if (suffix.startsWith("Pisopak") || suffix.startsWith("Decorplas")) {
+                return value.substring(0, index).stripTrailing();
+            }
+        }
+        return value.trim();
     }
     private static String normalizarMoneda(String value, String text) {
         if (value != null && !value.isBlank()) return value.equalsIgnoreCase("S/") ? "PEN" : value.toUpperCase(Locale.ROOT);

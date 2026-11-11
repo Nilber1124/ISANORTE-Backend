@@ -70,27 +70,29 @@ class ProductCategoryUnitIntegrityIntegrationTest {
         assertEquals(1, withScoped.getCategorias().size());
         assertEquals(0, withoutCategory.getCategorias().size());
 
+        ProductoRequest invalidRequest = productRequest("invalid", unitA.getId(), Set.of(scopedB.id()));
         IllegalStateException invalidCreate = assertThrows(IllegalStateException.class,
-                () -> productoService.create(productRequest("invalid", unitA.getId(), Set.of(scopedB.id()))));
+                () -> productoService.create(invalidRequest));
         assertEquals("La categoría seleccionada no pertenece a la unidad de negocio del producto.",
                 invalidCreate.getMessage());
 
-        assertDoesNotThrow(() -> productoService.update(withScoped.getId(),
-                productUpdate(withScoped, unitA.getId(), Set.of(global.id()))));
+        ProductoUpdateRequest validCategoryUpdate = productUpdate(withScoped, unitA.getId(), Set.of(global.id()));
+        assertDoesNotThrow(() -> productoService.update(withScoped.getId(), validCategoryUpdate));
+        ProductoUpdateRequest invalidCategoryUpdate = productUpdate(withScoped, unitA.getId(), Set.of(scopedB.id()));
+        UUID withScopedId = withScoped.getId();
         IllegalStateException invalidCategoryChange = assertThrows(IllegalStateException.class,
-                () -> productoService.update(withScoped.getId(),
-                        productUpdate(withScoped, unitA.getId(), Set.of(scopedB.id()))));
+                () -> productoService.update(withScopedId, invalidCategoryUpdate));
         assertEquals("La categoría seleccionada no pertenece a la unidad de negocio del producto.",
                 invalidCategoryChange.getMessage());
 
-        assertDoesNotThrow(() -> productoService.update(withGlobal.getId(),
-                productUpdate(withGlobal, unitB.getId(), Set.of(global.id()))));
+        ProductoUpdateRequest validUnitUpdate = productUpdate(withGlobal, unitB.getId(), Set.of(global.id()));
+        assertDoesNotThrow(() -> productoService.update(withGlobal.getId(), validUnitUpdate));
         Producto movedWithGlobal = productoRepository.findById(withGlobal.getId()).orElseThrow();
         assertEquals(unitB.getId(), movedWithGlobal.getUnidadNegocio().getId());
 
+        ProductoUpdateRequest invalidUnitUpdate = productUpdate(withScoped, unitB.getId(), Set.of(scopedA.id()));
         IllegalStateException invalidUnitChange = assertThrows(IllegalStateException.class,
-                () -> productoService.update(withScoped.getId(),
-                        productUpdate(withScoped, unitB.getId(), Set.of(scopedA.id()))));
+                () -> productoService.update(withScopedId, invalidUnitUpdate));
         assertEquals("La categoría seleccionada no pertenece a la unidad de negocio del producto.",
                 invalidUnitChange.getMessage());
     }
@@ -166,7 +168,7 @@ class ProductCategoryUnitIntegrityIntegrationTest {
         return new ProductoRequest(
                 "SKU-" + seed + "-" + random(5), "Producto " + seed + random(4),
                 "product-" + seed + "-" + random(5), null, "Descripción", null, null, null,
-                EstadoDisponibilidad.DISPONIBLE, false, false, EstadoPublicacion.BORRADOR, null, null,
+                EstadoDisponibilidad.DISPONIBLE, false, 0, false, EstadoPublicacion.BORRADOR, null, null,
                 unitId, categoryIds, null, null, null, null, null);
     }
 
@@ -174,7 +176,7 @@ class ProductCategoryUnitIntegrityIntegrationTest {
         return new ProductoUpdateRequest(
                 product.getSku(), product.getNombre(), product.getSlug(), product.getResumen(), product.getDescripcion(),
                 product.getPrecioBase(), product.getPrecioAnterior(), product.getDescuentoPorcentaje(),
-                product.getDisponibilidad(), Boolean.TRUE.equals(product.getDestacado()), product.getRetiroEnTienda(),
+                product.getDisponibilidad(), Boolean.TRUE.equals(product.getDestacado()), product.getOrdenDestacado(), product.getRetiroEnTienda(),
                 product.getEstado(), product.getTituloSeo(), product.getDescripcionSeo(), unitId, categoryIds);
     }
 

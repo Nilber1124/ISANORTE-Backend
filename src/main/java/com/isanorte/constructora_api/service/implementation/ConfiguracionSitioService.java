@@ -36,6 +36,10 @@ public class ConfiguracionSitioService extends GenericService<ConfiguracionSitio
     @Override
     @Transactional
     public ConfiguracionSitio create(ConfiguracionSitioRequest request) {
+        return createInternal(request);
+    }
+
+    private ConfiguracionSitio createInternal(ConfiguracionSitioRequest request) {
         Empresa empresa = empresaRepository.findById(request.empresaId())
                 .orElseThrow(() -> new ModelNotFoundException("Empresa no encontrada con ID: " + request.empresaId()));
         if (empresa.getConfiguracionSitio() != null) {
@@ -85,7 +89,7 @@ public class ConfiguracionSitioService extends GenericService<ConfiguracionSitio
     @Override
     @Transactional
     public ConfiguracionSitioResponse createResponse(ConfiguracionSitioRequest request) {
-        return configuracionSitioMapper.toResponse(create(request));
+        return configuracionSitioMapper.toResponse(createInternal(request));
     }
 
     @Override

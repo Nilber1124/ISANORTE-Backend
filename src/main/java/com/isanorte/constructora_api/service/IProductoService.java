@@ -7,6 +7,7 @@ import com.isanorte.constructora_api.dto.request.ProductoRequest;
 import com.isanorte.constructora_api.dto.request.EstadoPublicacionRequest;
 import com.isanorte.constructora_api.dto.request.ConfiguracionCalculoRequest;
 import com.isanorte.constructora_api.dto.request.DocumentoProductoRequest;
+import com.isanorte.constructora_api.dto.request.DestacadoProductoRequest;
 import com.isanorte.constructora_api.dto.request.EspecificacionProductoRequest;
 import com.isanorte.constructora_api.dto.request.ImagenProductoRequest;
 import com.isanorte.constructora_api.dto.request.ProductoUpdateRequest;
@@ -46,6 +47,8 @@ public interface IProductoService extends IGenericService<Producto, UUID> {
     ProductoResponse update(UUID id, ProductoUpdateRequest request);
 
     ProductoResponse updateEstado(UUID id, EstadoPublicacionRequest request);
+
+    ProductoResponse updateDestacado(UUID id, DestacadoProductoRequest request);
 
     VarianteProductoResponse createVariante(UUID productoId, VarianteProductoRequest request);
 

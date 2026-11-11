@@ -18,8 +18,6 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
-import java.util.UUID;
-
 import com.isanorte.constructora_api.dto.request.SolicitudContactoCreateRequest;
 import com.isanorte.constructora_api.dto.request.CrearResenaRequest;
 import com.isanorte.constructora_api.dto.response.PublicBusinessUnitResponse;
@@ -33,17 +31,22 @@ import com.isanorte.constructora_api.dto.response.SolicitudContactoPublicRespons
 import com.isanorte.constructora_api.dto.response.ProductoRecomendadoResponse;
 import com.isanorte.constructora_api.dto.response.ResenaProductoResponse;
 import com.isanorte.constructora_api.dto.response.ResumenResenasResponse;
+import com.isanorte.constructora_api.enums.OrdenCatalogoProducto;
 import com.isanorte.constructora_api.enums.OrdenResena;
 import com.isanorte.constructora_api.enums.TipoPaginaPublica;
 import com.isanorte.constructora_api.service.IPublicContentService;
 import com.isanorte.constructora_api.service.IComparacionPrecioService;
 import com.isanorte.constructora_api.service.IComparacionCompetidoresService;
 import com.isanorte.constructora_api.service.ICotizacionService;
+import com.isanorte.constructora_api.service.IPedidoService;
 import com.isanorte.constructora_api.dto.request.ComparacionPrecioRequest;
 import com.isanorte.constructora_api.dto.request.PublicCotizacionRequest;
+import com.isanorte.constructora_api.dto.request.PublicPedidoRequest;
+import com.isanorte.constructora_api.dto.request.PublicProductCatalogQuery;
 import com.isanorte.constructora_api.dto.response.ComparacionPrecioResponse;
 import com.isanorte.constructora_api.dto.response.ComparacionCompetidoresResponse;
 import com.isanorte.constructora_api.dto.response.PublicCotizacionResponse;
+import com.isanorte.constructora_api.dto.response.PublicPedidoResponse;
 import com.isanorte.constructora_api.service.ISolicitudContactoService;
 import com.isanorte.constructora_api.service.IResenaProductoService;
 
@@ -59,6 +62,7 @@ public class PublicContentController {
     private final IComparacionPrecioService comparacionPrecioService;
     private final IComparacionCompetidoresService comparacionCompetidoresService;
     private final ICotizacionService cotizacionService;
+    private final IPedidoService pedidoService;
     private final IResenaProductoService resenaProductoService;
 
     @GetMapping("/sitios/{clave}/unidades/{unidadSlug}/productos/{productoSlug}/recomendados")
@@ -86,7 +90,7 @@ public class PublicContentController {
             @Valid @RequestBody CrearResenaRequest request, Authentication authentication) {
         ClientIdentity client = authenticatedClient(authentication);
         return ResponseEntity.status(HttpStatus.CREATED).body(resenaProductoService.createPublicReview(
-                clave, unidadSlug, productoSlug, client.id(), client.name(), request));
+                clave, unidadSlug, productoSlug, client.id(), request));
     }
 
     @PostMapping("/resenas/{resenaId}/util")
@@ -145,8 +149,18 @@ public class PublicContentController {
 
     @GetMapping("/sitios/{clave}/unidades/{unidadSlug}/catalogo")
     public ResponseEntity<PublicProductCatalogResponse> findProductCatalog(
-            @PathVariable String clave, @PathVariable String unidadSlug) {
-        return ResponseEntity.ok(publicContentService.findProductCatalog(clave, unidadSlug));
+            @PathVariable String clave, @PathVariable String unidadSlug,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "12") int size,
+            @RequestParam(required = false) String categoria,
+            @RequestParam(required = false) String q,
+            @RequestParam(defaultValue = "false") boolean soloDescuento,
+            @RequestParam(defaultValue = "false") boolean soloDisponible,
+            @RequestParam(defaultValue = "false") boolean soloDestacados,
+            @RequestParam(defaultValue = "DESTACADOS") OrdenCatalogoProducto orden) {
+        var query = new PublicProductCatalogQuery(
+                page, size, categoria, q, soloDescuento, soloDisponible, soloDestacados, orden);
+        return ResponseEntity.ok(publicContentService.findProductCatalog(clave, unidadSlug, query));
     }
 
     @GetMapping("/sitios/{clave}/unidades/{unidadSlug}/productos/{productoSlug}")
@@ -165,6 +179,16 @@ public class PublicContentController {
                 .body(cotizacionService.createPublic(siteKey, unitSlug, request, UUID.fromString(jwt.getSubject())));
     }
 
+    @PostMapping("/sitios/{siteKey}/unidades/{unitSlug}/pedidos")
+    public ResponseEntity<PublicPedidoResponse> createPublicPedido(
+            @PathVariable String siteKey,
+            @PathVariable String unitSlug,
+            @Valid @RequestBody PublicPedidoRequest request,
+            @AuthenticationPrincipal Jwt jwt) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(pedidoService.createPublic(siteKey, unitSlug, request, UUID.fromString(jwt.getSubject())));
+    }
+
     private ClientIdentity authenticatedClient(Authentication authentication) {
         if (!(authentication instanceof JwtAuthenticationToken token) || !authentication.isAuthenticated()) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
@@ -172,19 +196,18 @@ public class PublicContentController {
         }
         boolean isClient = token.getAuthorities().stream()
                 .anyMatch(authority -> authority.getAuthority().equals("ROLE_CLIENTE"));
-        String clientId = token.getToken().getClaimAsString("cliente_id");
-        String clientName = token.getToken().getClaimAsString("nombre");
-        if (!isClient || clientId == null || clientName == null || clientName.isBlank()) {
+        String clientId = token.getToken().getSubject();
+        if (!isClient || clientId == null) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                    "La autenticación de clientes todavía no está disponible");
+                    "La identidad del cliente no está disponible");
         }
         try {
-            return new ClientIdentity(UUID.fromString(clientId), clientName);
+            return new ClientIdentity(UUID.fromString(clientId));
         } catch (IllegalArgumentException exception) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Identidad de cliente inválida");
         }
     }
 
-    private record ClientIdentity(UUID id, String name) {
+    private record ClientIdentity(UUID id) {
     }
 }

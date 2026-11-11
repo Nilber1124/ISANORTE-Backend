@@ -30,4 +30,6 @@ public interface IProyectoService extends IGenericService<Proyecto, UUID> {
     ProyectoResponse update(UUID id, ProyectoUpdateRequest request);
 
     ProyectoResponse updateActivo(UUID id, ActivoRequest request);
+
+    void delete(UUID id);
 }

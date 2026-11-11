@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.isanorte.constructora_api.dto.request.ActivoRequest;
@@ -36,6 +37,14 @@ public class ServicioController {
     @GetMapping
     public ResponseEntity<List<ServicioResponse>> findAll() {
         return ResponseEntity.ok(servicioService.findAllResponse());
+    }
+
+    @GetMapping("/slug-disponible")
+    public ResponseEntity<java.util.Map<String, Boolean>> checkSlugAvailable(
+            @RequestParam String slug,
+            @RequestParam(required = false) UUID excludeId) {
+        boolean available = servicioService.isSlugAvailable(slug.trim(), excludeId);
+        return ResponseEntity.ok(java.util.Map.of("available", available));
     }
 
     @GetMapping("/activos")

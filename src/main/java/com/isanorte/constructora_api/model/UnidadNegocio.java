@@ -1,5 +1,7 @@
 package com.isanorte.constructora_api.model;
 
+import com.isanorte.constructora_api.util.BusinessTime;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +42,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UnidadNegocio {
+    private static final String NULL_PRODUCT_MESSAGE = "El producto no puede ser null";
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -92,6 +95,12 @@ public class UnidadNegocio {
     @OrderBy("orden ASC, id ASC")
     private List<RecursoUnidadNegocio> recursos = new ArrayList<>();
 
+    @Setter(AccessLevel.NONE)
+    @Builder.Default
+    @OneToMany(mappedBy = "unidadNegocio", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("orden ASC, id ASC")
+    private List<Catalogo> catalogos = new ArrayList<>();
+
     @Column(nullable = false)
     private LocalDateTime fechaCreacion;
 
@@ -105,7 +114,7 @@ public class UnidadNegocio {
      * @throws NullPointerException si {@code producto} es {@code null}
      */
     public void addProducto(Producto producto) {
-        Objects.requireNonNull(producto, "El producto no puede ser null");
+        Objects.requireNonNull(producto, NULL_PRODUCT_MESSAGE);
         if (producto.getUnidadNegocio() != null && producto.getUnidadNegocio() != this) {
             throw new IllegalStateException("El producto ya pertenece a otra unidad de negocio");
         }
@@ -113,12 +122,12 @@ public class UnidadNegocio {
     }
 
     void agregarProductoReferencia(Producto producto) {
-        Objects.requireNonNull(producto, "El producto no puede ser null");
+        Objects.requireNonNull(producto, NULL_PRODUCT_MESSAGE);
         this.productos.add(producto);
     }
 
     void removerProductoReferencia(Producto producto) {
-        Objects.requireNonNull(producto, "El producto no puede ser null");
+        Objects.requireNonNull(producto, NULL_PRODUCT_MESSAGE);
         this.productos.remove(producto);
     }
 
@@ -136,10 +145,24 @@ public class UnidadNegocio {
         if (recursos.remove(recurso)) recurso.setUnidadNegocio(null);
     }
 
+    public void addCatalogo(Catalogo catalogo) {
+        Objects.requireNonNull(catalogo, "El catálogo no puede ser null");
+        if (catalogo.getUnidadNegocio() != null && catalogo.getUnidadNegocio() != this) {
+            throw new IllegalStateException("El catálogo ya pertenece a otra unidad de negocio");
+        }
+        catalogos.add(catalogo);
+        catalogo.setUnidadNegocio(this);
+    }
+
+    public void removeCatalogo(Catalogo catalogo) {
+        Objects.requireNonNull(catalogo, "El catálogo no puede ser null");
+        if (catalogos.remove(catalogo)) catalogo.setUnidadNegocio(null);
+    }
+
     @PrePersist
     protected void onCreate() {
-        fechaCreacion = LocalDateTime.now();
-        fechaActualizacion = LocalDateTime.now();
+        fechaCreacion = BusinessTime.now();
+        fechaActualizacion = BusinessTime.now();
 
         if (activo == null) {
             activo = true;
@@ -154,6 +177,6 @@ public class UnidadNegocio {
 
     @PreUpdate
     protected void onUpdate() {
-        fechaActualizacion = LocalDateTime.now();
+        fechaActualizacion = BusinessTime.now();
     }
 }

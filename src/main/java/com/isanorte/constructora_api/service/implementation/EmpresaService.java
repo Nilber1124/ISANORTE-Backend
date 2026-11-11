@@ -42,6 +42,10 @@ public class EmpresaService extends GenericService<Empresa, UUID> implements IEm
     @Override
     @Transactional
     public Empresa create(EmpresaRequest request) {
+        return createInternal(request);
+    }
+
+    private Empresa createInternal(EmpresaRequest request) {
         Empresa empresa = empresaMapper.toEntity(request);
         if (request.redesSociales() != null) {
             request.redesSociales().stream()
@@ -82,7 +86,7 @@ public class EmpresaService extends GenericService<Empresa, UUID> implements IEm
     @Override
     @Transactional
     public EmpresaResponse createResponse(EmpresaRequest request) {
-        return empresaMapper.toResponse(create(request));
+        return empresaMapper.toResponse(createInternal(request));
     }
 
     @Override

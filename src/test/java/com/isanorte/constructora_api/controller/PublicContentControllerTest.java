@@ -11,11 +11,15 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 
+import com.isanorte.constructora_api.dto.request.PublicProductCatalogQuery;
+import com.isanorte.constructora_api.dto.response.PublicProductCatalogResponse;
 import com.isanorte.constructora_api.dto.response.PublicProjectResponse;
+import com.isanorte.constructora_api.enums.OrdenCatalogoProducto;
 import com.isanorte.constructora_api.exception.ModelNotFoundException;
 import com.isanorte.constructora_api.service.IComparacionCompetidoresService;
 import com.isanorte.constructora_api.service.IComparacionPrecioService;
 import com.isanorte.constructora_api.service.ICotizacionService;
+import com.isanorte.constructora_api.service.IPedidoService;
 import com.isanorte.constructora_api.service.IPublicContentService;
 import com.isanorte.constructora_api.service.IResenaProductoService;
 import com.isanorte.constructora_api.service.ISolicitudContactoService;
@@ -51,9 +55,28 @@ class PublicContentControllerTest {
         verify(service).findPublicProject("isanorte", "inexistente");
     }
 
+    @Test
+    void retornaCatalogoDelegandoEnElServicioConLosParametrosRecibidos() {
+        IPublicContentService service = mock(IPublicContentService.class);
+        PublicProductCatalogResponse catalog = new PublicProductCatalogResponse(
+                new PublicProductCatalogResponse.Unidad("Unidad", "unidad"), List.of(),
+                new PublicProductCatalogResponse.Pagina(List.of(), 0, 12, 0, 0));
+        var query = new PublicProductCatalogQuery(
+                0, 12, "colectivo", "muro", true, true, true, OrdenCatalogoProducto.PRECIO_ASC);
+        when(service.findProductCatalog("isanorte", "unidad", query)).thenReturn(catalog);
+        PublicContentController controller = controllerWith(service);
+
+        var response = controller.findProductCatalog(
+                "isanorte", "unidad", 0, 12, "colectivo", "muro", true, true, true, OrdenCatalogoProducto.PRECIO_ASC);
+
+        assertSame(HttpStatus.OK, response.getStatusCode());
+        assertSame(catalog, response.getBody());
+        verify(service).findProductCatalog("isanorte", "unidad", query);
+    }
+
     private PublicContentController controllerWith(IPublicContentService service) {
         return new PublicContentController(service, mock(ISolicitudContactoService.class),
                 mock(IComparacionPrecioService.class), mock(IComparacionCompetidoresService.class),
-                mock(ICotizacionService.class), mock(IResenaProductoService.class));
+                mock(ICotizacionService.class), mock(IPedidoService.class), mock(IResenaProductoService.class));
     }
 }

@@ -8,6 +8,7 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.access.AccessDeniedException;
 
 import com.isanorte.constructora_api.dto.request.CrearResenaRequest;
 import com.isanorte.constructora_api.dto.response.ResenaProductoResponse;
@@ -18,6 +19,7 @@ import com.isanorte.constructora_api.exception.ModelNotFoundException;
 import com.isanorte.constructora_api.model.Producto;
 import com.isanorte.constructora_api.model.ResenaProducto;
 import com.isanorte.constructora_api.repository.ConfiguracionSitioRepository;
+import com.isanorte.constructora_api.repository.ClienteRepository;
 import com.isanorte.constructora_api.repository.ProductoRepository;
 import com.isanorte.constructora_api.repository.ResenaProductoRepository;
 import com.isanorte.constructora_api.repository.UnidadNegocioRepository;
@@ -32,6 +34,7 @@ public class ResenaProductoService implements IResenaProductoService {
     private final UnidadNegocioRepository unidadRepository;
     private final ProductoRepository productoRepository;
     private final ResenaProductoRepository resenaRepository;
+    private final ClienteRepository clienteRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -73,8 +76,15 @@ public class ResenaProductoService implements IResenaProductoService {
     @Transactional
     public ResenaProductoResponse createPublicReview(
             String clave, String unidadSlug, String productoSlug,
-            UUID clienteId, String nombreCliente, CrearResenaRequest request) {
+            UUID clienteId, CrearResenaRequest request) {
         Producto producto = findPublicProduct(clave, unidadSlug, productoSlug);
+        var cliente = clienteRepository.findById(clienteId)
+                .filter(value -> Boolean.TRUE.equals(value.getActivo()))
+                .orElseThrow(() -> new AccessDeniedException("La cuenta de cliente no está activa"));
+        String nombreCliente = java.util.stream.Stream.of(cliente.getNombre(), cliente.getApellido())
+                .filter(value -> value != null && !value.isBlank())
+                .map(String::trim)
+                .collect(java.util.stream.Collectors.joining(" "));
         ResenaProducto resena = ResenaProducto.builder()
                 .producto(producto)
                 .clienteId(clienteId)

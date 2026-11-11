@@ -12,6 +12,8 @@ import com.isanorte.constructora_api.dto.request.UnidadNegocioRequest;
 import com.isanorte.constructora_api.dto.request.UnidadNegocioUpdateRequest;
 import com.isanorte.constructora_api.dto.response.UnidadNegocioResponse;
 import com.isanorte.constructora_api.dto.response.RecursoUnidadNegocioResponse;
+import com.isanorte.constructora_api.dto.response.CatalogoResponse;
+import com.isanorte.constructora_api.model.Catalogo;
 import com.isanorte.constructora_api.model.Empresa;
 import com.isanorte.constructora_api.model.RecursoUnidadNegocio;
 import com.isanorte.constructora_api.model.UnidadNegocio;
@@ -21,6 +23,7 @@ public interface UnidadNegocioMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "recursos", ignore = true)
+    @Mapping(target = "catalogos", ignore = true)
     @Mapping(target = "empresa", ignore = true)
     @Mapping(target = "productos", ignore = true)
     @Mapping(target = "fechaCreacion", ignore = true)
@@ -29,6 +32,7 @@ public interface UnidadNegocioMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "recursos", ignore = true)
+    @Mapping(target = "catalogos", ignore = true)
     @Mapping(target = "empresa", ignore = true)
     @Mapping(target = "productos", ignore = true)
     @Mapping(target = "fechaCreacion", ignore = true)
@@ -36,6 +40,7 @@ public interface UnidadNegocioMapper {
     void updateEntity(UnidadNegocioUpdateRequest request, @MappingTarget UnidadNegocio unidadNegocio);
 
     @Mapping(target = "recursos", expression = "java(sortedResources(unidadNegocio.getRecursos()))")
+    @Mapping(target = "catalogos", expression = "java(sortedCatalogos(unidadNegocio.getCatalogos()))")
     UnidadNegocioResponse toResponse(UnidadNegocio unidadNegocio);
 
     default List<RecursoUnidadNegocioResponse> sortedResources(List<RecursoUnidadNegocio> values) {
@@ -43,6 +48,14 @@ public interface UnidadNegocioMapper {
                 .thenComparing(value -> value.getId().toString()))
                 .map(value -> new RecursoUnidadNegocioResponse(value.getId(), value.getTipo(), value.getUrl(),
                         value.getAlt(), value.getEtiqueta(), value.getOrden(), value.getActivo()))
+                .toList();
+    }
+
+    default List<CatalogoResponse> sortedCatalogos(List<Catalogo> values) {
+        return values.stream().sorted(Comparator.comparing(Catalogo::getOrden)
+                .thenComparing(value -> value.getId().toString()))
+                .map(value -> new CatalogoResponse(value.getId(), value.getTitulo(), value.getImagenPortadaUrl(),
+                        value.getArchivoUrl(), value.getOrden(), value.getActivo()))
                 .toList();
     }
 

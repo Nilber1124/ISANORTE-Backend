@@ -1,5 +1,8 @@
 HELP.md
 target/
+
+# Variables de entorno locales — NUNCA commitear
+.env
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
@@ -31,3 +34,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Configuración local: puede contener credenciales. Usar application.example.properties como plantilla.
+src/main/resources/application.properties

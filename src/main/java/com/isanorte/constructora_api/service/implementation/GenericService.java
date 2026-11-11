@@ -9,9 +9,9 @@ import com.isanorte.constructora_api.repository.IGenericRepository;
 import com.isanorte.constructora_api.service.IGenericService;
 
 @Transactional(readOnly = true)
-public abstract class GenericService<T, ID> implements IGenericService<T, ID> {
+public abstract class GenericService<T, I> implements IGenericService<T, I> {
 
-    protected abstract IGenericRepository<T, ID> getRepo();
+    protected abstract IGenericRepository<T, I> getRepo();
 
     @Override
     @Transactional
@@ -25,7 +25,7 @@ public abstract class GenericService<T, ID> implements IGenericService<T, ID> {
     }
 
     @Override
-    public T findById(ID id) {
+    public T findById(I id) {
         return getRepo().findById(id)
                 .orElseThrow(() -> new ModelNotFoundException("Registro no encontrado con ID: " + id));
     }

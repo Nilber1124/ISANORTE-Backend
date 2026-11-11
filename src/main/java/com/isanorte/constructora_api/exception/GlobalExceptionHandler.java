@@ -1,6 +1,7 @@
 package com.isanorte.constructora_api.exception;
 
-import java.time.OffsetDateTime;
+import com.isanorte.constructora_api.util.BusinessTime;
+
 import java.util.stream.Collectors;
 
 import org.springframework.dao.DataIntegrityViolationException;
@@ -71,7 +72,7 @@ public class GlobalExceptionHandler {
     private ResponseEntity<ApiErrorResponse> build(
             HttpStatus status, String message, HttpServletRequest request) {
         ApiErrorResponse response = new ApiErrorResponse(
-                OffsetDateTime.now(), status.value(), status.getReasonPhrase(), message, request.getRequestURI());
+                BusinessTime.nowOffset(), status.value(), status.getReasonPhrase(), message, request.getRequestURI());
         return ResponseEntity.status(status).body(response);
     }
 }

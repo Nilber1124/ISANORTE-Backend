@@ -40,6 +40,8 @@ public interface ProductoMapper {
     @Mapping(target = "especificaciones", ignore = true)
     @Mapping(target = "documentos", ignore = true)
     @Mapping(target = "configuracionCalculo", ignore = true)
+    @Mapping(target = "stockActual", ignore = true)
+    @Mapping(target = "version", ignore = true)
     Producto toEntity(ProductoRequest request);
 
     @Mapping(target = "id", ignore = true)
@@ -52,6 +54,8 @@ public interface ProductoMapper {
     @Mapping(target = "especificaciones", ignore = true)
     @Mapping(target = "documentos", ignore = true)
     @Mapping(target = "configuracionCalculo", ignore = true)
+    @Mapping(target = "stockActual", ignore = true)
+    @Mapping(target = "version", ignore = true)
     void updateEntity(ProductoUpdateRequest request, @MappingTarget Producto producto);
 
     @Mapping(target = "id", ignore = true)

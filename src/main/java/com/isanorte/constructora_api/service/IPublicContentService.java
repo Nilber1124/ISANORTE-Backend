@@ -2,6 +2,7 @@ package com.isanorte.constructora_api.service;
 
 import java.util.List;
 
+import com.isanorte.constructora_api.dto.request.PublicProductCatalogQuery;
 import com.isanorte.constructora_api.dto.response.PublicBusinessUnitResponse;
 import com.isanorte.constructora_api.dto.response.PublicHomeResponse;
 import com.isanorte.constructora_api.dto.response.PublicPageResponse;
@@ -18,7 +19,8 @@ public interface IPublicContentService {
     PublicPageResponse findPage(String clave, TipoPaginaPublica pagina);
     PublicProjectResponse findPublicProject(String clave, String proyectoSlug);
     PublicBusinessUnitResponse findBusinessUnit(String clave, String slug);
-    PublicProductCatalogResponse findProductCatalog(String clave, String unidadSlug);
+    PublicProductCatalogResponse findProductCatalog(
+            String clave, String unidadSlug, PublicProductCatalogQuery query);
     PublicProductDetailResponse findPublicProduct(String clave, String unidadSlug, String productoSlug);
     List<ProductoRecomendadoResponse> findRecommendedProducts(
             String clave, String unidadSlug, String productoSlug);

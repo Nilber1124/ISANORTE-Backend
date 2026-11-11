@@ -61,6 +61,10 @@ public class SeccionLandingService extends GenericService<SeccionLanding, UUID> 
     @Override
     @Transactional
     public SeccionLanding create(SeccionLandingRequest request) {
+        return createInternal(request);
+    }
+
+    private SeccionLanding createInternal(SeccionLandingRequest request) {
         ConfiguracionSitio configuracion = configuracionSitioRepository.findById(request.configuracionSitioId())
                 .orElseThrow(() -> new ModelNotFoundException(
                         "Configuración de sitio no encontrada con ID: " + request.configuracionSitioId()));
@@ -107,7 +111,7 @@ public class SeccionLandingService extends GenericService<SeccionLanding, UUID> 
     @Override
     @Transactional
     public SeccionLandingResponse createResponse(SeccionLandingRequest request) {
-        return seccionLandingMapper.toResponse(create(request));
+        return seccionLandingMapper.toResponse(createInternal(request));
     }
 
     @Override
@@ -232,27 +236,31 @@ public class SeccionLandingService extends GenericService<SeccionLanding, UUID> 
         String normalized = value.toLowerCase();
         boolean hasUnsafeCharacters = value.chars().anyMatch(Character::isISOControl)
                 || value.chars().anyMatch(Character::isWhitespace);
-        if (hasUnsafeCharacters) invalidLink();
+        if (hasUnsafeCharacters || !isAllowedLink(value, normalized)) invalidLink();
+    }
 
-        if (value.startsWith("/")) {
-            if (value.startsWith("//") || value.startsWith("/\\")) invalidLink();
-            return;
+    private static boolean isAllowedLink(String value, String normalized) {
+        return isInternalPath(value) || value.startsWith("#") || isContactLink(value, normalized)
+                || isSecureWebLink(value, normalized);
+    }
+
+    private static boolean isInternalPath(String value) {
+        return value.startsWith("/") && !value.startsWith("//") && !value.startsWith("/\\");
+    }
+
+    private static boolean isContactLink(String value, String normalized) {
+        boolean contactScheme = normalized.startsWith("mailto:") || normalized.startsWith("tel:");
+        return contactScheme && !value.substring(value.indexOf(':') + 1).isBlank();
+    }
+
+    private static boolean isSecureWebLink(String value, String normalized) {
+        if (!normalized.startsWith("https://")) return false;
+        try {
+            URI uri = new URI(value);
+            return "https".equalsIgnoreCase(uri.getScheme()) && uri.getHost() != null;
+        } catch (URISyntaxException exception) {
+            return false;
         }
-        if (value.startsWith("#")) return;
-        if (normalized.startsWith("mailto:") || normalized.startsWith("tel:")) {
-            if (value.substring(value.indexOf(':') + 1).isBlank()) invalidLink();
-            return;
-        }
-        if (normalized.startsWith("https://")) {
-            try {
-                URI uri = new URI(value);
-                if (!"https".equalsIgnoreCase(uri.getScheme()) || uri.getHost() == null) invalidLink();
-                return;
-            } catch (URISyntaxException exception) {
-                invalidLink();
-            }
-        }
-        invalidLink();
     }
 
     private void invalidLink() {
@@ -266,12 +274,19 @@ public class SeccionLandingService extends GenericService<SeccionLanding, UUID> 
                 .filter(action -> Boolean.TRUE.equals(action.getActivo()))
                 .filter(action -> currentId == null || !Objects.equals(action.getId(), currentId))
                 .count();
-        int maximum = section.getTipo() == TipoSeccionLanding.HERO ? 2
-                : section.getTipo() == TipoSeccionLanding.CTA ? 1 : Integer.MAX_VALUE;
+        int maximum = maximumActiveActions(section.getTipo());
         if (count >= maximum) {
             throw new IllegalArgumentException("La sección " + section.getTipo()
                     + " admite como máximo " + maximum + " acciones activas");
         }
+    }
+
+    private static int maximumActiveActions(TipoSeccionLanding type) {
+        return switch (type) {
+            case HERO -> 2;
+            case CTA -> 1;
+            default -> Integer.MAX_VALUE;
+        };
     }
 
     private void initializeForResponse(SeccionLanding seccion) {

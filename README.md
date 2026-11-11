@@ -40,32 +40,34 @@ GRANT ALL PRIVILEGES ON DATABASE isanorte_db TO isanorte_user;
 export SPRING_DATASOURCE_URL="jdbc:postgresql://<host>/<db>?sslmode=require"   # debe empezar con jdbc:postgresql://
 export SPRING_DATASOURCE_USERNAME="tu_usuario"
 export SPRING_DATASOURCE_PASSWORD="tu_contraseña"
-export CORS_ALLOWED_ORIGINS="https://tu-frontend.vercel.app"   # opcional; por defecto incluye localhost y Vercel
+export CORS_ALLOWED_ORIGINS="https://tu-frontend.vercel.app"   # lista separada por comas; solo orígenes exactos, sin comodines
 export PORT=8080   # Render la inyecta automáticamente; en local por defecto es 8080
 ```
 Si no se definen `SPRING_DATASOURCE_URL` y `SPRING_DATASOURCE_USERNAME`, la aplicación usa `jdbc:postgresql://localhost:5432/isanorte_db` y el usuario `isanorte_user`. **No hay contraseña por defecto**: `SPRING_DATASOURCE_PASSWORD` debe definirse siempre.
+
+`src/main/resources/application.properties` está excluido de Git porque puede contener configuración local sensible. Usa `application.example.properties` como plantilla y conserva las credenciales exclusivamente en variables de entorno o en un gestor de secretos. Si una credencial llegó a versionarse, eliminarla del archivo no es suficiente: debe revocarse y rotarse en el proveedor correspondiente.
+
+**Configuración para Render:** el perfil versionado `application-render.properties` enlaza estas variables sin almacenar secretos. Actívalo en el panel de Render con:
+
+```bash
+SPRING_PROFILES_ACTIVE=render
+```
+
+El perfil escucha en `0.0.0.0` y usa el puerto proporcionado por `PORT`. Mantiene Flyway limitado temporalmente a V12, por lo que V13 y V14 no se ejecutarán hasta que se validen y autoricen por separado. Los archivos `.env`, `application.properties` y otros perfiles locales quedan excluidos del contexto Docker; solo se permiten expresamente las plantillas seguras `application.example.properties` y `application-render.properties`.
 
 ---
 
 ### 2. Credenciales de Cloudinary
 El almacenamiento de fotografías del catálogo se realiza externamente en Cloudinary. La API necesita tus llaves para autorizar la subida de archivos. 
 
-Puedes configurar estas credenciales de dos maneras:
-
-**Opción A: Variables de entorno (Recomendado)**
+Configura estas credenciales mediante variables de entorno:
 ```bash
 export CLOUDINARY_CLOUD_NAME="tu_nombre_de_cloud"
 export CLOUDINARY_API_KEY="tu_api_key"
 export CLOUDINARY_API_SECRET="tu_api_secret"
 ```
 
-**Opción B: Editando `application.properties` (Para desarrollo local)**
-En `src/main/resources/application.properties`:
-```properties
-cloudinary.cloud-name=${CLOUDINARY_CLOUD_NAME:tu_nombre_de_cloud}
-cloudinary.api-key=${CLOUDINARY_API_KEY:tu_api_key}
-cloudinary.api-secret=${CLOUDINARY_API_SECRET:tu_api_secret}
-```
+La plantilla `src/main/resources/application.example.properties` referencia estas variables sin valores sensibles predeterminados. No copies claves reales al README ni a archivos versionados.
 
 ---
 
@@ -82,10 +84,16 @@ La API cuenta con autenticación basada en **JSON Web Tokens (JWT)** y control d
 | `ADMIN_PASSWORD` | `app.auth.initial-password` | **Entre 12 y 72 caracteres** | Contraseña del administrador inicial (hasheada con BCrypt). |
 | `JWT_EXPIRATION` | `app.jwt.expiration` | Formato ISO-8601 (ej: `PT8H`) | Tiempo de validez del token (por defecto 8 horas). |
 | `ADMIN_ROLE` | `app.auth.admin-role` | Nombre de rol (por defecto `ADMINISTRADOR`) | Nombre del rol con permisos administrativos. |
+| `SEED_DEMO_HOME_ISADECOR` | `app.seed.demo-home-isadecor` | `true` o `false` (por defecto `false`) | Inserta una sola vez contenido demostrativo administrable del Home ISADECOR. No activar en producción. |
+| `CORS_ALLOWED_ORIGINS` | `cors.allowed-origins` | Lista de orígenes `http://` o `https://` exactos, separados por comas; no admite `*` ni rutas | Frontends autorizados para llamadas desde navegador. |
+| `MULTIPART_MAX_FILE_SIZE` | `spring.servlet.multipart.max-file-size` | Tamaño de Spring (`7MB` por defecto; no superar `8MB` sin evaluación) | Tamaño máximo por archivo subido a Cloudinary. |
+| `MULTIPART_MAX_REQUEST_SIZE` | `spring.servlet.multipart.max-request-size` | Tamaño de Spring (`8MB` por defecto y mayor que el límite de archivo) | Tamaño máximo total de una petición multipart. |
 
 > **⚠️ Importante:** 
 > - Si `JWT_SECRET` tiene menos de 32 caracteres, la aplicación arrojará una excepción al iniciar y se detendrá.
 > - Al iniciar la aplicación por primera vez con `ADMIN_EMAIL` y `ADMIN_PASSWORD` configurados, el componente `AdminInitializer` creará automáticamente el administrador inicial en la base de datos. Si el usuario ya existe, no se modificará.
+> - `SPRING_DATASOURCE_PASSWORD`, `ADMIN_PASSWORD`, `JWT_SECRET` y las credenciales de Cloudinary no deben tener valores sensibles por defecto ni almacenarse en Git.
+> - Los límites multipart predeterminados dejan margen para la envoltura de una petición con un archivo de hasta 7 MB. Amplíalos solo si existe un requisito funcional verificado y se han evaluado la memoria disponible, las cuotas y el control de frecuencia, ya que la carga actual se materializa en memoria antes de enviarse a Cloudinary.
 
 #### Cómo configurarlo:
 
@@ -96,14 +104,18 @@ export ADMIN_EMAIL="admin@isanorte.com"
 export ADMIN_PASSWORD="AdminPasswordSeguro123!"
 ```
 
-**Opción B: En `application.properties` (Para desarrollo local)**
+**Plantilla local segura:**
+
+Haz una copia local de `src/main/resources/application.example.properties` como `application.properties`. El archivo resultante está ignorado por Git y mantiene las referencias a variables sin incluir secretos:
 ```properties
 app.auth.admin-role=ADMINISTRADOR
-app.auth.initial-email=${ADMIN_EMAIL:admin@isanorte.com}
-app.auth.initial-password=${ADMIN_PASSWORD:AdminPasswordSeguro123!}
-app.jwt.secret=${JWT_SECRET:tu_clave_secreta_super_segura_de_mas_de_32_bytes}
+app.auth.initial-email=${ADMIN_EMAIL}
+app.auth.initial-password=${ADMIN_PASSWORD}
+app.jwt.secret=${JWT_SECRET}
 app.jwt.expiration=${JWT_EXPIRATION:PT8H}
 ```
+
+La API es stateless y autentica mediante `Authorization: Bearer`; no usa cookies de autenticación. CSRF se excluye únicamente para `/api/**` y permanece activo para rutas web no API. CORS se centraliza en `CorsConfig` y rechaza comodines, rutas y esquemas distintos de HTTP/HTTPS.
 
 ---
 
@@ -120,19 +132,39 @@ app.jwt.expiration=${JWT_EXPIRATION:PT8H}
 - `GET /actuator/health`: Chequeo de salud del servicio.
 
 ### Endpoints Protegidos
+
+El modulo de anuncios administra `GET/POST /api/anuncios`, `GET/PUT/DELETE /api/anuncios/{id}` y
+`PATCH /api/anuncios/{id}/activo`. Estas rutas requieren JWT administrativo. Las imagenes reutilizan
+la carga Cloudinary existente en `POST /api/archivos/subir-imagen`.
+
 - Todas las rutas bajo `/api/**` que no sean públicas requieren el rol `ADMINISTRADOR`.
 - Requieren sesión de cliente (rol `CLIENTE`, cabecera `Authorization: Bearer <token>`):
   - `GET /api/publico/cuenta/me` y `GET /api/publico/cuenta/cotizaciones`.
   - `GET` y `PUT /api/publico/cuenta/carrito`: carrito guardado en la cuenta (se reemplaza completo en cada `PUT`, máximo 50 líneas).
   - `POST /api/publico/sitios/{clave}/unidades/{unidadSlug}/cotizaciones`: la cotización queda vinculada a la cuenta.
+  - `POST /api/publico/sitios/{clave}/unidades/{unidadSlug}/pedidos`: crea un pedido vinculado a la cuenta y su dirección.
   - `POST .../productos/{productoSlug}/comparar-precio` y `GET .../productos/{productoSlug}/comparacion-competidores`.
 
 ### Cuentas de cliente
+
 - Son independientes de los administradores: tabla `clientes`, token con rol `CLIENTE` y sin acceso a `/api/**` administrativo.
 - `POST /api/publico/cuenta/registro` exige `aceptaTratamientoDatos: true` y una contraseña de al menos 8 caracteres. Un correo repetido responde `409`.
 - El token expira según `app.jwt.expiration`. Tras expirar, el frontend debe pedir un nuevo inicio de sesión.
+- Migración `V8__create_resenas_producto.sql`: incorpora reseñas persistidas de productos.
 - Migración `V9__cuentas_clientes.sql`: crea `clientes` y agrega `cotizaciones.cliente_id`.
 - Migración `V10__carrito_cliente.sql`: crea `carritos_cliente`, un carrito por cuenta.
+- Migraciones `V13__create_catalogos.sql` y `V14__create_pedidos_direcciones.sql`: incorporan catálogos, inventario, pedidos y direcciones.
+
+### Anuncios públicos
+
+- `GET /api/publico/anuncios/ISANORTE` y `GET /api/publico/anuncios/ISADECOR` no requieren autenticación.
+- Solo retornan anuncios activos, vigentes y destinados al sitio solicitado o a `AMBOS`, ordenados por
+  orden de visualización, fecha de creación e identificador.
+- `V11__create_anuncios.sql` crea la tabla, las restricciones de enums y vigencia, y el índice de consulta pública.
+- El parámetro opcional `ubicacion` permite consultar `GENERAL`, `CINTA_HOME`,
+  `PROMOCION_PRINCIPAL`, `PROMOCION_SECUNDARIA`, `ANUNCIOS_HOME` o `CATEGORIA_SUPERIOR`.
+- `V12__home_isadecor_administrable.sql` amplía anuncios para estas ubicaciones y agrega el orden
+  de productos destacados. El seed del Home es opt-in e idempotente mediante `SEED_DEMO_HOME_ISADECOR=true`.
 
 ### 1. Iniciar Sesión (`Login`)
 Envía una petición `POST` a `/api/auth/login`:
@@ -141,8 +173,8 @@ Envía una petición `POST` a `/api/auth/login`:
 curl -X POST http://localhost:8080/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "admin@isanorte.com",
-    "password": "AdminPasswordSeguro123!"
+    "email": "<ADMIN_EMAIL>",
+    "password": "<ADMIN_PASSWORD>"
   }'
 ```
 
@@ -232,4 +264,4 @@ O para ejecutar un test específico:
 - `src/main/java/.../controller/`: Controladores REST (ej: `AuthController.java`, `ArchivoController.java`).
 - `src/main/java/.../service/`: Servicios y lógica de negocio.
 - `src/main/resources/db/migration/`: Scripts SQL gestionados por Flyway para la evolución de la base de datos.
-- `src/main/resources/application.properties`: Archivo principal de configuración.
+- `src/main/resources/application.example.properties`: plantilla versionada sin secretos; copiar localmente como `application.properties`, que permanece ignorado por Git.

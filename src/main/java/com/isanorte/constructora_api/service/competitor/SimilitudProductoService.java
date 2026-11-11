@@ -4,9 +4,9 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.Normalizer;
 import java.util.*;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-@Component
+@Service
 public class SimilitudProductoService {
     public static final BigDecimal UMBRAL = new BigDecimal("0.45");
     private static final BigDecimal PESO_NOMBRE = new BigDecimal("0.55");
@@ -26,7 +26,8 @@ public class SimilitudProductoService {
     private BigDecimal similitudCaracteristicas(Map<String, String> left, Map<String, String> right) {
         Map<String, String> normalizedRight = new HashMap<>();
         right.forEach((k, v) -> normalizedRight.put(clave(k), v));
-        BigDecimal sum = BigDecimal.ZERO; int count = 0;
+        BigDecimal sum = BigDecimal.ZERO;
+        int count = 0;
         for (var entry : left.entrySet()) {
             String other = normalizedRight.get(clave(entry.getKey()));
             if (other != null) { sum = sum.add(jaccard(tokens(entry.getValue()), tokens(other))); count++; }

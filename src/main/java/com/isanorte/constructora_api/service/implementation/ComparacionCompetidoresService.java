@@ -1,15 +1,15 @@
 package com.isanorte.constructora_api.service.implementation;
 
+import com.isanorte.constructora_api.util.BusinessTime;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.OffsetDateTime;
 import java.util.*;
 import org.springframework.stereotype.Service;
 import com.isanorte.constructora_api.dto.response.ComparacionCompetidoresResponse;
 import com.isanorte.constructora_api.dto.response.ComparacionCompetidoresResponse.*;
 import com.isanorte.constructora_api.dto.response.PublicProductDetailResponse;
 import com.isanorte.constructora_api.enums.EstadoComparacionCompetidor;
-import com.isanorte.constructora_api.exception.ScrapingPrecioException;
 import com.isanorte.constructora_api.service.IComparacionCompetidoresService;
 import com.isanorte.constructora_api.service.IPublicContentService;
 import com.isanorte.constructora_api.service.competitor.*;
@@ -34,7 +34,7 @@ public class ComparacionCompetidoresService implements IComparacionCompetidoresS
                 .sorted(Comparator.comparing(CompetidorProductoProvider::empresa)).map(p -> consultar(p, reference)).toList();
         var interno = new ProductoComparable(product.nombre(), product.precioBase(), product.precioAnterior(),
                 MONEDA_ISADECOR, unidad, caracteristicas(specs));
-        return new ComparacionCompetidoresResponse(interno, results, diferencias(interno, results), OffsetDateTime.now());
+        return new ComparacionCompetidoresResponse(interno, results, diferencias(interno, results), BusinessTime.nowOffset());
     }
 
     private ResultadoCompetidor consultar(CompetidorProductoProvider provider, ProductoReferencia reference) {

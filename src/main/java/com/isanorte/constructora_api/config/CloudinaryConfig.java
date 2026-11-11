@@ -26,6 +26,8 @@ public class CloudinaryConfig {
         config.put("cloud_name", cloudName);
         config.put("api_key", apiKey);
         config.put("api_secret", apiSecret);
+        config.put("connection_timeout", "10000");
+        config.put("read_timeout", "30000");
         return new Cloudinary(config);
     }
 }

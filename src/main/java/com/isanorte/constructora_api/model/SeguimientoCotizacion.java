@@ -1,5 +1,7 @@
 package com.isanorte.constructora_api.model;
 
+import com.isanorte.constructora_api.util.BusinessTime;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -65,7 +67,7 @@ public class SeguimientoCotizacion {
     @PrePersist
     protected void onCreate() {
         if (fecha == null) {
-            fecha = LocalDateTime.now();
+            fecha = BusinessTime.now();
         }
     }
 }

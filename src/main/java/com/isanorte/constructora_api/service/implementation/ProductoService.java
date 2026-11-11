@@ -13,6 +13,7 @@ import com.isanorte.constructora_api.dto.request.ProductoRequest;
 import com.isanorte.constructora_api.dto.request.EstadoPublicacionRequest;
 import com.isanorte.constructora_api.dto.request.ConfiguracionCalculoRequest;
 import com.isanorte.constructora_api.dto.request.DocumentoProductoRequest;
+import com.isanorte.constructora_api.dto.request.DestacadoProductoRequest;
 import com.isanorte.constructora_api.dto.request.EspecificacionProductoRequest;
 import com.isanorte.constructora_api.dto.request.ImagenProductoRequest;
 import com.isanorte.constructora_api.dto.request.ProductoUpdateRequest;
@@ -85,6 +86,10 @@ public class ProductoService extends GenericService<Producto, UUID> implements I
     @Override
     @Transactional
     public Producto create(ProductoRequest request) {
+        return createInternal(request);
+    }
+
+    private Producto createInternal(ProductoRequest request) {
         if (productoRepository.existsBySku(request.sku())) {
             throw new IllegalStateException("Ya existe un producto con SKU: " + request.sku());
         }
@@ -195,7 +200,7 @@ public class ProductoService extends GenericService<Producto, UUID> implements I
     @Override
     @Transactional
     public ProductoResponse createResponse(ProductoRequest request) {
-        return productoMapper.toResponse(create(request));
+        return productoMapper.toResponse(createInternal(request));
     }
 
     @Override
@@ -231,6 +236,15 @@ public class ProductoService extends GenericService<Producto, UUID> implements I
                 producto.addCategoria(categoria);
             }
         }
+        return productoMapper.toResponse(productoRepository.saveAndFlush(producto));
+    }
+
+    @Override
+    @Transactional
+    public ProductoResponse updateDestacado(UUID id, DestacadoProductoRequest request) {
+        Producto producto = super.findById(id);
+        producto.setDestacado(request.destacado());
+        producto.setOrdenDestacado(request.ordenDestacado());
         return productoMapper.toResponse(productoRepository.saveAndFlush(producto));
     }
 

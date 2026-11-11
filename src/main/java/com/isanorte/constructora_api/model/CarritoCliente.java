@@ -1,5 +1,7 @@
 package com.isanorte.constructora_api.model;
 
+import com.isanorte.constructora_api.util.BusinessTime;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -38,6 +40,6 @@ public class CarritoCliente {
     @PrePersist
     @PreUpdate
     void actualizarFecha() {
-        this.fechaActualizacion = LocalDateTime.now();
+        this.fechaActualizacion = BusinessTime.now();
     }
 }

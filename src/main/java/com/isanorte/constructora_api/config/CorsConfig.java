@@ -6,31 +6,27 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 
 @Configuration
-public class CorsConfig implements WebMvcConfigurer {
+public class CorsConfig {
 
-    @Value("${cors.allowed-origins:http://localhost:4200,http://localhost:3000,https://*.vercel.app}")
-    private String allowedOrigins;
+    private static final String DEFAULT_ALLOWED_ORIGINS =
+            "http://localhost:4200,http://localhost:3000,https://isanorte-frontend.vercel.app";
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource(
-            @Value("${cors.allowed-origins:http://localhost:4200,http://localhost:3000,https://*.vercel.app,https://isanorte-frontend.vercel.app}") String allowedOriginsValue) {
-        List<String> origins = Arrays.stream(allowedOriginsValue.split(","))
-                .map(String::trim)
-                .filter(s -> !s.isEmpty())
-                .toList();
+            @Value("${cors.allowed-origins:" + DEFAULT_ALLOWED_ORIGINS + "}") String allowedOriginsValue) {
+        List<String> origins = parseAllowedOrigins(allowedOriginsValue);
 
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOriginPatterns(origins);
+        config.setAllowedOrigins(origins);
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
-        config.setAllowedHeaders(List.of("*"));
-        config.setAllowCredentials(true);
+        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With"));
+        config.setAllowCredentials(false);
         config.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
@@ -38,18 +34,39 @@ public class CorsConfig implements WebMvcConfigurer {
         return source;
     }
 
-    @Override
-    public void addCorsMappings(CorsRegistry registry) {
-        String[] origins = Arrays.stream(allowedOrigins.split(","))
+    static List<String> parseAllowedOrigins(String configuredOrigins) {
+        if (configuredOrigins == null || configuredOrigins.isBlank()) {
+            throw new IllegalArgumentException("cors.allowed-origins debe contener al menos un origen explícito");
+        }
+
+        List<String> origins = Arrays.stream(configuredOrigins.split(","))
                 .map(String::trim)
                 .filter(origin -> !origin.isEmpty())
-                .toArray(String[]::new);
+                .distinct()
+                .toList();
 
-        registry.addMapping("/**")
-                .allowedOriginPatterns(origins)
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
-                .allowedHeaders("*")
-                .allowCredentials(true)
-                .maxAge(3600);
+        if (origins.isEmpty()) {
+            throw new IllegalArgumentException("cors.allowed-origins debe contener al menos un origen explícito");
+        }
+        origins.forEach(CorsConfig::validateOrigin);
+        return origins;
+    }
+
+    private static void validateOrigin(String origin) {
+        if (origin.contains("*")) {
+            throw new IllegalArgumentException("CORS no admite comodines; configure orígenes exactos: " + origin);
+        }
+        URI uri;
+        try {
+            uri = URI.create(origin);
+        } catch (IllegalArgumentException exception) {
+            throw new IllegalArgumentException("Origen CORS inválido: " + origin, exception);
+        }
+        boolean validScheme = "http".equalsIgnoreCase(uri.getScheme()) || "https".equalsIgnoreCase(uri.getScheme());
+        boolean rootOrigin = (uri.getPath() == null || uri.getPath().isEmpty())
+                && uri.getQuery() == null && uri.getFragment() == null && uri.getUserInfo() == null;
+        if (!validScheme || uri.getHost() == null || !rootOrigin) {
+            throw new IllegalArgumentException("Origen CORS inválido; use esquema, host y puerto opcional: " + origin);
+        }
     }
 }

@@ -1,5 +1,7 @@
 package com.isanorte.constructora_api.model;
 
+import com.isanorte.constructora_api.util.BusinessTime;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -31,6 +33,7 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import jakarta.persistence.Version;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
@@ -96,9 +99,22 @@ public class Producto {
     @Column(nullable = false, length = 30)
     private EstadoDisponibilidad disponibilidad;
 
+    /** Inventario gestionado; null significa que este producto no se controla por stock (depende solo de {@link #disponibilidad}). */
+    @PositiveOrZero
+    private Integer stockActual;
+
+    @Version
+    @Builder.Default
+    @Column(nullable = false)
+    private Integer version = 0;
+
     @Builder.Default
     @Column(nullable = false)
     private Boolean destacado = false;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private Integer ordenDestacado = 0;
 
     @Builder.Default
     @Column(name = "retiro_en_tienda")
@@ -337,11 +353,14 @@ public class Producto {
 
     @PrePersist
     protected void onCreate() {
-        fechaCreacion = LocalDateTime.now();
-        fechaActualizacion = LocalDateTime.now();
+        fechaCreacion = BusinessTime.now();
+        fechaActualizacion = BusinessTime.now();
 
         if (destacado == null) {
             destacado = false;
+        }
+        if (ordenDestacado == null) {
+            ordenDestacado = 0;
         }
 
         if (retiroEnTienda == null) {
@@ -355,10 +374,20 @@ public class Producto {
         if (disponibilidad == null) {
             disponibilidad = EstadoDisponibilidad.CONSULTAR;
         }
+
+        forzarAgotadoSiSinStock();
     }
 
     @PreUpdate
     protected void onUpdate() {
-        fechaActualizacion = LocalDateTime.now();
+        fechaActualizacion = BusinessTime.now();
+        forzarAgotadoSiSinStock();
+    }
+
+    /** Si el inventario es gestionado (stockActual no nulo) y llegó a 0, la disponibilidad pasa a AGOTADO automáticamente. */
+    private void forzarAgotadoSiSinStock() {
+        if (stockActual != null && stockActual <= 0) {
+            disponibilidad = EstadoDisponibilidad.AGOTADO;
+        }
     }
 }

@@ -22,6 +22,8 @@ import com.isanorte.constructora_api.dto.response.UnidadNegocioResponse;
 import com.isanorte.constructora_api.service.IUnidadNegocioService;
 import com.isanorte.constructora_api.dto.request.RecursoUnidadNegocioRequest;
 import com.isanorte.constructora_api.dto.response.RecursoUnidadNegocioResponse;
+import com.isanorte.constructora_api.dto.request.CatalogoRequest;
+import com.isanorte.constructora_api.dto.response.CatalogoResponse;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -91,6 +93,24 @@ public class UnidadNegocioController {
     @DeleteMapping("/{unidadId}/recursos/{recursoId}")
     public ResponseEntity<Void> deleteRecurso(@PathVariable UUID unidadId, @PathVariable UUID recursoId) {
         unidadNegocioService.deleteRecurso(unidadId, recursoId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{unidadId}/catalogos")
+    public ResponseEntity<CatalogoResponse> createCatalogo(@PathVariable UUID unidadId,
+            @Valid @RequestBody CatalogoRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(unidadNegocioService.createCatalogo(unidadId, request));
+    }
+
+    @PutMapping("/{unidadId}/catalogos/{catalogoId}")
+    public ResponseEntity<CatalogoResponse> updateCatalogo(@PathVariable UUID unidadId,
+            @PathVariable UUID catalogoId, @Valid @RequestBody CatalogoRequest request) {
+        return ResponseEntity.ok(unidadNegocioService.updateCatalogo(unidadId, catalogoId, request));
+    }
+
+    @DeleteMapping("/{unidadId}/catalogos/{catalogoId}")
+    public ResponseEntity<Void> deleteCatalogo(@PathVariable UUID unidadId, @PathVariable UUID catalogoId) {
+        unidadNegocioService.deleteCatalogo(unidadId, catalogoId);
         return ResponseEntity.noContent().build();
     }
 }

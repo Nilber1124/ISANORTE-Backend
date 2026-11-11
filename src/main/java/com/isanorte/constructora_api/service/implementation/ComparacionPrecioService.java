@@ -1,8 +1,9 @@
 package com.isanorte.constructora_api.service.implementation;
 
+import com.isanorte.constructora_api.util.BusinessTime;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.OffsetDateTime;
 import org.springframework.stereotype.Service;
 import com.isanorte.constructora_api.dto.request.ComparacionPrecioRequest;
 import com.isanorte.constructora_api.dto.response.ComparacionPrecioResponse;
@@ -50,20 +51,25 @@ public class ComparacionPrecioService implements IComparacionPrecioService {
                     porcentaje = diferencia.multiply(BigDecimal.valueOf(100))
                             .divide(interno, 2, RoundingMode.HALF_UP);
                 }
-                String monto = "S/ " + diferencia.abs().toPlainString();
-                mensaje = diferencia.signum() > 0 ? "ISADECOR tiene un precio " + monto + " menor."
-                        : diferencia.signum() < 0 ? "El precio externo es " + monto + " menor."
-                        : "Ambos precios son iguales.";
+                mensaje = comparisonMessage(diferencia);
             }
             return new ComparacionPrecioResponse(producto.nombre(), externo.url(), externo.dominio(),
                     externo.nombreProducto(), interno, externo.precio(), MONEDA_INTERNA, externo.moneda(),
                     diferencia, porcentaje, estado == EstadoComparacionPrecio.SUCCESS, estado, mensaje,
-                    OffsetDateTime.now());
+                    BusinessTime.nowOffset());
         } catch (ScrapingPrecioException ex) {
             // Expected external failures are typed outcomes, not HTTP 500. Do not echo unsafe URLs.
             return new ComparacionPrecioResponse(producto.nombre(), null, null, null, interno, null,
-                    MONEDA_INTERNA, null, null, null, false, ex.getEstado(), ex.getMessage(), OffsetDateTime.now());
+                    MONEDA_INTERNA, null, null, null, false, ex.getEstado(), ex.getMessage(), BusinessTime.nowOffset());
         }
+    }
+
+    private static String comparisonMessage(BigDecimal difference) {
+        if (difference.signum() == 0) return "Ambos precios son iguales.";
+        String amount = "S/ " + difference.abs().toPlainString();
+        return difference.signum() > 0
+                ? "ISADECOR tiene un precio " + amount + " menor."
+                : "El precio externo es " + amount + " menor.";
     }
 }
 

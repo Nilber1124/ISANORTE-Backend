@@ -4,7 +4,7 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public record ConfiguracionSitioUpdateRequest(
-    @Pattern(regexp = "[a-z0-9]+(?:-[a-z0-9]+)*") @Size(max = 100) String clave,
+    @Pattern(regexp = "[a-z0-9]++(?:-[a-z0-9]++)*+") @Size(max = 100) String clave,
     String tituloSitio,
     String descripcionSitio,
     String logoUrl,

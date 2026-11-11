@@ -15,6 +15,8 @@ public interface IServicioService extends IGenericService<Servicio, UUID> {
 
     Servicio findBySlug(String slug);
 
+    boolean isSlugAvailable(String slug, UUID excludeId);
+
     Servicio create(ServicioRequest request);
 
     List<ServicioResponse> findAllResponse();
