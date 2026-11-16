@@ -3,6 +3,7 @@ package com.isanorte.constructora_api.config;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -22,6 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.core.io.DefaultResourceLoader;
 
+import com.isanorte.constructora_api.config.demo.DemoSupport;
 import com.isanorte.constructora_api.enums.EstadoPublicacion;
 import com.isanorte.constructora_api.model.CategoriaProducto;
 import com.isanorte.constructora_api.model.Producto;
@@ -37,6 +39,7 @@ class DemoProductSeederTest {
     @Mock private ProductoRepository productoRepository;
     @Mock private CategoriaProductoRepository categoriaRepository;
     @Mock private UnidadNegocioRepository unidadRepository;
+    @Mock private DemoSupport demoSupport;
 
     private UnidadNegocio unit;
     private DemoProductSeeder seeder;
@@ -46,7 +49,9 @@ class DemoProductSeederTest {
         unit = UnidadNegocio.builder().id(UUID.randomUUID()).slug("isadecor").nombre("ISADECOR").build();
         seeder = new DemoProductSeeder(
                 productoRepository, categoriaRepository, unidadRepository,
-                new DefaultResourceLoader(), new ObjectMapper());
+                new DefaultResourceLoader(), demoSupport, new ObjectMapper());
+        lenient().when(demoSupport.url(any()))
+                .thenAnswer(call -> "https://res.cloudinary.com/test/image/upload/" + call.getArgument(0) + ".jpg");
         when(unidadRepository.findBySlug("isadecor")).thenReturn(Optional.of(unit));
     }
 
@@ -65,7 +70,7 @@ class DemoProductSeederTest {
                 .returns(EstadoPublicacion.PUBLICADO, Producto::getEstado)
                 .returns(unit, Producto::getUnidadNegocio)
                 .returns(1, value -> value.getCategorias().size())
-                .returns(3, value -> value.getImagenes().size())
+                .returns(2, value -> value.getImagenes().size())
                 .returns(2, value -> value.getVariantes().size())
                 .returns(8, value -> value.getEspecificaciones().size())
                 .matches(value -> value.getConfiguracionCalculo() != null, "tiene configuración de cálculo"));
@@ -73,7 +78,7 @@ class DemoProductSeederTest {
         assertThat(products).extracting(Producto::getSku).doesNotHaveDuplicates();
         assertThat(products).extracting(Producto::getSlug).doesNotHaveDuplicates();
         assertThat(products).flatExtracting(Producto::getImagenes)
-                .allMatch(image -> image.getUrl().startsWith("/images/") && !image.getAltText().isBlank());
+                .allMatch(image -> image.getUrl().contains("res.cloudinary.com") && !image.getAltText().isBlank());
     }
 
     @Test
@@ -117,8 +122,8 @@ class DemoProductSeederTest {
 
     private List<CategoriaProducto> categories() {
         return List.of(
-                category("wall-panels"), category("paneles-decorativos"),
-                category("revestimientos"), category("pisos"));
+                category("wall-panels"), category("paneles-decorativos"), category("paneles-listonados"),
+                category("paneles-acusticos"), category("revestimientos"), category("pisos"));
     }
 
     private CategoriaProducto category(String slug) {

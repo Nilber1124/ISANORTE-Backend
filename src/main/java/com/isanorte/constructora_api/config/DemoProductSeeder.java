@@ -10,12 +10,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.isanorte.constructora_api.config.demo.DemoSupport;
 import com.isanorte.constructora_api.enums.EstadoDisponibilidad;
 import com.isanorte.constructora_api.enums.EstadoPublicacion;
 import com.isanorte.constructora_api.model.CategoriaProducto;
@@ -35,7 +37,8 @@ import tools.jackson.databind.ObjectMapper;
 /** Carga explícita e idempotente del catálogo de demostración de ISADECOR. */
 @Component
 @RequiredArgsConstructor
-@ConditionalOnProperty(name = "app.seed.demo-products", havingValue = "true")
+@Order(20)
+@ConditionalOnExpression("'${app.seed.demo-products:false}' == 'true' or '${app.seed.demo-data:false}' == 'true'")
 public class DemoProductSeeder implements ApplicationRunner {
     private static final Logger log = LoggerFactory.getLogger(DemoProductSeeder.class);
     private static final String DATA_RESOURCE = "classpath:data/isadecor-demo-products.json";
@@ -44,6 +47,7 @@ public class DemoProductSeeder implements ApplicationRunner {
     private final CategoriaProductoRepository categoriaRepository;
     private final UnidadNegocioRepository unidadRepository;
     private final ResourceLoader resourceLoader;
+    private final DemoSupport demoSupport;
     private final ObjectMapper objectMapper;
 
     @Override
@@ -67,7 +71,7 @@ public class DemoProductSeeder implements ApplicationRunner {
                 skipped++;
                 continue;
             }
-            Producto product = toProduct(data, unit, activeCategories, catalog.imageSets());
+            Producto product = toProduct(data, unit, activeCategories);
             productoRepository.save(product);
             inserted++;
         }
@@ -96,8 +100,7 @@ public class DemoProductSeeder implements ApplicationRunner {
     }
 
     private Producto toProduct(
-            DemoProduct data, UnidadNegocio unit, Map<String, CategoriaProducto> activeCategories,
-            Map<String, List<DemoImageTemplate>> imageSets) {
+            DemoProduct data, UnidadNegocio unit, Map<String, CategoriaProducto> activeCategories) {
         Producto product = Producto.builder()
                 .sku(data.sku())
                 .nombre(data.name())
@@ -124,16 +127,16 @@ public class DemoProductSeeder implements ApplicationRunner {
             }
             product.addCategoria(category);
         }
-        List<DemoImageTemplate> images = imageSets.get(data.imageSet());
-        if (images == null || images.isEmpty()) {
-            throw new IllegalStateException("El set de imágenes demo no existe o está vacío: " + data.imageSet());
-        }
-        images.forEach(image -> product.addImagen(ImagenProducto.builder()
-                .url(image.url()).altText(data.name() + " — " + image.label())
-                .esPrincipal(image.primary()).orden(image.order()).build()));
+        // Imágenes de Cloudinary (manifiesto): una de ambiente (principal) y una de textura por producto.
+        String primaryUrl = demoSupport.url("prod-" + data.slug() + "-1");
+        product.addImagen(ImagenProducto.builder()
+                .url(primaryUrl).altText(data.name() + " — ambiente instalado").esPrincipal(true).orden(0).build());
+        product.addImagen(ImagenProducto.builder()
+                .url(demoSupport.url("prod-" + data.slug() + "-2")).altText(data.name() + " — detalle de textura")
+                .esPrincipal(false).orden(1).build());
         data.variants().forEach(variant -> product.addVariante(VarianteProducto.builder()
                 .sku(variant.sku()).nombre(variant.name()).descripcion(variant.description())
-                .precio(variant.price()).disponible(variant.available()).imagenUrl(variant.imageUrl())
+                .precio(variant.price()).disponible(variant.available()).imagenUrl(primaryUrl)
                 .orden(variant.order()).build()));
         addSpecification(product, "Material", data.material(), 0);
         addSpecification(product, "Acabado", data.finish(), 1);
@@ -163,23 +166,20 @@ public class DemoProductSeeder implements ApplicationRunner {
     }
 
     record DemoCatalog(
-            String businessUnitSlug, Map<String, List<DemoImageTemplate>> imageSets,
-            List<DemoProduct> products) { }
+            String businessUnitSlug, List<DemoProduct> products) { }
 
     record DemoProduct(
             String sku, String name, String slug, String summary, String description,
             BigDecimal price, BigDecimal previousPrice, BigDecimal discountPercentage,
             EstadoDisponibilidad availability, boolean featured, boolean storePickup,
             String seoTitle, String seoDescription, List<String> categorySlugs,
-            String imageSet, String material, String finish, String color, String dimensions,
+            String material, String finish, String color, String dimensions,
             String thickness, String recommendedUse, String moistureResistance, String installation,
             List<DemoVariant> variants, DemoCalculation calculation) { }
 
-    record DemoImageTemplate(String url, String label, boolean primary, int order) { }
-
     record DemoVariant(
             String sku, String name, String description, BigDecimal price,
-            boolean available, String imageUrl, int order) { }
+            boolean available, int order) { }
 
     record DemoCalculation(
             String inputLabel, String inputUnit, BigDecimal coveragePerUnit,
