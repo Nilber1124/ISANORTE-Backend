@@ -8,7 +8,6 @@ public record PublicConfianzaResponse(
         List<Miembro> equipo,
         List<Credencial> credenciales,
         List<Testimonio> testimonios,
-        List<Cliente> clientes,
         List<Garantia> garantias,
         List<Paso> pasos,
         List<ImagenProyecto> galeria) {
@@ -29,9 +28,6 @@ public record PublicConfianzaResponse(
 
     public record Testimonio(String autor, String cargo, String texto, String proyectoSlug,
             String fotoUrl, String fotoAlt) {
-    }
-
-    public record Cliente(String nombre, String logoUrl, String enlace) {
     }
 
     public record Garantia(String titulo, String texto, boolean enHero) {

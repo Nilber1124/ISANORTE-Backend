@@ -136,9 +136,9 @@ La API es stateless y autentica mediante `Authorization: Bearer`; no usa cookies
 `tiempoRespuesta` y la ubicación de la oficina (`latitud`, `longitud`, validadas entre -90/90 y -180/180); la unidad destacada, sus `ofertas` (texto con «|» publicado como lista); y la solicitud
 de contacto guarda `ubicacion`, `servicioInteres` y `consentimiento` (obligatorio, con `fechaConsentimiento`).
 
-**Contenido del sitio.** Preguntas frecuentes, equipo, credenciales, testimonios, clientes y marcas, garantías, pasos del
+**Contenido del sitio.** Preguntas frecuentes, equipo, credenciales, testimonios, garantías, pasos del
 proceso y galería de proyectos (`ANTES|PROCESO|FINAL|DETALLE`) tienen su propia tabla y un CRUD administrativo (`/api/faqs`, `/api/equipo`, `/api/credenciales`,
-`/api/testimonios`, `/api/clientes-marca`, `/api/garantias`, `/api/pasos-proceso`, `/api/proyecto-galeria`; JWT administrativo, con
+`/api/testimonios`, `/api/garantias`, `/api/pasos-proceso`, `/api/proyecto-galeria`; JWT administrativo, con
 `PATCH /{id}/activo`). Los proyectos tienen ficha técnica (`areaM2`, `plazoMeses`, `alcance`, `tipoObra`). El sitio lee todo, solo activos y ordenados, en `GET /api/publico/sitios/{clave}/confianza`.
 
 El modulo de anuncios administra `GET/POST /api/anuncios`, `GET/PUT/DELETE /api/anuncios/{id}` y

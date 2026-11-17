@@ -2133,63 +2133,6 @@ paths:
       responses:
         '200': {description: Estado actualizado, content: {application/json: {schema: {type: object}}}}
         '404': {$ref: '#/components/responses/NotFound'}
-  /api/clientes-marca:
-    get:
-      tags: [Contenido del sitio]
-      operationId: listarClienteMarca
-      summary: Lista clientes y marcas (administración)
-      x-access-intent: ADMIN
-      responses:
-        '200': {description: Lista ordenada, content: {application/json: {schema: {type: array, items: {type: object}}}}}
-    post:
-      tags: [Contenido del sitio]
-      operationId: crearClienteMarca
-      summary: Crea clientes y marcas
-      x-access-intent: ADMIN
-      requestBody: {required: true, content: {application/json: {schema: {type: object}}}}
-      responses:
-        '201': {description: Creado, content: {application/json: {schema: {type: object}}}}
-        '400': {$ref: '#/components/responses/BadRequest'}
-  /api/clientes-marca/{id}:
-    get:
-      tags: [Contenido del sitio]
-      operationId: obtenerClienteMarca
-      summary: Obtiene un registro de clientes y marcas
-      x-access-intent: ADMIN
-      parameters: [{$ref: '#/components/parameters/UuidId'}]
-      responses:
-        '200': {description: Registro, content: {application/json: {schema: {type: object}}}}
-        '404': {$ref: '#/components/responses/NotFound'}
-    put:
-      tags: [Contenido del sitio]
-      operationId: actualizarClienteMarca
-      summary: Actualiza un registro de clientes y marcas
-      x-access-intent: ADMIN
-      parameters: [{$ref: '#/components/parameters/UuidId'}]
-      requestBody: {required: true, content: {application/json: {schema: {type: object}}}}
-      responses:
-        '200': {description: Actualizado, content: {application/json: {schema: {type: object}}}}
-        '404': {$ref: '#/components/responses/NotFound'}
-    delete:
-      tags: [Contenido del sitio]
-      operationId: eliminarClienteMarca
-      summary: Elimina un registro de clientes y marcas
-      x-access-intent: ADMIN
-      parameters: [{$ref: '#/components/parameters/UuidId'}]
-      responses:
-        '204': {description: Eliminado}
-        '404': {$ref: '#/components/responses/NotFound'}
-  /api/clientes-marca/{id}/activo:
-    patch:
-      tags: [Contenido del sitio]
-      operationId: cambiarActivoClienteMarca
-      summary: Activa o desactiva un registro de clientes y marcas
-      x-access-intent: ADMIN
-      parameters: [{$ref: '#/components/parameters/UuidId'}]
-      requestBody: {required: true, content: {application/json: {schema: {type: object, required: [activo], properties: {activo: {type: boolean}}}}}}
-      responses:
-        '200': {description: Estado actualizado, content: {application/json: {schema: {type: object}}}}
-        '404': {$ref: '#/components/responses/NotFound'}
   /api/garantias:
     get:
       tags: [Contenido del sitio]
@@ -2365,12 +2308,12 @@ paths:
     get:
       tags: [Contenido del sitio]
       operationId: obtenerConfianzaPublica
-      summary: Preguntas frecuentes, equipo, credenciales, testimonios, clientes, garantías y pasos activos del sitio
+      summary: Preguntas frecuentes, equipo, credenciales, testimonios, garantías y pasos activos del sitio
       x-access-intent: PUBLICO
       parameters:
         - {name: clave, in: path, required: true, schema: {type: string}}
       responses:
-        '200': {description: Contenido de confianza ordenado, content: {application/json: {schema: {type: object, properties: {faqs: {type: array, items: {type: object}}, equipo: {type: array, items: {type: object}}, credenciales: {type: array, items: {type: object}}, testimonios: {type: array, items: {type: object}}, clientes: {type: array, items: {type: object}}, garantias: {type: array, items: {type: object}}, pasos: {type: array, items: {type: object}}}}}}}
+        '200': {description: Contenido de confianza ordenado, content: {application/json: {schema: {type: object, properties: {faqs: {type: array, items: {type: object}}, equipo: {type: array, items: {type: object}}, credenciales: {type: array, items: {type: object}}, testimonios: {type: array, items: {type: object}}, garantias: {type: array, items: {type: object}}, pasos: {type: array, items: {type: object}}}}}}}
         '404': {$ref: '#/components/responses/NotFound'}
 
 components:

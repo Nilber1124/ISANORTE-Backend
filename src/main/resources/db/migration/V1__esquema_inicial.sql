@@ -788,18 +788,6 @@ CREATE TABLE testimonios (
     CONSTRAINT ck_testimonios_orden CHECK (orden >= 0)
 );
 
-CREATE TABLE clientes_marca (
-    id UUID PRIMARY KEY,
-    nombre VARCHAR(150) NOT NULL,
-    logo_url VARCHAR(500),
-    enlace VARCHAR(300),
-    orden INTEGER NOT NULL,
-    activo BOOLEAN NOT NULL,
-    fecha_creacion TIMESTAMP(6) NOT NULL,
-    fecha_actualizacion TIMESTAMP(6) NOT NULL,
-    CONSTRAINT ck_clientes_marca_orden CHECK (orden >= 0)
-);
-
 CREATE TABLE garantias (
     id UUID PRIMARY KEY,
     titulo VARCHAR(150) NOT NULL,

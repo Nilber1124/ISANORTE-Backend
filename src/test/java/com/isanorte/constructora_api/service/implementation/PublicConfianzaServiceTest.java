@@ -19,7 +19,6 @@ import com.isanorte.constructora_api.model.ConfiguracionSitio;
 import com.isanorte.constructora_api.model.Faq;
 import com.isanorte.constructora_api.model.Garantia;
 import com.isanorte.constructora_api.model.PasoProceso;
-import com.isanorte.constructora_api.repository.ClienteMarcaRepository;
 import com.isanorte.constructora_api.repository.ConfiguracionSitioRepository;
 import com.isanorte.constructora_api.repository.CredencialRepository;
 import com.isanorte.constructora_api.repository.FaqRepository;
@@ -36,7 +35,6 @@ class PublicConfianzaServiceTest {
     @Mock private MiembroEquipoRepository equipoRepository;
     @Mock private CredencialRepository credencialRepository;
     @Mock private TestimonioRepository testimonioRepository;
-    @Mock private ClienteMarcaRepository clienteRepository;
     @Mock private GarantiaRepository garantiaRepository;
     @Mock private PasoProcesoRepository pasoRepository;
     @Mock private com.isanorte.constructora_api.repository.ProyectoGaleriaRepository galeriaRepository;

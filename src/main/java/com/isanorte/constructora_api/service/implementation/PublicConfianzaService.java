@@ -5,7 +5,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.isanorte.constructora_api.dto.response.PublicConfianzaResponse;
 import com.isanorte.constructora_api.exception.ModelNotFoundException;
-import com.isanorte.constructora_api.repository.ClienteMarcaRepository;
 import com.isanorte.constructora_api.repository.ConfiguracionSitioRepository;
 import com.isanorte.constructora_api.repository.CredencialRepository;
 import com.isanorte.constructora_api.repository.FaqRepository;
@@ -27,7 +26,6 @@ public class PublicConfianzaService implements IPublicConfianzaService {
     private final MiembroEquipoRepository equipoRepository;
     private final CredencialRepository credencialRepository;
     private final TestimonioRepository testimonioRepository;
-    private final ClienteMarcaRepository clienteRepository;
     private final GarantiaRepository garantiaRepository;
     private final PasoProcesoRepository pasoRepository;
     private final ProyectoGaleriaRepository galeriaRepository;
@@ -57,10 +55,6 @@ public class PublicConfianzaService implements IPublicConfianzaService {
                         .map(item -> new PublicConfianzaResponse.Testimonio(
                                 item.getAutor(), item.getCargo(), item.getTexto(), item.getProyectoSlug(),
                                 item.getFotoUrl(), item.getFotoAlt()))
-                        .toList(),
-                clienteRepository.findByActivoTrueOrderByOrdenAscIdAsc().stream()
-                        .map(item -> new PublicConfianzaResponse.Cliente(
-                                item.getNombre(), item.getLogoUrl(), item.getEnlace()))
                         .toList(),
                 garantiaRepository.findByActivoTrueOrderByOrdenAscIdAsc().stream()
                         .map(item -> new PublicConfianzaResponse.Garantia(
