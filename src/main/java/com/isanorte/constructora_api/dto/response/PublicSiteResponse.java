@@ -4,8 +4,7 @@ import java.util.List;
 
 public record PublicSiteResponse(
         String clave, String tituloSitio, String descripcionSitio, String logoUrl,
-        String logoBlancoUrl, String faviconUrl, String textoPiePagina, String videoProcesoUrl,
-        String videoProcesoMovilUrl, String videoProcesoPosterUrl,
+        String logoBlancoUrl, String faviconUrl, String textoPiePagina,
         EmpresaPublica empresa, List<RedPublica> redes, List<UnidadPublica> unidades) {
 
     public record EmpresaPublica(

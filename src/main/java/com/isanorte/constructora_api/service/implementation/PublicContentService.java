@@ -145,7 +145,6 @@ public class PublicContentService implements IPublicContentService {
                 company.getLongitud());
         return new PublicSiteResponse(site.getClave(), site.getTituloSitio(), site.getDescripcionSitio(),
                 site.getLogoUrl(), site.getLogoBlancoUrl(), site.getFaviconUrl(), site.getTextoPiePagina(),
-                site.getVideoProcesoUrl(), site.getVideoProcesoMovilUrl(), site.getVideoProcesoPosterUrl(),
                 publicCompany, social, units);
     }
 

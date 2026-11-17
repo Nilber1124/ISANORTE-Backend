@@ -39,7 +39,7 @@ class ConfiguracionSitioRegexTest {
     void acceptsCanonicalKeysAndRejectsPartialOrRepeatedSeparators() {
         assertTrue(validateCreate("sitio-norte-2026").isEmpty());
         assertTrue(validator.validate(new ConfiguracionSitioUpdateRequest(
-                "isadecor", null, null, null, null, null, null, null, null, null, null, null)).isEmpty());
+                "isadecor", null, null, null, null, null, null, null, null)).isEmpty());
         assertFalse(validateCreate("-sitio").isEmpty());
         assertFalse(validateCreate("sitio--norte").isEmpty());
         assertFalse(validateCreate("sitio_norte").isEmpty());
@@ -51,7 +51,7 @@ class ConfiguracionSitioRegexTest {
         assertTimeoutPreemptively(Duration.ofSeconds(1), () -> {
             assertFalse(validateCreate(adversarial).isEmpty());
             assertFalse(validator.validate(new ConfiguracionSitioUpdateRequest(
-                    adversarial, null, null, null, null, null, null, null, null, null, null, null)).isEmpty());
+                    adversarial, null, null, null, null, null, null, null, null)).isEmpty());
         });
     }
 
@@ -73,6 +73,6 @@ class ConfiguracionSitioRegexTest {
     private static Set<ConstraintViolation<ConfiguracionSitioRequest>> validateCreate(String key) {
         return validator.validate(new ConfiguracionSitioRequest(
                 java.util.UUID.randomUUID(), key, null, null, null, null, null,
-                null, null, null, null, null, null, null));
+                null, null, null, null));
     }
 }
