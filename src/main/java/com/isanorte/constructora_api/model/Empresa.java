@@ -83,6 +83,14 @@ public class Empresa {
     @Column(length = 180)
     private String horarioAtencion;
 
+    private Integer anioFundacion;
+
+    @Column(length = 300)
+    private String zonaCobertura;
+
+    @Column(length = 120)
+    private String tiempoRespuesta;
+
     @Column(columnDefinition = "TEXT")
     private String mision;
 

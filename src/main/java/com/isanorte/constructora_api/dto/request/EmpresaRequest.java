@@ -4,6 +4,8 @@ import java.util.List;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.NotBlank;
 
 public record EmpresaRequest(
@@ -18,6 +20,9 @@ public record EmpresaRequest(
     @Email String emailVentas,
     String whatsapp,
     String horarioAtencion,
+    @PositiveOrZero Integer anioFundacion,
+    @Size(max = 300) String zonaCobertura,
+    @Size(max = 120) String tiempoRespuesta,
     String mision,
     String vision,
     String valores,

@@ -16,6 +16,7 @@ import com.isanorte.constructora_api.mapper.DynamicContentMapper;
 import com.isanorte.constructora_api.model.SolicitudContacto;
 import com.isanorte.constructora_api.repository.SolicitudContactoRepository;
 import com.isanorte.constructora_api.service.ISolicitudContactoService;
+import com.isanorte.constructora_api.util.BusinessTime;
 
 import lombok.RequiredArgsConstructor;
 
@@ -29,6 +30,8 @@ public class SolicitudContactoService implements ISolicitudContactoService {
     public SolicitudContactoPublicResponse createPublic(SolicitudContactoCreateRequest request) {
         SolicitudContacto entity = mapper.toEntity(request);
         entity.setEstado(EstadoSolicitudContacto.NUEVA);
+        entity.setConsentimiento(request.consentimiento());
+        entity.setFechaConsentimiento(request.consentimiento() ? BusinessTime.now() : null);
         return mapper.toPublicResponse(repository.saveAndFlush(entity));
     }
 

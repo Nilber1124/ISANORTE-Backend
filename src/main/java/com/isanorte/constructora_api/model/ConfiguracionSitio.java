@@ -63,6 +63,15 @@ public class ConfiguracionSitio {
     @Column(length = 500)
     private String faviconUrl;
 
+    @Column(length = 500)
+    private String videoProcesoUrl;
+
+    @Column(length = 500)
+    private String videoProcesoMovilUrl;
+
+    @Column(length = 500)
+    private String videoProcesoPosterUrl;
+
     @Column(length = 20)
     private String colorPrimario;
 

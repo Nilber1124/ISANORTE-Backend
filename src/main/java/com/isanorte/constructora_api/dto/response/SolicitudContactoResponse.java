@@ -6,6 +6,7 @@ import java.util.UUID;
 import com.isanorte.constructora_api.enums.EstadoSolicitudContacto;
 
 public record SolicitudContactoResponse(
-        UUID id, String nombre, String email, String telefono, String empresa, String mensaje,
+        UUID id, String nombre, String email, String telefono, String empresa, String ubicacion,
+        String servicioInteres, String mensaje, Boolean consentimiento, LocalDateTime fechaConsentimiento,
         EstadoSolicitudContacto estado, LocalDateTime fechaCreacion, LocalDateTime fechaActualizacion) {
 }

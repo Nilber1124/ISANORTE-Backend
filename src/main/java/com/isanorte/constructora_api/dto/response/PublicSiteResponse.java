@@ -4,13 +4,15 @@ import java.util.List;
 
 public record PublicSiteResponse(
         String clave, String tituloSitio, String descripcionSitio, String logoUrl,
-        String logoBlancoUrl, String faviconUrl, String textoPiePagina,
+        String logoBlancoUrl, String faviconUrl, String textoPiePagina, String videoProcesoUrl,
+        String videoProcesoMovilUrl, String videoProcesoPosterUrl,
         EmpresaPublica empresa, List<RedPublica> redes, List<UnidadPublica> unidades) {
 
     public record EmpresaPublica(
             String nombreComercial, String direccion, String ciudad, String telefono,
             String telefonoSecundario, String email, String emailVentas, String whatsapp,
-            String horarioAtencion, String resumenNosotros) {
+            String horarioAtencion, String resumenNosotros, Integer anioFundacion, String zonaCobertura,
+            String tiempoRespuesta) {
     }
 
     public record RedPublica(String nombre, String url, String icono, Integer orden) {

@@ -140,9 +140,11 @@ public class PublicContentService implements IPublicContentService {
         var publicCompany = new PublicSiteResponse.EmpresaPublica(
                 company.getNombreComercial(), company.getDireccion(), company.getCiudad(), company.getTelefono(),
                 company.getTelefonoSecundario(), company.getEmail(), company.getEmailVentas(), company.getWhatsapp(),
-                company.getHorarioAtencion(), company.getResumenNosotros());
+                company.getHorarioAtencion(), company.getResumenNosotros(), company.getAnioFundacion(),
+                company.getZonaCobertura(), company.getTiempoRespuesta());
         return new PublicSiteResponse(site.getClave(), site.getTituloSitio(), site.getDescripcionSitio(),
                 site.getLogoUrl(), site.getLogoBlancoUrl(), site.getFaviconUrl(), site.getTextoPiePagina(),
+                site.getVideoProcesoUrl(), site.getVideoProcesoMovilUrl(), site.getVideoProcesoPosterUrl(),
                 publicCompany, social, units);
     }
 
@@ -182,7 +184,7 @@ public class PublicContentService implements IPublicContentService {
                 .findByEmpresaIdAndActivoTrueAndDestacadoTrue(site.getEmpresa().getId())
                 .map(item -> new PublicHomeResponse.UnidadDestacada(
                         item.getNombre(), item.getSlug(), item.getDescripcion(), item.getIcono(), item.getImagenUrl(),
-                        item.getImagenAlt(), item.getOrden(), item.getRecursos().stream()
+                        item.getImagenAlt(), splitOfertas(item.getOfertas()), item.getOrden(), item.getRecursos().stream()
                                 .filter(resource -> Boolean.TRUE.equals(resource.getActivo()))
                                 .sorted(RESOURCE_ORDER)
                                 .map(resource -> new PublicHomeResponse.Recurso(resource.getTipo(), resource.getUrl(),
@@ -366,6 +368,15 @@ public class PublicContentService implements IPublicContentService {
                     product.getNombre(), product.getSlug(), product.getPrecioBase(),
                     publicProductMapper.toImage(primaryImage(product)), category, rating, reviewCount);
         }).toList();
+    }
+
+    /** «A | B | C» (o una por línea) se publica como lista; vacío o nulo devuelve una lista vacía. */
+    static List<String> splitOfertas(String value) {
+        if (value == null || value.isBlank()) return List.of();
+        return java.util.Arrays.stream(value.split("[|\\n]"))
+                .map(String::trim)
+                .filter(item -> !item.isEmpty())
+                .toList();
     }
 
     private ConfiguracionSitio findSiteEntity(String key) {

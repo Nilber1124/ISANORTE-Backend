@@ -132,6 +132,11 @@ La API es stateless y autentica mediante `Authorization: Bearer`; no usa cookies
 
 ### Endpoints Protegidos
 
+**Datos nuevos de empresa, sitio y contacto.** La empresa publica `anioFundacion`, `zonaCobertura` y
+`tiempoRespuesta`; el sitio, las URL del video del proceso (`videoProcesoUrl`, `videoProcesoMovilUrl`,
+`videoProcesoPosterUrl`); la unidad destacada, sus `ofertas` (texto con «|» publicado como lista); y la solicitud
+de contacto guarda `ubicacion`, `servicioInteres` y `consentimiento` (obligatorio, con `fechaConsentimiento`).
+
 **Contenido del sitio.** Preguntas frecuentes, equipo, credenciales, testimonios, clientes y marcas, garantías y pasos del
 proceso tienen su propia tabla y un CRUD administrativo (`/api/faqs`, `/api/equipo`, `/api/credenciales`,
 `/api/testimonios`, `/api/clientes-marca`, `/api/garantias`, `/api/pasos-proceso`; JWT administrativo, con

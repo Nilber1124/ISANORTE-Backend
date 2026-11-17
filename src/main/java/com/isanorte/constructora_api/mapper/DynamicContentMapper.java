@@ -112,6 +112,7 @@ public interface DynamicContentMapper {
 
     @Mapping(target = "id", ignore = true) @Mapping(target = "estado", ignore = true)
     @Mapping(target = "fechaCreacion", ignore = true) @Mapping(target = "fechaActualizacion", ignore = true)
+    @Mapping(target = "fechaConsentimiento", ignore = true)
     SolicitudContacto toEntity(SolicitudContactoCreateRequest request);
     SolicitudContactoResponse toResponse(SolicitudContacto entity);
     SolicitudContactoPublicResponse toPublicResponse(SolicitudContacto entity);

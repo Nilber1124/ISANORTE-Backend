@@ -10,6 +10,9 @@ public record ConfiguracionSitioUpdateRequest(
     String logoUrl,
     String logoBlancoUrl,
     String faviconUrl,
+    @Size(max = 500) String videoProcesoUrl,
+    @Size(max = 500) String videoProcesoMovilUrl,
+    @Size(max = 500) String videoProcesoPosterUrl,
     String colorPrimario,
     String colorSecundario,
     String textoPiePagina) {

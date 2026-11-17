@@ -14,6 +14,7 @@ public record UnidadNegocioUpdateRequest(
     String icono,
     String imagenUrl,
     @Size(max = 300) String imagenAlt,
+    String ofertas,
     @NotNull Boolean activo,
     @NotNull Boolean destacado,
     @NotNull @PositiveOrZero Integer orden,

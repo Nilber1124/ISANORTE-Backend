@@ -55,9 +55,22 @@ public class SolicitudContacto {
     @Column(length = 180)
     private String empresa;
 
+    @Column(length = 150)
+    private String ubicacion;
+
+    @Column(length = 180)
+    private String servicioInteres;
+
     @NotBlank
     @Column(nullable = false, columnDefinition = "TEXT")
     private String mensaje;
+
+    /** El visitante autorizó el uso de sus datos para responder la solicitud. */
+    @Builder.Default
+    @Column(nullable = false)
+    private Boolean consentimiento = false;
+
+    private LocalDateTime fechaConsentimiento;
 
     @NotNull
     @Enumerated(EnumType.STRING)

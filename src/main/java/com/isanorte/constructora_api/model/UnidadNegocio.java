@@ -68,6 +68,10 @@ public class UnidadNegocio {
     @Column(length = 300)
     private String imagenAlt;
 
+    /** Líneas de oferta separadas por «|» (se publican como lista). */
+    @Column(columnDefinition = "TEXT")
+    private String ofertas;
+
     @Builder.Default
     @Column(nullable = false)
     private Boolean activo = true;

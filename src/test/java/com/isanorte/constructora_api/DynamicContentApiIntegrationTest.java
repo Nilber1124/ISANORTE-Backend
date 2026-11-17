@@ -401,15 +401,23 @@ class DynamicContentApiIntegrationTest {
     @Test
     void contactoPublicoYBandejaAdministrativa() throws Exception {
         Map<String, Object> body = Map.of("nombre", "Ana", "email", "ana@example.com", "telefono", "999999999",
-                "mensaje", "Necesito información");
+                "ubicacion", "Cajamarca", "servicioInteres", "Remodelaciones",
+                "mensaje", "Necesito información", "consentimiento", true);
         UUID id = id(mockMvc.perform(post("/api/publico/contacto").contentType(MediaType.APPLICATION_JSON)
                 .content(json(body))).andExpect(status().isCreated()).andExpect(jsonPath("$.estado").value("NUEVA"))
                 .andExpect(jsonPath("$.email").doesNotExist()).andReturn());
         mockMvc.perform(post("/api/publico/contacto").contentType(MediaType.APPLICATION_JSON)
-                .content(json(Map.of("nombre", "Ana", "email", "incorrecto", "telefono", "1", "mensaje", "X"))))
+                .content(json(Map.of("nombre", "Ana", "email", "incorrecto", "telefono", "1", "mensaje", "X",
+                        "consentimiento", true))))
                 .andExpect(status().isBadRequest());
         mockMvc.perform(post("/api/publico/contacto").contentType(MediaType.APPLICATION_JSON)
-                .content(json(Map.of("nombre", "Ana", "email", "ana@example.com", "telefono", "1"))))
+                .content(json(Map.of("nombre", "Ana", "email", "ana@example.com", "telefono", "1",
+                        "consentimiento", true))))
+                .andExpect(status().isBadRequest());
+        // Sin consentimiento no se registra la solicitud.
+        mockMvc.perform(post("/api/publico/contacto").contentType(MediaType.APPLICATION_JSON)
+                .content(json(Map.of("nombre", "Ana", "email", "ana@example.com", "telefono", "1",
+                        "mensaje", "Hola", "consentimiento", false))))
                 .andExpect(status().isBadRequest());
         mockMvc.perform(get("/api/solicitudes-contacto").with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
                 .param("estado", "NUEVA"))
@@ -417,7 +425,11 @@ class DynamicContentApiIntegrationTest {
         mockMvc.perform(get("/api/solicitudes-contacto").with(jwt().authorities(() -> "ROLE_ADMINISTRADOR")))
                 .andExpect(status().isOk()).andExpect(jsonPath("$[0].id").value(id.toString()));
         mockMvc.perform(get("/api/solicitudes-contacto/{id}", id)
-                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))).andExpect(status().isOk());
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))).andExpect(status().isOk())
+                .andExpect(jsonPath("$.ubicacion").value("Cajamarca"))
+                .andExpect(jsonPath("$.servicioInteres").value("Remodelaciones"))
+                .andExpect(jsonPath("$.consentimiento").value(true))
+                .andExpect(jsonPath("$.fechaConsentimiento").isNotEmpty());
         mockMvc.perform(patch("/api/solicitudes-contacto/{id}/estado", id)
                 .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR")).contentType(MediaType.APPLICATION_JSON)
                 .content("{\"estado\":\"RESPONDIDA\"}"))

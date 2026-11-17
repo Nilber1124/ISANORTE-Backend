@@ -12,6 +12,7 @@ public record UnidadNegocioResponse(
     String icono,
     String imagenUrl,
     String imagenAlt,
+    String ofertas,
     Boolean activo,
     Boolean destacado,
     Integer orden,

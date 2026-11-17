@@ -38,7 +38,7 @@ public record PublicHomeResponse(
 
     public record UnidadDestacada(
             String nombre, String slug, String descripcion, String icono, String imagenUrl,
-            String imagenAlt, Integer orden, List<Recurso> recursos) {
+            String imagenAlt, List<String> ofertas, Integer orden, List<Recurso> recursos) {
     }
 
     public record Recurso(
