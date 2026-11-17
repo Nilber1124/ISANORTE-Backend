@@ -1905,6 +1905,417 @@ paths:
         '200': {description: Anuncios visibles ordenados, content: {application/json: {schema: {type: array, items: {$ref: '#/components/schemas/AnuncioResponse'}}}}}
         '400': {$ref: '#/components/responses/BadRequest'}
 
+  /api/faqs:
+    get:
+      tags: [Contenido del sitio]
+      operationId: listarFaq
+      summary: Lista preguntas frecuentes (administración)
+      x-access-intent: ADMIN
+      responses:
+        '200': {description: Lista ordenada, content: {application/json: {schema: {type: array, items: {type: object}}}}}
+    post:
+      tags: [Contenido del sitio]
+      operationId: crearFaq
+      summary: Crea preguntas frecuentes
+      x-access-intent: ADMIN
+      requestBody: {required: true, content: {application/json: {schema: {type: object}}}}
+      responses:
+        '201': {description: Creado, content: {application/json: {schema: {type: object}}}}
+        '400': {$ref: '#/components/responses/BadRequest'}
+  /api/faqs/{id}:
+    get:
+      tags: [Contenido del sitio]
+      operationId: obtenerFaq
+      summary: Obtiene un registro de preguntas frecuentes
+      x-access-intent: ADMIN
+      parameters: [{$ref: '#/components/parameters/UuidId'}]
+      responses:
+        '200': {description: Registro, content: {application/json: {schema: {type: object}}}}
+        '404': {$ref: '#/components/responses/NotFound'}
+    put:
+      tags: [Contenido del sitio]
+      operationId: actualizarFaq
+      summary: Actualiza un registro de preguntas frecuentes
+      x-access-intent: ADMIN
+      parameters: [{$ref: '#/components/parameters/UuidId'}]
+      requestBody: {required: true, content: {application/json: {schema: {type: object}}}}
+      responses:
+        '200': {description: Actualizado, content: {application/json: {schema: {type: object}}}}
+        '404': {$ref: '#/components/responses/NotFound'}
+    delete:
+      tags: [Contenido del sitio]
+      operationId: eliminarFaq
+      summary: Elimina un registro de preguntas frecuentes
+      x-access-intent: ADMIN
+      parameters: [{$ref: '#/components/parameters/UuidId'}]
+      responses:
+        '204': {description: Eliminado}
+        '404': {$ref: '#/components/responses/NotFound'}
+  /api/faqs/{id}/activo:
+    patch:
+      tags: [Contenido del sitio]
+      operationId: cambiarActivoFaq
+      summary: Activa o desactiva un registro de preguntas frecuentes
+      x-access-intent: ADMIN
+      parameters: [{$ref: '#/components/parameters/UuidId'}]
+      requestBody: {required: true, content: {application/json: {schema: {type: object, required: [activo], properties: {activo: {type: boolean}}}}}}
+      responses:
+        '200': {description: Estado actualizado, content: {application/json: {schema: {type: object}}}}
+        '404': {$ref: '#/components/responses/NotFound'}
+  /api/equipo:
+    get:
+      tags: [Contenido del sitio]
+      operationId: listarMiembroEquipo
+      summary: Lista miembros del equipo (administración)
+      x-access-intent: ADMIN
+      responses:
+        '200': {description: Lista ordenada, content: {application/json: {schema: {type: array, items: {type: object}}}}}
+    post:
+      tags: [Contenido del sitio]
+      operationId: crearMiembroEquipo
+      summary: Crea miembros del equipo
+      x-access-intent: ADMIN
+      requestBody: {required: true, content: {application/json: {schema: {type: object}}}}
+      responses:
+        '201': {description: Creado, content: {application/json: {schema: {type: object}}}}
+        '400': {$ref: '#/components/responses/BadRequest'}
+  /api/equipo/{id}:
+    get:
+      tags: [Contenido del sitio]
+      operationId: obtenerMiembroEquipo
+      summary: Obtiene un registro de miembros del equipo
+      x-access-intent: ADMIN
+      parameters: [{$ref: '#/components/parameters/UuidId'}]
+      responses:
+        '200': {description: Registro, content: {application/json: {schema: {type: object}}}}
+        '404': {$ref: '#/components/responses/NotFound'}
+    put:
+      tags: [Contenido del sitio]
+      operationId: actualizarMiembroEquipo
+      summary: Actualiza un registro de miembros del equipo
+      x-access-intent: ADMIN
+      parameters: [{$ref: '#/components/parameters/UuidId'}]
+      requestBody: {required: true, content: {application/json: {schema: {type: object}}}}
+      responses:
+        '200': {description: Actualizado, content: {application/json: {schema: {type: object}}}}
+        '404': {$ref: '#/components/responses/NotFound'}
+    delete:
+      tags: [Contenido del sitio]
+      operationId: eliminarMiembroEquipo
+      summary: Elimina un registro de miembros del equipo
+      x-access-intent: ADMIN
+      parameters: [{$ref: '#/components/parameters/UuidId'}]
+      responses:
+        '204': {description: Eliminado}
+        '404': {$ref: '#/components/responses/NotFound'}
+  /api/equipo/{id}/activo:
+    patch:
+      tags: [Contenido del sitio]
+      operationId: cambiarActivoMiembroEquipo
+      summary: Activa o desactiva un registro de miembros del equipo
+      x-access-intent: ADMIN
+      parameters: [{$ref: '#/components/parameters/UuidId'}]
+      requestBody: {required: true, content: {application/json: {schema: {type: object, required: [activo], properties: {activo: {type: boolean}}}}}}
+      responses:
+        '200': {description: Estado actualizado, content: {application/json: {schema: {type: object}}}}
+        '404': {$ref: '#/components/responses/NotFound'}
+  /api/credenciales:
+    get:
+      tags: [Contenido del sitio]
+      operationId: listarCredencial
+      summary: Lista credenciales y certificados (administración)
+      x-access-intent: ADMIN
+      responses:
+        '200': {description: Lista ordenada, content: {application/json: {schema: {type: array, items: {type: object}}}}}
+    post:
+      tags: [Contenido del sitio]
+      operationId: crearCredencial
+      summary: Crea credenciales y certificados
+      x-access-intent: ADMIN
+      requestBody: {required: true, content: {application/json: {schema: {type: object}}}}
+      responses:
+        '201': {description: Creado, content: {application/json: {schema: {type: object}}}}
+        '400': {$ref: '#/components/responses/BadRequest'}
+  /api/credenciales/{id}:
+    get:
+      tags: [Contenido del sitio]
+      operationId: obtenerCredencial
+      summary: Obtiene un registro de credenciales y certificados
+      x-access-intent: ADMIN
+      parameters: [{$ref: '#/components/parameters/UuidId'}]
+      responses:
+        '200': {description: Registro, content: {application/json: {schema: {type: object}}}}
+        '404': {$ref: '#/components/responses/NotFound'}
+    put:
+      tags: [Contenido del sitio]
+      operationId: actualizarCredencial
+      summary: Actualiza un registro de credenciales y certificados
+      x-access-intent: ADMIN
+      parameters: [{$ref: '#/components/parameters/UuidId'}]
+      requestBody: {required: true, content: {application/json: {schema: {type: object}}}}
+      responses:
+        '200': {description: Actualizado, content: {application/json: {schema: {type: object}}}}
+        '404': {$ref: '#/components/responses/NotFound'}
+    delete:
+      tags: [Contenido del sitio]
+      operationId: eliminarCredencial
+      summary: Elimina un registro de credenciales y certificados
+      x-access-intent: ADMIN
+      parameters: [{$ref: '#/components/parameters/UuidId'}]
+      responses:
+        '204': {description: Eliminado}
+        '404': {$ref: '#/components/responses/NotFound'}
+  /api/credenciales/{id}/activo:
+    patch:
+      tags: [Contenido del sitio]
+      operationId: cambiarActivoCredencial
+      summary: Activa o desactiva un registro de credenciales y certificados
+      x-access-intent: ADMIN
+      parameters: [{$ref: '#/components/parameters/UuidId'}]
+      requestBody: {required: true, content: {application/json: {schema: {type: object, required: [activo], properties: {activo: {type: boolean}}}}}}
+      responses:
+        '200': {description: Estado actualizado, content: {application/json: {schema: {type: object}}}}
+        '404': {$ref: '#/components/responses/NotFound'}
+  /api/testimonios:
+    get:
+      tags: [Contenido del sitio]
+      operationId: listarTestimonio
+      summary: Lista testimonios (administración)
+      x-access-intent: ADMIN
+      responses:
+        '200': {description: Lista ordenada, content: {application/json: {schema: {type: array, items: {type: object}}}}}
+    post:
+      tags: [Contenido del sitio]
+      operationId: crearTestimonio
+      summary: Crea testimonios
+      x-access-intent: ADMIN
+      requestBody: {required: true, content: {application/json: {schema: {type: object}}}}
+      responses:
+        '201': {description: Creado, content: {application/json: {schema: {type: object}}}}
+        '400': {$ref: '#/components/responses/BadRequest'}
+  /api/testimonios/{id}:
+    get:
+      tags: [Contenido del sitio]
+      operationId: obtenerTestimonio
+      summary: Obtiene un registro de testimonios
+      x-access-intent: ADMIN
+      parameters: [{$ref: '#/components/parameters/UuidId'}]
+      responses:
+        '200': {description: Registro, content: {application/json: {schema: {type: object}}}}
+        '404': {$ref: '#/components/responses/NotFound'}
+    put:
+      tags: [Contenido del sitio]
+      operationId: actualizarTestimonio
+      summary: Actualiza un registro de testimonios
+      x-access-intent: ADMIN
+      parameters: [{$ref: '#/components/parameters/UuidId'}]
+      requestBody: {required: true, content: {application/json: {schema: {type: object}}}}
+      responses:
+        '200': {description: Actualizado, content: {application/json: {schema: {type: object}}}}
+        '404': {$ref: '#/components/responses/NotFound'}
+    delete:
+      tags: [Contenido del sitio]
+      operationId: eliminarTestimonio
+      summary: Elimina un registro de testimonios
+      x-access-intent: ADMIN
+      parameters: [{$ref: '#/components/parameters/UuidId'}]
+      responses:
+        '204': {description: Eliminado}
+        '404': {$ref: '#/components/responses/NotFound'}
+  /api/testimonios/{id}/activo:
+    patch:
+      tags: [Contenido del sitio]
+      operationId: cambiarActivoTestimonio
+      summary: Activa o desactiva un registro de testimonios
+      x-access-intent: ADMIN
+      parameters: [{$ref: '#/components/parameters/UuidId'}]
+      requestBody: {required: true, content: {application/json: {schema: {type: object, required: [activo], properties: {activo: {type: boolean}}}}}}
+      responses:
+        '200': {description: Estado actualizado, content: {application/json: {schema: {type: object}}}}
+        '404': {$ref: '#/components/responses/NotFound'}
+  /api/clientes-marca:
+    get:
+      tags: [Contenido del sitio]
+      operationId: listarClienteMarca
+      summary: Lista clientes y marcas (administración)
+      x-access-intent: ADMIN
+      responses:
+        '200': {description: Lista ordenada, content: {application/json: {schema: {type: array, items: {type: object}}}}}
+    post:
+      tags: [Contenido del sitio]
+      operationId: crearClienteMarca
+      summary: Crea clientes y marcas
+      x-access-intent: ADMIN
+      requestBody: {required: true, content: {application/json: {schema: {type: object}}}}
+      responses:
+        '201': {description: Creado, content: {application/json: {schema: {type: object}}}}
+        '400': {$ref: '#/components/responses/BadRequest'}
+  /api/clientes-marca/{id}:
+    get:
+      tags: [Contenido del sitio]
+      operationId: obtenerClienteMarca
+      summary: Obtiene un registro de clientes y marcas
+      x-access-intent: ADMIN
+      parameters: [{$ref: '#/components/parameters/UuidId'}]
+      responses:
+        '200': {description: Registro, content: {application/json: {schema: {type: object}}}}
+        '404': {$ref: '#/components/responses/NotFound'}
+    put:
+      tags: [Contenido del sitio]
+      operationId: actualizarClienteMarca
+      summary: Actualiza un registro de clientes y marcas
+      x-access-intent: ADMIN
+      parameters: [{$ref: '#/components/parameters/UuidId'}]
+      requestBody: {required: true, content: {application/json: {schema: {type: object}}}}
+      responses:
+        '200': {description: Actualizado, content: {application/json: {schema: {type: object}}}}
+        '404': {$ref: '#/components/responses/NotFound'}
+    delete:
+      tags: [Contenido del sitio]
+      operationId: eliminarClienteMarca
+      summary: Elimina un registro de clientes y marcas
+      x-access-intent: ADMIN
+      parameters: [{$ref: '#/components/parameters/UuidId'}]
+      responses:
+        '204': {description: Eliminado}
+        '404': {$ref: '#/components/responses/NotFound'}
+  /api/clientes-marca/{id}/activo:
+    patch:
+      tags: [Contenido del sitio]
+      operationId: cambiarActivoClienteMarca
+      summary: Activa o desactiva un registro de clientes y marcas
+      x-access-intent: ADMIN
+      parameters: [{$ref: '#/components/parameters/UuidId'}]
+      requestBody: {required: true, content: {application/json: {schema: {type: object, required: [activo], properties: {activo: {type: boolean}}}}}}
+      responses:
+        '200': {description: Estado actualizado, content: {application/json: {schema: {type: object}}}}
+        '404': {$ref: '#/components/responses/NotFound'}
+  /api/garantias:
+    get:
+      tags: [Contenido del sitio]
+      operationId: listarGarantia
+      summary: Lista garantías (administración)
+      x-access-intent: ADMIN
+      responses:
+        '200': {description: Lista ordenada, content: {application/json: {schema: {type: array, items: {type: object}}}}}
+    post:
+      tags: [Contenido del sitio]
+      operationId: crearGarantia
+      summary: Crea garantías
+      x-access-intent: ADMIN
+      requestBody: {required: true, content: {application/json: {schema: {type: object}}}}
+      responses:
+        '201': {description: Creado, content: {application/json: {schema: {type: object}}}}
+        '400': {$ref: '#/components/responses/BadRequest'}
+  /api/garantias/{id}:
+    get:
+      tags: [Contenido del sitio]
+      operationId: obtenerGarantia
+      summary: Obtiene un registro de garantías
+      x-access-intent: ADMIN
+      parameters: [{$ref: '#/components/parameters/UuidId'}]
+      responses:
+        '200': {description: Registro, content: {application/json: {schema: {type: object}}}}
+        '404': {$ref: '#/components/responses/NotFound'}
+    put:
+      tags: [Contenido del sitio]
+      operationId: actualizarGarantia
+      summary: Actualiza un registro de garantías
+      x-access-intent: ADMIN
+      parameters: [{$ref: '#/components/parameters/UuidId'}]
+      requestBody: {required: true, content: {application/json: {schema: {type: object}}}}
+      responses:
+        '200': {description: Actualizado, content: {application/json: {schema: {type: object}}}}
+        '404': {$ref: '#/components/responses/NotFound'}
+    delete:
+      tags: [Contenido del sitio]
+      operationId: eliminarGarantia
+      summary: Elimina un registro de garantías
+      x-access-intent: ADMIN
+      parameters: [{$ref: '#/components/parameters/UuidId'}]
+      responses:
+        '204': {description: Eliminado}
+        '404': {$ref: '#/components/responses/NotFound'}
+  /api/garantias/{id}/activo:
+    patch:
+      tags: [Contenido del sitio]
+      operationId: cambiarActivoGarantia
+      summary: Activa o desactiva un registro de garantías
+      x-access-intent: ADMIN
+      parameters: [{$ref: '#/components/parameters/UuidId'}]
+      requestBody: {required: true, content: {application/json: {schema: {type: object, required: [activo], properties: {activo: {type: boolean}}}}}}
+      responses:
+        '200': {description: Estado actualizado, content: {application/json: {schema: {type: object}}}}
+        '404': {$ref: '#/components/responses/NotFound'}
+  /api/pasos-proceso:
+    get:
+      tags: [Contenido del sitio]
+      operationId: listarPasoProceso
+      summary: Lista pasos del proceso (administración)
+      x-access-intent: ADMIN
+      responses:
+        '200': {description: Lista ordenada, content: {application/json: {schema: {type: array, items: {type: object}}}}}
+    post:
+      tags: [Contenido del sitio]
+      operationId: crearPasoProceso
+      summary: Crea pasos del proceso
+      x-access-intent: ADMIN
+      requestBody: {required: true, content: {application/json: {schema: {type: object}}}}
+      responses:
+        '201': {description: Creado, content: {application/json: {schema: {type: object}}}}
+        '400': {$ref: '#/components/responses/BadRequest'}
+  /api/pasos-proceso/{id}:
+    get:
+      tags: [Contenido del sitio]
+      operationId: obtenerPasoProceso
+      summary: Obtiene un registro de pasos del proceso
+      x-access-intent: ADMIN
+      parameters: [{$ref: '#/components/parameters/UuidId'}]
+      responses:
+        '200': {description: Registro, content: {application/json: {schema: {type: object}}}}
+        '404': {$ref: '#/components/responses/NotFound'}
+    put:
+      tags: [Contenido del sitio]
+      operationId: actualizarPasoProceso
+      summary: Actualiza un registro de pasos del proceso
+      x-access-intent: ADMIN
+      parameters: [{$ref: '#/components/parameters/UuidId'}]
+      requestBody: {required: true, content: {application/json: {schema: {type: object}}}}
+      responses:
+        '200': {description: Actualizado, content: {application/json: {schema: {type: object}}}}
+        '404': {$ref: '#/components/responses/NotFound'}
+    delete:
+      tags: [Contenido del sitio]
+      operationId: eliminarPasoProceso
+      summary: Elimina un registro de pasos del proceso
+      x-access-intent: ADMIN
+      parameters: [{$ref: '#/components/parameters/UuidId'}]
+      responses:
+        '204': {description: Eliminado}
+        '404': {$ref: '#/components/responses/NotFound'}
+  /api/pasos-proceso/{id}/activo:
+    patch:
+      tags: [Contenido del sitio]
+      operationId: cambiarActivoPasoProceso
+      summary: Activa o desactiva un registro de pasos del proceso
+      x-access-intent: ADMIN
+      parameters: [{$ref: '#/components/parameters/UuidId'}]
+      requestBody: {required: true, content: {application/json: {schema: {type: object, required: [activo], properties: {activo: {type: boolean}}}}}}
+      responses:
+        '200': {description: Estado actualizado, content: {application/json: {schema: {type: object}}}}
+        '404': {$ref: '#/components/responses/NotFound'}
+  /api/publico/sitios/{clave}/confianza:
+    get:
+      tags: [Contenido del sitio]
+      operationId: obtenerConfianzaPublica
+      summary: Preguntas frecuentes, equipo, credenciales, testimonios, clientes, garantías y pasos activos del sitio
+      x-access-intent: PUBLICO
+      parameters:
+        - {name: clave, in: path, required: true, schema: {type: string}}
+      responses:
+        '200': {description: Contenido de confianza ordenado, content: {application/json: {schema: {type: object, properties: {faqs: {type: array, items: {type: object}}, equipo: {type: array, items: {type: object}}, credenciales: {type: array, items: {type: object}}, testimonios: {type: array, items: {type: object}}, clientes: {type: array, items: {type: object}}, garantias: {type: array, items: {type: object}}, pasos: {type: array, items: {type: object}}}}}}}
+        '404': {$ref: '#/components/responses/NotFound'}
+
 components:
   parameters:
     UuidId:

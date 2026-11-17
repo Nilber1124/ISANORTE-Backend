@@ -709,3 +709,100 @@ CREATE INDEX ix_direcciones_cliente_cliente ON direcciones_cliente(cliente_id);
 
 ALTER TABLE productos ADD COLUMN stock_actual INTEGER;
 ALTER TABLE productos ADD COLUMN version INTEGER NOT NULL DEFAULT 0;
+
+-- ---- Contenido del sitio: preguntas frecuentes, equipo, credenciales, testimonios, clientes, garantías y pasos del proceso ----
+
+CREATE TABLE faqs (
+    id UUID PRIMARY KEY,
+    pregunta VARCHAR(300) NOT NULL,
+    respuesta TEXT NOT NULL,
+    ambito VARCHAR(20) NOT NULL,
+    orden INTEGER NOT NULL,
+    activo BOOLEAN NOT NULL,
+    fecha_creacion TIMESTAMP(6) NOT NULL,
+    fecha_actualizacion TIMESTAMP(6) NOT NULL,
+    CONSTRAINT ck_faqs_orden CHECK (orden >= 0),
+    CONSTRAINT ck_faqs_ambito CHECK (ambito IN ('HOME', 'SERVICIOS', 'CONTACTO', 'GENERAL'))
+);
+
+CREATE TABLE miembros_equipo (
+    id UUID PRIMARY KEY,
+    nombre VARCHAR(150) NOT NULL,
+    cargo VARCHAR(150) NOT NULL,
+    especialidad VARCHAR(200),
+    biografia TEXT,
+    foto_url VARCHAR(500),
+    foto_alt VARCHAR(300),
+    orden INTEGER NOT NULL,
+    activo BOOLEAN NOT NULL,
+    fecha_creacion TIMESTAMP(6) NOT NULL,
+    fecha_actualizacion TIMESTAMP(6) NOT NULL,
+    CONSTRAINT ck_miembros_equipo_orden CHECK (orden >= 0)
+);
+
+CREATE TABLE credenciales (
+    id UUID PRIMARY KEY,
+    nombre VARCHAR(200) NOT NULL,
+    entidad VARCHAR(200),
+    tipo VARCHAR(30) NOT NULL,
+    codigo VARCHAR(80),
+    anio INTEGER,
+    imagen_url VARCHAR(500),
+    imagen_alt VARCHAR(300),
+    orden INTEGER NOT NULL,
+    activo BOOLEAN NOT NULL,
+    fecha_creacion TIMESTAMP(6) NOT NULL,
+    fecha_actualizacion TIMESTAMP(6) NOT NULL,
+    CONSTRAINT ck_credenciales_orden CHECK (orden >= 0),
+    CONSTRAINT ck_credenciales_tipo CHECK (tipo IN ('LICENCIA', 'COLEGIATURA', 'CERTIFICACION', 'REGISTRO'))
+);
+
+CREATE TABLE testimonios (
+    id UUID PRIMARY KEY,
+    autor VARCHAR(150) NOT NULL,
+    cargo VARCHAR(150),
+    texto TEXT NOT NULL,
+    proyecto_slug VARCHAR(200),
+    foto_url VARCHAR(500),
+    foto_alt VARCHAR(300),
+    orden INTEGER NOT NULL,
+    activo BOOLEAN NOT NULL,
+    fecha_creacion TIMESTAMP(6) NOT NULL,
+    fecha_actualizacion TIMESTAMP(6) NOT NULL,
+    CONSTRAINT ck_testimonios_orden CHECK (orden >= 0)
+);
+
+CREATE TABLE clientes_marca (
+    id UUID PRIMARY KEY,
+    nombre VARCHAR(150) NOT NULL,
+    logo_url VARCHAR(500),
+    enlace VARCHAR(300),
+    orden INTEGER NOT NULL,
+    activo BOOLEAN NOT NULL,
+    fecha_creacion TIMESTAMP(6) NOT NULL,
+    fecha_actualizacion TIMESTAMP(6) NOT NULL,
+    CONSTRAINT ck_clientes_marca_orden CHECK (orden >= 0)
+);
+
+CREATE TABLE garantias (
+    id UUID PRIMARY KEY,
+    titulo VARCHAR(150) NOT NULL,
+    texto VARCHAR(500) NOT NULL,
+    en_hero BOOLEAN NOT NULL,
+    orden INTEGER NOT NULL,
+    activo BOOLEAN NOT NULL,
+    fecha_creacion TIMESTAMP(6) NOT NULL,
+    fecha_actualizacion TIMESTAMP(6) NOT NULL,
+    CONSTRAINT ck_garantias_orden CHECK (orden >= 0)
+);
+
+CREATE TABLE pasos_proceso (
+    id UUID PRIMARY KEY,
+    titulo VARCHAR(150) NOT NULL,
+    texto VARCHAR(500) NOT NULL,
+    orden INTEGER NOT NULL,
+    activo BOOLEAN NOT NULL,
+    fecha_creacion TIMESTAMP(6) NOT NULL,
+    fecha_actualizacion TIMESTAMP(6) NOT NULL,
+    CONSTRAINT ck_pasos_proceso_orden CHECK (orden >= 0)
+);

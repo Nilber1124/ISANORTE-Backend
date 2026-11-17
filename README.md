@@ -132,6 +132,11 @@ La API es stateless y autentica mediante `Authorization: Bearer`; no usa cookies
 
 ### Endpoints Protegidos
 
+**Contenido del sitio.** Preguntas frecuentes, equipo, credenciales, testimonios, clientes y marcas, garantías y pasos del
+proceso tienen su propia tabla y un CRUD administrativo (`/api/faqs`, `/api/equipo`, `/api/credenciales`,
+`/api/testimonios`, `/api/clientes-marca`, `/api/garantias`, `/api/pasos-proceso`; JWT administrativo, con
+`PATCH /{id}/activo`). El sitio los lee, solo activos y ordenados, en `GET /api/publico/sitios/{clave}/confianza`.
+
 El modulo de anuncios administra `GET/POST /api/anuncios`, `GET/PUT/DELETE /api/anuncios/{id}` y
 `PATCH /api/anuncios/{id}/activo`. Estas rutas requieren JWT administrativo. Las imagenes reutilizan
 la carga Cloudinary existente en `POST /api/archivos/subir-imagen`.
