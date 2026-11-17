@@ -12,7 +12,7 @@ public record PublicSiteResponse(
             String nombreComercial, String direccion, String ciudad, String telefono,
             String telefonoSecundario, String email, String emailVentas, String whatsapp,
             String horarioAtencion, String resumenNosotros, Integer anioFundacion, String zonaCobertura,
-            String tiempoRespuesta) {
+            String tiempoRespuesta, Double latitud, Double longitud) {
     }
 
     public record RedPublica(String nombre, String url, String icono, Integer orden) {

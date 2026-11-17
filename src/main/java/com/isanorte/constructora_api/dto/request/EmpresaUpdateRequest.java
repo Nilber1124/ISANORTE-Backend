@@ -1,5 +1,7 @@
 package com.isanorte.constructora_api.dto.request;
 
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -20,6 +22,8 @@ public record EmpresaUpdateRequest(
     @PositiveOrZero Integer anioFundacion,
     @Size(max = 300) String zonaCobertura,
     @Size(max = 120) String tiempoRespuesta,
+    @DecimalMin("-90.0") @DecimalMax("90.0") Double latitud,
+    @DecimalMin("-180.0") @DecimalMax("180.0") Double longitud,
     String mision,
     String vision,
     String valores,

@@ -24,6 +24,8 @@ CREATE TABLE empresa (
     anio_fundacion INTEGER,
     zona_cobertura VARCHAR(300),
     tiempo_respuesta VARCHAR(120),
+    latitud DOUBLE PRECISION,
+    longitud DOUBLE PRECISION,
     mision TEXT,
     vision TEXT,
     valores TEXT,

@@ -132,8 +132,8 @@ La API es stateless y autentica mediante `Authorization: Bearer`; no usa cookies
 
 ### Endpoints Protegidos
 
-**Datos nuevos de empresa, sitio y contacto.** La empresa publica `anioFundacion`, `zonaCobertura` y
-`tiempoRespuesta`; el sitio, las URL del video del proceso (`videoProcesoUrl`, `videoProcesoMovilUrl`,
+**Datos nuevos de empresa, sitio y contacto.** La empresa publica `anioFundacion`, `zonaCobertura`,
+`tiempoRespuesta` y la ubicación de la oficina (`latitud`, `longitud`, validadas entre -90/90 y -180/180); el sitio, las URL del video del proceso (`videoProcesoUrl`, `videoProcesoMovilUrl`,
 `videoProcesoPosterUrl`); la unidad destacada, sus `ofertas` (texto con «|» publicado como lista); y la solicitud
 de contacto guarda `ubicacion`, `servicioInteres` y `consentimiento` (obligatorio, con `fechaConsentimiento`).
 

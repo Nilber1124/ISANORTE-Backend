@@ -20,6 +20,8 @@ public record EmpresaResponse(
     Integer anioFundacion,
     String zonaCobertura,
     String tiempoRespuesta,
+    Double latitud,
+    Double longitud,
     String mision,
     String vision,
     String valores,

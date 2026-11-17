@@ -91,6 +91,11 @@ public class Empresa {
     @Column(length = 120)
     private String tiempoRespuesta;
 
+    /** Ubicación de la oficina en el mapa (WGS84). */
+    private Double latitud;
+
+    private Double longitud;
+
     @Column(columnDefinition = "TEXT")
     private String mision;
 

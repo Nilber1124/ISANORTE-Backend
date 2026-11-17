@@ -141,7 +141,8 @@ public class PublicContentService implements IPublicContentService {
                 company.getNombreComercial(), company.getDireccion(), company.getCiudad(), company.getTelefono(),
                 company.getTelefonoSecundario(), company.getEmail(), company.getEmailVentas(), company.getWhatsapp(),
                 company.getHorarioAtencion(), company.getResumenNosotros(), company.getAnioFundacion(),
-                company.getZonaCobertura(), company.getTiempoRespuesta());
+                company.getZonaCobertura(), company.getTiempoRespuesta(), company.getLatitud(),
+                company.getLongitud());
         return new PublicSiteResponse(site.getClave(), site.getTituloSitio(), site.getDescripcionSitio(),
                 site.getLogoUrl(), site.getLogoBlancoUrl(), site.getFaviconUrl(), site.getTextoPiePagina(),
                 site.getVideoProcesoUrl(), site.getVideoProcesoMovilUrl(), site.getVideoProcesoPosterUrl(),

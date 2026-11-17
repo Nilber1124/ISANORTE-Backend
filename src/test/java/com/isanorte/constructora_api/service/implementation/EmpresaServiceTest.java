@@ -61,7 +61,7 @@ class EmpresaServiceTest {
 
     @Test
     void create_debeRetornarEmpresa_cuandoDatosSonValidos() {
-        EmpresaRequest request = new EmpresaRequest("ISANORTE", "Isanorte SAC", "20123456789", "Dir", "Ciudad", "tel1", null, "email@test.com", null, null, null, null, null, null, null, null, null, null, List.of());
+        EmpresaRequest request = new EmpresaRequest("ISANORTE", "Isanorte SAC", "20123456789", "Dir", "Ciudad", "tel1", null, "email@test.com", null, null, null, null, null, null, null, null, null, null, null, null, List.of());
         when(empresaMapper.toEntity(request)).thenReturn(empresa);
         when(empresaRepository.save(empresa)).thenReturn(empresa);
 
@@ -74,11 +74,11 @@ class EmpresaServiceTest {
 
     @Test
     void update_debeActualizarEmpresa_cuandoRucNoEsDuplicado() {
-        EmpresaUpdateRequest request = new EmpresaUpdateRequest("ISANORTE", "Isanorte SAC", "20123456789", "Dir", "Ciudad", "tel1", null, "email@test.com", null, null, null, null, null, null, null, null, null, null);
+        EmpresaUpdateRequest request = new EmpresaUpdateRequest("ISANORTE", "Isanorte SAC", "20123456789", "Dir", "Ciudad", "tel1", null, "email@test.com", null, null, null, null, null, null, null, null, null, null, null, null);
         when(empresaRepository.findById(empresaId)).thenReturn(Optional.of(empresa));
         when(empresaRepository.existsByRucAndIdNot(request.ruc(), empresaId)).thenReturn(false);
         when(empresaRepository.saveAndFlush(empresa)).thenReturn(empresa);
-        EmpresaResponse response = new EmpresaResponse(empresaId, "ISANORTE", "Isanorte SAC", "20123456789", "Dir", "Ciudad", "tel1", null, "email@test.com", null, null, null, null, null, null, null, null, null, null, List.of(), List.of(), null, null);
+        EmpresaResponse response = new EmpresaResponse(empresaId, "ISANORTE", "Isanorte SAC", "20123456789", "Dir", "Ciudad", "tel1", null, "email@test.com", null, null, null, null, null, null, null, null, null, null, null, null, List.of(), List.of(), null, null);
         when(empresaMapper.toResponse(empresa)).thenReturn(response);
 
         EmpresaResponse result = empresaService.update(empresaId, request);
@@ -91,7 +91,7 @@ class EmpresaServiceTest {
 
     @Test
     void update_debeLanzarExcepcion_cuandoRucEstaDuplicado() {
-        EmpresaUpdateRequest request = new EmpresaUpdateRequest("ISANORTE", "Isanorte SAC", "20123456789", "Dir", "Ciudad", "tel1", null, "email@test.com", null, null, null, null, null, null, null, null, null, null);
+        EmpresaUpdateRequest request = new EmpresaUpdateRequest("ISANORTE", "Isanorte SAC", "20123456789", "Dir", "Ciudad", "tel1", null, "email@test.com", null, null, null, null, null, null, null, null, null, null, null, null);
         when(empresaRepository.findById(empresaId)).thenReturn(Optional.of(empresa));
         when(empresaRepository.existsByRucAndIdNot(request.ruc(), empresaId)).thenReturn(true);
 
