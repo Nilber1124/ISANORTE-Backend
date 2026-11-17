@@ -825,3 +825,16 @@ CREATE TABLE proyecto_galeria (
     CONSTRAINT ck_proyecto_galeria_orden CHECK (orden >= 0),
     CONSTRAINT ck_proyecto_galeria_etiqueta CHECK (etiqueta IN ('ANTES', 'PROCESO', 'FINAL', 'DETALLE'))
 );
+
+CREATE TABLE politicas (
+    id UUID PRIMARY KEY,
+    slug VARCHAR(80) NOT NULL,
+    titulo VARCHAR(150) NOT NULL,
+    contenido TEXT NOT NULL,
+    orden INTEGER NOT NULL,
+    activo BOOLEAN NOT NULL,
+    fecha_creacion TIMESTAMP(6) NOT NULL,
+    fecha_actualizacion TIMESTAMP(6) NOT NULL,
+    CONSTRAINT uk_politicas_slug UNIQUE (slug),
+    CONSTRAINT ck_politicas_orden CHECK (orden >= 0)
+);

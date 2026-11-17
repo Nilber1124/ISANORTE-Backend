@@ -2247,6 +2247,63 @@ paths:
       responses:
         '200': {description: Estado actualizado, content: {application/json: {schema: {type: object}}}}
         '404': {$ref: '#/components/responses/NotFound'}
+  /api/politicas:
+    get:
+      tags: [Contenido del sitio]
+      operationId: listarPolitica
+      summary: Lista políticas (administración)
+      x-access-intent: ADMIN
+      responses:
+        '200': {description: Lista ordenada, content: {application/json: {schema: {type: array, items: {type: object}}}}}
+    post:
+      tags: [Contenido del sitio]
+      operationId: crearPolitica
+      summary: Crea políticas
+      x-access-intent: ADMIN
+      requestBody: {required: true, content: {application/json: {schema: {type: object}}}}
+      responses:
+        '201': {description: Creado, content: {application/json: {schema: {type: object}}}}
+        '400': {$ref: '#/components/responses/BadRequest'}
+  /api/politicas/{id}:
+    get:
+      tags: [Contenido del sitio]
+      operationId: obtenerPolitica
+      summary: Obtiene un registro de políticas
+      x-access-intent: ADMIN
+      parameters: [{$ref: '#/components/parameters/UuidId'}]
+      responses:
+        '200': {description: Registro, content: {application/json: {schema: {type: object}}}}
+        '404': {$ref: '#/components/responses/NotFound'}
+    put:
+      tags: [Contenido del sitio]
+      operationId: actualizarPolitica
+      summary: Actualiza un registro de políticas
+      x-access-intent: ADMIN
+      parameters: [{$ref: '#/components/parameters/UuidId'}]
+      requestBody: {required: true, content: {application/json: {schema: {type: object}}}}
+      responses:
+        '200': {description: Actualizado, content: {application/json: {schema: {type: object}}}}
+        '404': {$ref: '#/components/responses/NotFound'}
+    delete:
+      tags: [Contenido del sitio]
+      operationId: eliminarPolitica
+      summary: Elimina un registro de políticas
+      x-access-intent: ADMIN
+      parameters: [{$ref: '#/components/parameters/UuidId'}]
+      responses:
+        '204': {description: Eliminado}
+        '404': {$ref: '#/components/responses/NotFound'}
+  /api/politicas/{id}/activo:
+    patch:
+      tags: [Contenido del sitio]
+      operationId: cambiarActivoPolitica
+      summary: Activa o desactiva un registro de políticas
+      x-access-intent: ADMIN
+      parameters: [{$ref: '#/components/parameters/UuidId'}]
+      requestBody: {required: true, content: {application/json: {schema: {type: object, required: [activo], properties: {activo: {type: boolean}}}}}}
+      responses:
+        '200': {description: Estado actualizado, content: {application/json: {schema: {type: object}}}}
+        '404': {$ref: '#/components/responses/NotFound'}
   /api/proyecto-galeria:
     get:
       tags: [Contenido del sitio]
@@ -2308,12 +2365,12 @@ paths:
     get:
       tags: [Contenido del sitio]
       operationId: obtenerConfianzaPublica
-      summary: Preguntas frecuentes, equipo, credenciales, testimonios, garantías y pasos activos del sitio
+      summary: Preguntas frecuentes, equipo, credenciales, testimonios, garantías, pasos y políticas activos del sitio
       x-access-intent: PUBLICO
       parameters:
         - {name: clave, in: path, required: true, schema: {type: string}}
       responses:
-        '200': {description: Contenido de confianza ordenado, content: {application/json: {schema: {type: object, properties: {faqs: {type: array, items: {type: object}}, equipo: {type: array, items: {type: object}}, credenciales: {type: array, items: {type: object}}, testimonios: {type: array, items: {type: object}}, garantias: {type: array, items: {type: object}}, pasos: {type: array, items: {type: object}}}}}}}
+        '200': {description: Contenido de confianza ordenado, content: {application/json: {schema: {type: object, properties: {faqs: {type: array, items: {type: object}}, equipo: {type: array, items: {type: object}}, credenciales: {type: array, items: {type: object}}, testimonios: {type: array, items: {type: object}}, garantias: {type: array, items: {type: object}}, pasos: {type: array, items: {type: object}}, politicas: {type: array, items: {type: object}}}}}}}
         '404': {$ref: '#/components/responses/NotFound'}
 
 components:
