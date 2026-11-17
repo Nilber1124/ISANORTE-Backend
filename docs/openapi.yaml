@@ -2304,6 +2304,63 @@ paths:
       responses:
         '200': {description: Estado actualizado, content: {application/json: {schema: {type: object}}}}
         '404': {$ref: '#/components/responses/NotFound'}
+  /api/proyecto-galeria:
+    get:
+      tags: [Contenido del sitio]
+      operationId: listarProyectoGaleria
+      summary: Lista imágenes de galería de proyecto (administración)
+      x-access-intent: ADMIN
+      responses:
+        '200': {description: Lista ordenada, content: {application/json: {schema: {type: array, items: {type: object}}}}}
+    post:
+      tags: [Contenido del sitio]
+      operationId: crearProyectoGaleria
+      summary: Crea imágenes de galería de proyecto
+      x-access-intent: ADMIN
+      requestBody: {required: true, content: {application/json: {schema: {type: object}}}}
+      responses:
+        '201': {description: Creado, content: {application/json: {schema: {type: object}}}}
+        '400': {$ref: '#/components/responses/BadRequest'}
+  /api/proyecto-galeria/{id}:
+    get:
+      tags: [Contenido del sitio]
+      operationId: obtenerProyectoGaleria
+      summary: Obtiene un registro de imágenes de galería de proyecto
+      x-access-intent: ADMIN
+      parameters: [{$ref: '#/components/parameters/UuidId'}]
+      responses:
+        '200': {description: Registro, content: {application/json: {schema: {type: object}}}}
+        '404': {$ref: '#/components/responses/NotFound'}
+    put:
+      tags: [Contenido del sitio]
+      operationId: actualizarProyectoGaleria
+      summary: Actualiza un registro de imágenes de galería de proyecto
+      x-access-intent: ADMIN
+      parameters: [{$ref: '#/components/parameters/UuidId'}]
+      requestBody: {required: true, content: {application/json: {schema: {type: object}}}}
+      responses:
+        '200': {description: Actualizado, content: {application/json: {schema: {type: object}}}}
+        '404': {$ref: '#/components/responses/NotFound'}
+    delete:
+      tags: [Contenido del sitio]
+      operationId: eliminarProyectoGaleria
+      summary: Elimina un registro de imágenes de galería de proyecto
+      x-access-intent: ADMIN
+      parameters: [{$ref: '#/components/parameters/UuidId'}]
+      responses:
+        '204': {description: Eliminado}
+        '404': {$ref: '#/components/responses/NotFound'}
+  /api/proyecto-galeria/{id}/activo:
+    patch:
+      tags: [Contenido del sitio]
+      operationId: cambiarActivoProyectoGaleria
+      summary: Activa o desactiva un registro de imágenes de galería de proyecto
+      x-access-intent: ADMIN
+      parameters: [{$ref: '#/components/parameters/UuidId'}]
+      requestBody: {required: true, content: {application/json: {schema: {type: object, required: [activo], properties: {activo: {type: boolean}}}}}}
+      responses:
+        '200': {description: Estado actualizado, content: {application/json: {schema: {type: object}}}}
+        '404': {$ref: '#/components/responses/NotFound'}
   /api/publico/sitios/{clave}/confianza:
     get:
       tags: [Contenido del sitio]

@@ -10,7 +10,11 @@ public record PublicConfianzaResponse(
         List<Testimonio> testimonios,
         List<Cliente> clientes,
         List<Garantia> garantias,
-        List<Paso> pasos) {
+        List<Paso> pasos,
+        List<ImagenProyecto> galeria) {
+
+    public record ImagenProyecto(String proyectoSlug, String url, String alt, String etiqueta) {
+    }
 
     public record Faq(String pregunta, String respuesta, String ambito) {
     }

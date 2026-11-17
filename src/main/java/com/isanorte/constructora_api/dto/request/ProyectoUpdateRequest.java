@@ -1,5 +1,6 @@
 package com.isanorte.constructora_api.dto.request;
 
+import jakarta.validation.constraints.Pattern;
 import java.util.Set;
 import java.util.UUID;
 
@@ -14,6 +15,10 @@ public record ProyectoUpdateRequest(
     String cliente,
     String ubicacion,
     String fechaProyecto,
+    @PositiveOrZero Integer areaM2,
+    @PositiveOrZero Integer plazoMeses,
+    String alcance,
+    @Pattern(regexp = "VIVIENDA|COMERCIAL|INDUSTRIAL|INSTITUCIONAL|REMODELACION|HABILITACION") String tipoObra,
     @NotBlank String descripcion,
     @Size(max = 500) String imagenUrl,
     @Size(max = 300) String imagenAlt,

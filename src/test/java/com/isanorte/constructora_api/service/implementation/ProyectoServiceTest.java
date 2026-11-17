@@ -36,7 +36,7 @@ class ProyectoServiceTest {
         ProyectoMapper proyectoMapper = mock(ProyectoMapper.class);
         Proyecto proyecto = mock(Proyecto.class);
         UUID id = UUID.randomUUID();
-        ProyectoResponse response = new ProyectoResponse(id, "Proyecto", "proyecto", null, null, null, null,
+        ProyectoResponse response = new ProyectoResponse(id, "Proyecto", "proyecto", null, null, null, null, null, null, null, null,
                 null, null, false, activo, 0, Set.of(), LocalDateTime.MIN, LocalDateTime.MIN);
         when(proyectoRepository.existsById(id)).thenReturn(true);
         when(proyectoRepository.findById(id)).thenReturn(Optional.of(proyecto));

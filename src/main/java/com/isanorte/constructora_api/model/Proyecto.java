@@ -61,6 +61,16 @@ public class Proyecto {
     @Column(length = 60)
     private String fechaProyecto;
 
+    private Integer areaM2;
+
+    private Integer plazoMeses;
+
+    @Column(columnDefinition = "TEXT")
+    private String alcance;
+
+    @Column(length = 30)
+    private String tipoObra;
+
     @NotBlank
     @Column(nullable = false, columnDefinition = "TEXT")
     private String descripcion;

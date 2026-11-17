@@ -436,7 +436,8 @@ public class PublicContentService implements IPublicContentService {
     private PublicProjectResponse toPublicProject(com.isanorte.constructora_api.model.Proyecto project) {
         return new PublicProjectResponse(
                 project.getNombre(), project.getSlug(), project.getDescripcion(), project.getUbicacion(),
-                project.getFechaProyecto(), project.getOrden(),
+                project.getFechaProyecto(), project.getAreaM2(), project.getPlazoMeses(), project.getAlcance(),
+                project.getTipoObra(), project.getOrden(),
                 project.getImagenUrl() != null
                         ? List.of(new PublicProjectImageResponse(project.getImagenUrl(), project.getImagenAlt(), true, 0))
                         : List.of(),

@@ -39,6 +39,7 @@ class PublicConfianzaServiceTest {
     @Mock private ClienteMarcaRepository clienteRepository;
     @Mock private GarantiaRepository garantiaRepository;
     @Mock private PasoProcesoRepository pasoRepository;
+    @Mock private com.isanorte.constructora_api.repository.ProyectoGaleriaRepository galeriaRepository;
 
     @InjectMocks
     private PublicConfianzaService service;
@@ -53,8 +54,13 @@ class PublicConfianzaServiceTest {
         when(pasoRepository.findByActivoTrueOrderByOrdenAscIdAsc()).thenReturn(List.of(
                 PasoProceso.builder().titulo("Consulta").texto("Visita").build()));
 
+        when(galeriaRepository.findByActivoTrueOrderByOrdenAscIdAsc()).thenReturn(List.of(
+                com.isanorte.constructora_api.model.ProyectoGaleria.builder().proyectoSlug("casa").url("u")
+                        .etiqueta("FINAL").build()));
+
         var response = service.findConfianza("isanorte");
 
+        assertEquals("FINAL", response.galeria().get(0).etiqueta());
         assertEquals(1, response.faqs().size());
         assertEquals("¿Cuánto cuesta?", response.faqs().get(0).pregunta());
         assertTrue(response.garantias().get(0).enHero());

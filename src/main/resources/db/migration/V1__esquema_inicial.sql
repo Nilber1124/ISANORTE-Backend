@@ -523,6 +523,12 @@ CREATE TABLE solicitudes_contacto (
 -- ---- Imagen directa en proyectos ----
 ALTER TABLE proyectos ADD COLUMN imagen_url VARCHAR(500);
 ALTER TABLE proyectos ADD COLUMN imagen_alt VARCHAR(300);
+ALTER TABLE proyectos ADD COLUMN area_m2 INTEGER;
+ALTER TABLE proyectos ADD COLUMN plazo_meses INTEGER;
+ALTER TABLE proyectos ADD COLUMN alcance TEXT;
+ALTER TABLE proyectos ADD COLUMN tipo_obra VARCHAR(30);
+ALTER TABLE proyectos ADD CONSTRAINT ck_proyecto_tipo_obra CHECK (
+    tipo_obra IS NULL OR tipo_obra IN ('VIVIENDA', 'COMERCIAL', 'INDUSTRIAL', 'INSTITUCIONAL', 'REMODELACION', 'HABILITACION'));
 
 
 -- ---- Cuentas de clientes ----
@@ -816,4 +822,19 @@ CREATE TABLE pasos_proceso (
     fecha_creacion TIMESTAMP(6) NOT NULL,
     fecha_actualizacion TIMESTAMP(6) NOT NULL,
     CONSTRAINT ck_pasos_proceso_orden CHECK (orden >= 0)
+);
+
+
+CREATE TABLE proyecto_galeria (
+    id UUID PRIMARY KEY,
+    proyecto_slug VARCHAR(200) NOT NULL,
+    url VARCHAR(500) NOT NULL,
+    alt VARCHAR(300),
+    etiqueta VARCHAR(20) NOT NULL,
+    orden INTEGER NOT NULL,
+    activo BOOLEAN NOT NULL,
+    fecha_creacion TIMESTAMP(6) NOT NULL,
+    fecha_actualizacion TIMESTAMP(6) NOT NULL,
+    CONSTRAINT ck_proyecto_galeria_orden CHECK (orden >= 0),
+    CONSTRAINT ck_proyecto_galeria_etiqueta CHECK (etiqueta IN ('ANTES', 'PROCESO', 'FINAL', 'DETALLE'))
 );

@@ -12,6 +12,7 @@ import com.isanorte.constructora_api.repository.FaqRepository;
 import com.isanorte.constructora_api.repository.GarantiaRepository;
 import com.isanorte.constructora_api.repository.MiembroEquipoRepository;
 import com.isanorte.constructora_api.repository.PasoProcesoRepository;
+import com.isanorte.constructora_api.repository.ProyectoGaleriaRepository;
 import com.isanorte.constructora_api.repository.TestimonioRepository;
 import com.isanorte.constructora_api.service.IPublicConfianzaService;
 
@@ -29,6 +30,7 @@ public class PublicConfianzaService implements IPublicConfianzaService {
     private final ClienteMarcaRepository clienteRepository;
     private final GarantiaRepository garantiaRepository;
     private final PasoProcesoRepository pasoRepository;
+    private final ProyectoGaleriaRepository galeriaRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -66,6 +68,10 @@ public class PublicConfianzaService implements IPublicConfianzaService {
                         .toList(),
                 pasoRepository.findByActivoTrueOrderByOrdenAscIdAsc().stream()
                         .map(item -> new PublicConfianzaResponse.Paso(item.getTitulo(), item.getTexto()))
+                        .toList(),
+                galeriaRepository.findByActivoTrueOrderByOrdenAscIdAsc().stream()
+                        .map(item -> new PublicConfianzaResponse.ImagenProyecto(
+                                item.getProyectoSlug(), item.getUrl(), item.getAlt(), item.getEtiqueta()))
                         .toList());
     }
 }
