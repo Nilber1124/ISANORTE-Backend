@@ -53,7 +53,7 @@ Si no se definen `SPRING_DATASOURCE_URL` y `SPRING_DATASOURCE_USERNAME`, la apli
 SPRING_PROFILES_ACTIVE=render
 ```
 
-El perfil escucha en `0.0.0.0` y usa el puerto proporcionado por `PORT`. Flyway ejecuta todas las migraciones, incluidas V13 (catálogos) y V14 (pedidos y direcciones), que crean las tablas que usan las entidades `Catalogo`, `Pedido`, `DetallePedido` y `DireccionCliente`. Los archivos `.env`, `application.properties` y otros perfiles locales quedan excluidos del contexto Docker; solo se permiten expresamente las plantillas seguras `application.example.properties` y `application-render.properties`.
+El perfil escucha en `0.0.0.0` y usa el puerto proporcionado por `PORT`. Flyway ejecuta todas las migraciones (esquema inicial, restricciones de PostgreSQL y datos mínimos), que crean las tablas que usan las entidades `Catalogo`, `Pedido`, `DetallePedido` y `DireccionCliente`. Los archivos `.env`, `application.properties` y otros perfiles locales quedan excluidos del contexto Docker; solo se permiten expresamente las plantillas seguras `application.example.properties` y `application-render.properties`.
 
 ---
 
@@ -84,10 +84,6 @@ La API cuenta con autenticación basada en **JSON Web Tokens (JWT)** y control d
 | `ADMIN_PASSWORD` | `app.auth.initial-password` | **Entre 12 y 72 caracteres** | Contraseña del administrador inicial (hasheada con BCrypt). |
 | `JWT_EXPIRATION` | `app.jwt.expiration` | Formato ISO-8601 (ej: `PT8H`) | Tiempo de validez del token (por defecto 8 horas). |
 | `ADMIN_ROLE` | `app.auth.admin-role` | Nombre de rol (por defecto `ADMINISTRADOR`) | Nombre del rol con permisos administrativos. |
-| `SEED_DEMO_PRODUCTS` | `app.seed.demo-products` | `true` o `false` (por defecto `false`) | Carga solo el catálogo demo de ISADECOR (26 productos). Lo incluye `SEED_DEMO_DATA`. No activar en producción real. |
-| `SEED_DEMO_DATA` | `app.seed.demo-data` | `true` o `false` (por defecto `false`) | Carga completa de datos demo (contenido, catálogo, clientes, cotizaciones, pedidos, reseñas) con imágenes de Cloudinary. Ver "Datos de demostración". |
-| `SEED_DEMO_DATA_CLEAN` | `app.seed.demo-data-clean` | `true` o `false` (por defecto `false`) | Elimina solo lo sembrado por `SEED_DEMO_DATA`. Usar con `SEED_DEMO_DATA=false`. |
-| `SEED_DEMO_CLIENT_PASSWORD` | `app.seed.demo-client-password` | Texto de 8 a 72 caracteres | Contraseña de las cuentas demo de clientes (`*@demo.isanorte.ec`). Si no se define, las cuentas se crean con una clave aleatoria y no pueden iniciar sesión. |
 | `CORS_ALLOWED_ORIGINS` | `cors.allowed-origins` | Lista de orígenes `http://` o `https://` exactos, separados por comas; no admite `*` ni rutas | Frontends autorizados para llamadas desde navegador. |
 | `MULTIPART_MAX_FILE_SIZE` | `spring.servlet.multipart.max-file-size` | Tamaño de Spring (`7MB` por defecto; no superar `8MB` sin evaluación) | Tamaño máximo por archivo subido a Cloudinary. |
 | `MULTIPART_MAX_REQUEST_SIZE` | `spring.servlet.multipart.max-request-size` | Tamaño de Spring (`8MB` por defecto y mayor que el límite de archivo) | Tamaño máximo total de una petición multipart. |
@@ -153,21 +149,20 @@ la carga Cloudinary existente en `POST /api/archivos/subir-imagen`.
 - Son independientes de los administradores: tabla `clientes`, token con rol `CLIENTE` y sin acceso a `/api/**` administrativo.
 - `POST /api/publico/cuenta/registro` exige `aceptaTratamientoDatos: true` y una contraseña de al menos 8 caracteres. Un correo repetido responde `409`.
 - El token expira según `app.jwt.expiration`. Tras expirar, el frontend debe pedir un nuevo inicio de sesión.
-- Migración `V8__create_resenas_producto.sql`: incorpora reseñas persistidas de productos.
-- Migración `V9__cuentas_clientes.sql`: crea `clientes` y agrega `cotizaciones.cliente_id`.
-- Migración `V10__carrito_cliente.sql`: crea `carritos_cliente`, un carrito por cuenta.
-- Migraciones `V13__create_catalogos.sql` y `V14__create_pedidos_direcciones.sql`: incorporan catálogos, inventario, pedidos y direcciones.
+- El esquema inicial (`V1`) incluye las reseñas persistidas de productos.
+- `V1` crea `clientes` y relaciona `cotizaciones.cliente_id`.
+- `V1` crea `carritos_cliente`, un carrito por cuenta.
+- `V1` incorpora catálogos, inventario, pedidos y direcciones.
 
 ### Anuncios públicos
 
 - `GET /api/publico/anuncios/ISANORTE` y `GET /api/publico/anuncios/ISADECOR` no requieren autenticación.
 - Solo retornan anuncios activos, vigentes y destinados al sitio solicitado o a `AMBOS`, ordenados por
   orden de visualización, fecha de creación e identificador.
-- `V11__create_anuncios.sql` crea la tabla, las restricciones de enums y vigencia, y el índice de consulta pública.
+- `V1` crea la tabla de anuncios, las restricciones de enums y vigencia, y el índice de consulta pública.
 - El parámetro opcional `ubicacion` permite consultar `GENERAL`, `CINTA_HOME`,
   `PROMOCION_PRINCIPAL`, `PROMOCION_SECUNDARIA`, `ANUNCIOS_HOME` o `CATEGORIA_SUPERIOR`.
-- `V12__home_isadecor_administrable.sql` amplía anuncios para estas ubicaciones y agrega el orden
-  de productos destacados. Los anuncios del Home forman parte de la carga demo (`SEED_DEMO_DATA=true`).
+- `V1` amplía anuncios para estas ubicaciones y agrega el orden
 
 ### 1. Iniciar Sesión (`Login`)
 Envía una petición `POST` a `/api/auth/login`:
@@ -227,34 +222,12 @@ Administrador inicial creado correctamente.
 Started ConstructoraApiApplication in ... seconds
 ```
 
-### Datos de demostración (opt-in)
+### Datos iniciales y de ejemplo
 
-La carga demo completa el sistema con datos simulados pero realistas, respetando las reglas de negocio
-(totales = suma de líneas sin IVA, stock solo descontado en pedidos no cancelados, seguimientos que coinciden
-con el estado, códigos `COT-/PED-yyyyMMdd-XXXXXXXX`). **Ninguna imagen viaja con la aplicación**: todas son
-URLs de Cloudinary, igual que cuando se suben desde el panel.
-
-Qué carga (en este orden, cada fase es una transacción): sitio y redes; servicios, proyectos y landing
-(se reemplazan las rutas `/images/...` de la migración inicial por URLs de Cloudinary); anuncios y catálogos;
-categorías y 26 productos de ISADECOR (variantes, especificaciones, documentos, cálculo); 12 clientes con
-direcciones y 4 carritos; 15 solicitudes de contacto; 15 cotizaciones y 15 pedidos en todos los estados;
-40 reseñas; roles y permisos de ejemplo. `imagenes_proyecto` ya no existe y los administradores se crean solo
-con `ADMIN_EMAIL`/`ADMIN_PASSWORD`.
-
-1. Generar y subir las imágenes (fuera del repositorio; requiere `CLOUDINARY_*` en el entorno):
-   `python3 generar.py` y `python3 subir.py` (carpeta `demo-cloudinary/` junto a los repositorios; no se versiona). Usan `public_id` fijo con
-   `overwrite=true`, así que se pueden repetir sin duplicar. El script escribe el manifiesto de URLs
-   `src/main/resources/data/demo-manifest.json` (solo texto), que debe estar presente al arrancar.
-2. Activar `SEED_DEMO_DATA=true` (y `SEED_DEMO_CLIENT_PASSWORD`) en el entorno y arrancar. Es idempotente:
-   los ids de las filas nuevas son deterministas y las existentes solo reciben imágenes/textos vacíos.
-3. Desactivar `SEED_DEMO_DATA` después de la carga.
-
-Para eliminar solo lo sembrado: `SEED_DEMO_DATA_CLEAN=true` (con `SEED_DEMO_DATA=false`). No revierte las
-imágenes que se reemplazaron en filas de la migración inicial.
-
-`SEED_DEMO_PRODUCTS=true` carga únicamente el catálogo de `src/main/resources/data/isadecor-demo-products.json`
-(requiere las categorías y el manifiesto). Si falta una categoría o una clave del manifiesto, el arranque
-falla indicando cuál.
+Flyway crea el esquema (`V1`), los índices exclusivos de PostgreSQL (`V2`) y una empresa mínima con su sitio
+`isanorte` y la unidad ISADECOR (`V3`). **No hay seeders ni contenido comercial en el código:** el contenido
+(servicios, proyectos, equipo, preguntas frecuentes, etc.) se carga desde el panel administrativo o con un script
+SQL aparte, y el administrador inicial se crea con `ADMIN_EMAIL`/`ADMIN_PASSWORD`.
 
 ---
 

@@ -1,4 +1,4 @@
--- Esta migración usa índices parciales, una capacidad específica de PostgreSQL.
+-- Índices parciales: capacidad específica de PostgreSQL. Las pruebas con H2 se detienen en V1.
 
 CREATE UNIQUE INDEX uk_unidad_destacada_activa_empresa
     ON unidades_negocio(empresa_id)

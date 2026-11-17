@@ -76,11 +76,12 @@ class DynamicContentPersistenceIntegrationTest {
     @Autowired private SolicitudContactoRepository solicitudContactoRepository;
 
     @Test
-    void flywayAplicaBaselineYEvolucionAntesDeValidarJpa() {
-        assertThat(flyway.info().current().getVersion().getVersion()).startsWith("2");
+    void flywayAplicaElEsquemaInicialAntesDeValidarJpa() {
+        // Las pruebas con H2 se detienen en V1 (V2 y V3 son exclusivas de PostgreSQL).
+        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("1");
         assertThat(flyway.info().applied())
                 .extracting(info -> info.getVersion().getVersion())
-                .contains("1", "2");
+                .containsExactly("1");
     }
 
     @Test
