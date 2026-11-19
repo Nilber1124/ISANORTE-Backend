@@ -128,6 +128,7 @@ La API es stateless y autentica mediante `Authorization: Bearer`; no usa cookies
 - `GET .../productos/{productoSlug}/resenas` y `/resenas/resumen`: Comentarios y estadísticas persistidas.
 - `POST /api/publico/resenas/{resenaId}/util`: Incrementa el contador de utilidad de una reseña.
 - `POST .../productos/{productoSlug}/resenas`: Preparado para la futura autenticación de clientes; actualmente rechaza visitantes y credenciales administrativas.
+- `GET /api/publico/sitios/{clave}/unidades/{unidadSlug}/home`: Home completa de una unidad (hero, cinta, promociones, campaña, secciones «tienda» y «fáciles de instalar» por demanda, servicios y reseñas) en una sola respuesta.
 - `GET /actuator/health`: Chequeo de salud del servicio.
 
 ### Endpoints Protegidos
@@ -233,8 +234,18 @@ Started ConstructoraApiApplication in ... seconds
 
 ### Datos iniciales y de ejemplo
 
-Flyway crea el esquema (`V1`), los índices exclusivos de PostgreSQL (`V2`) y una empresa mínima con su sitio
-`isanorte` y la unidad ISADECOR (`V3`). **No hay seeders ni contenido comercial en el código:** el contenido
+Flyway crea el esquema (`V1`), los índices exclusivos de PostgreSQL (`V2`), una empresa mínima con su sitio
+`isanorte` y la unidad ISADECOR (`V3`) y las tablas de la Home de ISADECOR y del inventario (`V4`). Las
+migraciones comunes están en `db/migration/common/` y las propias de PostgreSQL en `db/migration/postgresql/`
+(los tests con H2 solo ejecutan las comunes, vía `{vendor}`).
+
+**Home de ISADECOR e inventario.** El contenido de la Home (hero, cinta, promociones, campaña, servicios y
+secciones de productos) se administra en `/api/isadecor/{hero|cinta|promociones|campanas|servicios-empresa|servicio-puntos|secciones}`
+y los productos fijados o excluidos de cada sección en `/api/isadecor/secciones/{id}/fijados|excluidos`.
+Las secciones «Elige tu acabado» y «Fáciles de instalar» se ordenan automáticamente por demanda
+(pedidos + cotizaciones en la ventana de días configurada), con modo `AUTOMATICO`, `MANUAL` o `MIXTO`. El stock
+se gestiona por acabado (`PATCH /api/productos/{id}/stock` y `.../variantes/{varianteId}/stock`, historial en
+`GET /api/productos/{id}/movimientos-stock`); los pedidos lo descuentan y la cancelación lo restituye. **No hay seeders ni contenido comercial en el código:** el contenido
 (servicios, proyectos, equipo, preguntas frecuentes, etc.) se carga desde el panel administrativo o con un script
 SQL aparte, y el administrador inicial se crea con `ADMIN_EMAIL`/`ADMIN_PASSWORD`.
 

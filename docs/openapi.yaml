@@ -2372,6 +2372,110 @@ paths:
       responses:
         '200': {description: Contenido de confianza ordenado, content: {application/json: {schema: {type: object, properties: {faqs: {type: array, items: {type: object}}, equipo: {type: array, items: {type: object}}, credenciales: {type: array, items: {type: object}}, testimonios: {type: array, items: {type: object}}, garantias: {type: array, items: {type: object}}, pasos: {type: array, items: {type: object}}, politicas: {type: array, items: {type: object}}}}}}}
         '404': {$ref: '#/components/responses/NotFound'}
+  /api/publico/sitios/{clave}/unidades/{unidadSlug}/home:
+    get:
+      tags: [Público]
+      operationId: obtenerHomeUnidadPublica
+      summary: Home de la unidad (hero, cinta, promociones, campaña, tienda, fáciles de instalar, servicios y reseñas)
+      x-access-intent: PUBLICO
+      parameters:
+        - {name: clave, in: path, required: true, schema: {type: string}}
+        - {name: unidadSlug, in: path, required: true, schema: {type: string}}
+      responses:
+        '200': {description: "Home armada; las secciones sin contenido activo vienen nulas o vacías", content: {application/json: {schema: {type: object, properties: {hero: {type: object, nullable: true}, cinta: {type: array, items: {type: object}}, promociones: {type: array, items: {type: object}}, campana: {type: object, nullable: true}, tienda: {type: object, nullable: true}, facil: {type: object, nullable: true}, servicios: {type: object, nullable: true}, resenas: {type: array, items: {type: object}}}}}}}
+        '404': {$ref: '#/components/responses/NotFound'}
+  /api/productos/{productoId}/stock:
+    patch:
+      tags: [Productos]
+      operationId: ajustarStockProducto
+      summary: Ajusta el stock del producto (ENTRADA, SALIDA o AJUSTE) y registra el movimiento
+      x-access-intent: ADMINISTRATIVO
+      parameters:
+        - {name: productoId, in: path, required: true, schema: {type: string, format: uuid}}
+      requestBody:
+        required: true
+        content: {application/json: {schema: {type: object, required: [tipo, cantidad], properties: {tipo: {type: string, enum: [ENTRADA, SALIDA, AJUSTE]}, cantidad: {type: integer, minimum: 0}, motivo: {type: string}}}}}
+      responses:
+        '200': {description: Stock resultante y estado, content: {application/json: {schema: {type: object}}}}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '404': {$ref: '#/components/responses/NotFound'}
+  /api/productos/{productoId}/variantes/{varianteId}/stock:
+    patch:
+      tags: [Productos]
+      operationId: ajustarStockVariante
+      summary: Ajusta el stock de un acabado (variante) y registra el movimiento
+      x-access-intent: ADMINISTRATIVO
+      parameters:
+        - {name: productoId, in: path, required: true, schema: {type: string, format: uuid}}
+        - {name: varianteId, in: path, required: true, schema: {type: string, format: uuid}}
+      requestBody:
+        required: true
+        content: {application/json: {schema: {type: object, required: [tipo, cantidad], properties: {tipo: {type: string, enum: [ENTRADA, SALIDA, AJUSTE]}, cantidad: {type: integer, minimum: 0}, motivo: {type: string}}}}}
+      responses:
+        '200': {description: Stock resultante y estado, content: {application/json: {schema: {type: object}}}}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '404': {$ref: '#/components/responses/NotFound'}
+  /api/productos/{productoId}/movimientos-stock:
+    get:
+      tags: [Productos]
+      operationId: listarMovimientosStock
+      summary: Historial de movimientos de stock del producto, del más reciente al más antiguo
+      x-access-intent: ADMINISTRATIVO
+      parameters:
+        - {name: productoId, in: path, required: true, schema: {type: string, format: uuid}}
+      responses:
+        '200': {description: Movimientos, content: {application/json: {schema: {type: array, items: {type: object}}}}}
+        '404': {$ref: '#/components/responses/NotFound'}
+  /api/isadecor/secciones/{seccionId}/fijados:
+    get:
+      tags: [Público]
+      operationId: listarFijadosSeccion
+      summary: Productos fijados manualmente en una sección de la Home
+      x-access-intent: ADMINISTRATIVO
+      parameters:
+        - {name: seccionId, in: path, required: true, schema: {type: string, format: uuid}}
+      responses:
+        '200': {description: Productos fijados en orden, content: {application/json: {schema: {type: array, items: {type: object}}}}}
+        '404': {$ref: '#/components/responses/NotFound'}
+    put:
+      tags: [Público]
+      operationId: reemplazarFijadosSeccion
+      summary: Reemplaza la lista ordenada de productos fijados de la sección
+      x-access-intent: ADMINISTRATIVO
+      parameters:
+        - {name: seccionId, in: path, required: true, schema: {type: string, format: uuid}}
+      requestBody:
+        required: true
+        content: {application/json: {schema: {type: object, required: [productoIds], properties: {productoIds: {type: array, items: {type: string, format: uuid}}}}}}
+      responses:
+        '200': {description: Lista resultante, content: {application/json: {schema: {type: array, items: {type: object}}}}}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '404': {$ref: '#/components/responses/NotFound'}
+  /api/isadecor/secciones/{seccionId}/excluidos:
+    get:
+      tags: [Público]
+      operationId: listarExcluidosSeccion
+      summary: Productos excluidos de una sección de la Home
+      x-access-intent: ADMINISTRATIVO
+      parameters:
+        - {name: seccionId, in: path, required: true, schema: {type: string, format: uuid}}
+      responses:
+        '200': {description: Productos excluidos, content: {application/json: {schema: {type: array, items: {type: object}}}}}
+        '404': {$ref: '#/components/responses/NotFound'}
+    put:
+      tags: [Público]
+      operationId: reemplazarExcluidosSeccion
+      summary: Reemplaza la lista de productos excluidos de la sección
+      x-access-intent: ADMINISTRATIVO
+      parameters:
+        - {name: seccionId, in: path, required: true, schema: {type: string, format: uuid}}
+      requestBody:
+        required: true
+        content: {application/json: {schema: {type: object, required: [productoIds], properties: {productoIds: {type: array, items: {type: string, format: uuid}}}}}}
+      responses:
+        '200': {description: Lista resultante, content: {application/json: {schema: {type: array, items: {type: object}}}}}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '404': {$ref: '#/components/responses/NotFound'}
 
 components:
   parameters:
