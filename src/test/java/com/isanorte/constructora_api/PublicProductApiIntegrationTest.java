@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -92,6 +93,7 @@ class PublicProductApiIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].slug").value(related.getSlug()))
                 .andExpect(jsonPath("$[0].calificacionPromedio").value(5.0))
+                .andExpect(jsonPath("$[0].tarjeta.valoracion").value(5.0))
                 .andExpect(jsonPath("$[*].slug", not(hasItem(current.getSlug()))))
                 .andExpect(jsonPath("$[*].slug", hasItem(fallback.getSlug())))
                 .andExpect(jsonPath("$.length()").value(2));
@@ -215,6 +217,10 @@ class PublicProductApiIntegrationTest {
         caro.setDescuentoPorcentaje(new BigDecimal("10.00"));
         caro.setDisponibilidad(EstadoDisponibilidad.DISPONIBLE);
         caro.addCategoria(mural);
+        caro.setModalidad(com.isanorte.constructora_api.enums.ModalidadVenta.COTIZAR);
+        caro.setFacilInstalacion(true);
+        caro.addVariante(VarianteProducto.builder().sku("PREMIUM-NOGAL").nombre("Nogal claro")
+                .colorHex("#755C44").stockActual(0).build());
         productoRepository.saveAndFlush(caro);
 
         Producto sinPrecio = product(unit, "panel-a-consultar", EstadoPublicacion.PUBLICADO);
@@ -232,6 +238,25 @@ class PublicProductApiIntegrationTest {
                 .andExpect(jsonPath("$.productos.totalElementos").value(3))
                 .andExpect(jsonPath("$.productos.totalPaginas").value(3))
                 .andExpect(jsonPath("$.productos.pagina").value(0));
+
+        mockMvc.perform(get(basePath, site.getClave(), unit.getSlug())
+                        .param("modalidad", "COTIZAR").param("facilInstalacion", "true")
+                        .param("precioMin", "500").param("precioMax", "500").param("acabado", "NOGAL"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.precioMinimo").value(15))
+                .andExpect(jsonPath("$.precioMaximo").value(500))
+                .andExpect(jsonPath("$.productos.contenido.length()").value(1))
+                .andExpect(jsonPath("$.productos.contenido[0].modalidad").value("COTIZAR"))
+                .andExpect(jsonPath("$.productos.contenido[0].facilInstalacion").value(true))
+                .andExpect(jsonPath("$.productos.contenido[0].acabados[0].colorHex").value("#755C44"))
+                .andExpect(jsonPath("$.productos.contenido[0].acabados[0].agotado").value(true))
+                .andExpect(jsonPath("$.productos.contenido[0].estadoStock").value("AGOTADO"));
+
+        for (String[] limites : List.of(new String[] {"-1", "30"}, new String[] {"30", "29"})) {
+            mockMvc.perform(get(basePath, site.getClave(), unit.getSlug())
+                            .param("precioMin", limites[0]).param("precioMax", limites[1]))
+                    .andExpect(status().isBadRequest());
+        }
 
         // Precio ascendente con nulls al final.
         mockMvc.perform(get(basePath, site.getClave(), unit.getSlug())

@@ -20,7 +20,7 @@ class IsadecorHomeControllerTest {
 
     @Test
     void findHomeDelegaYDevuelveOk() {
-        var home = new IsadecorHomeResponse(null, List.of(), List.of(), null, null, null, null, List.of());
+        var home = new IsadecorHomeResponse(null, List.of(), List.of(), null, null, null, null, List.of(), List.of());
         when(service.findHome("isanorte", "isadecor")).thenReturn(home);
 
         var response = controller.findHome("isanorte", "isadecor");

@@ -22,18 +22,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.isanorte.constructora_api.enums.ClaveSeccionProductos;
 import com.isanorte.constructora_api.enums.EstadoDisponibilidad;
-import com.isanorte.constructora_api.enums.EstadoStock;
 import com.isanorte.constructora_api.enums.ModoSeccionProductos;
 import com.isanorte.constructora_api.exception.ModelNotFoundException;
 import com.isanorte.constructora_api.model.ConfiguracionSitio;
 import com.isanorte.constructora_api.model.Empresa;
-import com.isanorte.constructora_api.model.ImagenProducto;
 import com.isanorte.constructora_api.model.IsadecorSeccionExcluido;
 import com.isanorte.constructora_api.model.IsadecorSeccionFijado;
 import com.isanorte.constructora_api.model.IsadecorSeccionProductos;
 import com.isanorte.constructora_api.model.Producto;
 import com.isanorte.constructora_api.model.UnidadNegocio;
-import com.isanorte.constructora_api.model.VarianteProducto;
 import com.isanorte.constructora_api.repository.ConfiguracionSitioRepository;
 import com.isanorte.constructora_api.repository.CotizacionRepository;
 import com.isanorte.constructora_api.repository.IsadecorCampanaRepository;
@@ -43,6 +40,7 @@ import com.isanorte.constructora_api.repository.IsadecorPromocionRepository;
 import com.isanorte.constructora_api.repository.IsadecorSeccionExcluidoRepository;
 import com.isanorte.constructora_api.repository.IsadecorSeccionFijadoRepository;
 import com.isanorte.constructora_api.repository.IsadecorSeccionProductosRepository;
+import com.isanorte.constructora_api.repository.IsadecorPublicacionRepository;
 import com.isanorte.constructora_api.repository.IsadecorServicioEmpresaRepository;
 import com.isanorte.constructora_api.repository.IsadecorServicioPuntoRepository;
 import com.isanorte.constructora_api.repository.PedidoRepository;
@@ -50,7 +48,6 @@ import com.isanorte.constructora_api.repository.ProductoRepository;
 import com.isanorte.constructora_api.repository.ResenaProductoRepository;
 import com.isanorte.constructora_api.repository.UnidadNegocioRepository;
 import com.isanorte.constructora_api.repository.projection.DemandaProducto;
-import com.isanorte.constructora_api.repository.projection.ResumenResena;
 
 @ExtendWith(MockitoExtension.class)
 class IsadecorHomeServiceTest {
@@ -70,6 +67,7 @@ class IsadecorHomeServiceTest {
     @Mock private PedidoRepository pedidoRepository;
     @Mock private CotizacionRepository cotizacionRepository;
     @Mock private ResenaProductoRepository resenaRepository;
+    @Mock private IsadecorPublicacionRepository publicacionRepository;
     @InjectMocks private IsadecorHomeService service;
 
     private final UUID unitId = UUID.randomUUID();
@@ -189,42 +187,6 @@ class IsadecorHomeServiceTest {
     }
 
     @Test
-    void cardIncluyeImagenPrincipalAcabadosValoracionYStock() {
-        Producto p = producto("Panel", false);
-        p.setStockMinimo(5);
-        p.getImagenes().add(ImagenProducto.builder().url("secundaria.webp").esPrincipal(false).orden(0).build());
-        p.getImagenes().add(ImagenProducto.builder().url("principal.webp").altText("alt").esPrincipal(true).orden(3).build());
-        p.getVariantes().add(VarianteProducto.builder().nombre("Roble").colorHex("#caa").stockActual(3).orden(0).build());
-        p.getVariantes().add(VarianteProducto.builder().nombre("Nogal").stockActual(0).orden(1).build());
-        ResumenResena resumen = new ResumenResena() {
-            @Override public UUID getProductoId() { return p.getId(); }
-            @Override public Double getPromedio() { return 4.5; }
-            @Override public Long getCantidad() { return 2L; }
-        };
-
-        var card = service.card(p, Map.of(p.getId(), resumen));
-
-        assertEquals("principal.webp", card.imagen().url());
-        assertEquals(2, card.acabados().size());
-        assertEquals(false, card.acabados().get(0).agotado());
-        assertEquals(true, card.acabados().get(1).agotado());
-        assertEquals(4.5, card.valoracion());
-        assertEquals(2L, card.resenasCantidad());
-        assertEquals(EstadoStock.QUEDAN, card.estadoStock());
-        assertEquals(3, card.quedan());
-    }
-
-    @Test
-    void cardSinImagenNiResenasNoFalla() {
-        var card = service.card(producto("Solo", false), Map.of());
-
-        assertNull(card.imagen());
-        assertNull(card.valoracion());
-        assertEquals(0L, card.resenasCantidad());
-        assertNull(card.quedan());
-    }
-
-    @Test
     void findHomeVacioDevuelveSeccionesNulasYListasVacias() {
         var empresa = Empresa.builder().id(UUID.randomUUID()).build();
         var site = ConfiguracionSitio.builder().empresa(empresa).build();
@@ -254,6 +216,7 @@ class IsadecorHomeServiceTest {
         assertTrue(home.cinta().isEmpty());
         assertTrue(home.promociones().isEmpty());
         assertTrue(home.resenas().isEmpty());
+        assertTrue(home.comunidad().isEmpty());
     }
 
     @Test

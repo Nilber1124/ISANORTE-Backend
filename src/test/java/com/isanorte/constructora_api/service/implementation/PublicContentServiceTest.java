@@ -103,7 +103,7 @@ class PublicContentServiceTest {
         when(productoRepository.findByIdIn(List.of(producto.getId()))).thenReturn(List.of(producto));
         PublicProductCardResponse card = new PublicProductCardResponse(
                 "Panel", "SKU-1", "panel", null, "Descripción", null, null, null, null, false, 0, false, null,
-                List.of());
+                List.of(), null, null, null, null, 0L, List.of(), null, null, false);
         when(publicProductMapper.toCard(any(), any(), any())).thenReturn(card);
         List<PublicProductCatalogCategoryResponse> facet = List.of(
                 new PublicProductCatalogCategoryResponse("Muros", "muros", 3L));
@@ -120,12 +120,15 @@ class PublicContentServiceTest {
         assertEquals(0, response.productos().pagina());
         assertEquals(1, response.productos().totalElementos());
         assertEquals(1, response.productos().totalPaginas());
+        verify(productoRepository).fetchVariantes(List.of(producto.getId()));
+        verify(resenaProductoRepository).resumenPorProductos(List.of(producto.getId()));
         verify(productoRepository).findAll(any(Specification.class), any(Pageable.class));
         verify(productoRepository, never()).findByUnidadNegocioIdAndEstadoOrderByNombreAscIdAsc(any(), any());
     }
 
     private PublicProductCatalogQuery catalogQuery(int page, int size) {
         return new PublicProductCatalogQuery(
-                page, size, null, null, false, false, false, OrdenCatalogoProducto.DESTACADOS);
+                page, size, null, null, false, false, false, OrdenCatalogoProducto.DESTACADOS,
+                null, null, null, null, null);
     }
 }

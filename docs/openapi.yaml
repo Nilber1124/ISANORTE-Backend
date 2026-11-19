@@ -1713,7 +1713,20 @@ paths:
       parameters:
         - {name: clave, in: path, required: true, schema: {type: string}}
         - {name: unidadSlug, in: path, required: true, schema: {type: string}}
-      responses: {'200': {description: Catálogo de productos públicos de la unidad, posiblemente vacío, content: {application/json: {schema: {$ref: '#/components/schemas/PublicProductCatalogResponse'}}}}, '404': {$ref: '#/components/responses/NotFound'}}
+        - {name: page, in: query, schema: {type: integer, minimum: 0, default: 0}}
+        - {name: size, in: query, schema: {type: integer, minimum: 1, maximum: 48, default: 12}}
+        - {name: categoria, in: query, schema: {type: string}}
+        - {name: q, in: query, schema: {type: string}}
+        - {name: soloDescuento, in: query, schema: {type: boolean}}
+        - {name: soloDisponible, in: query, schema: {type: boolean}}
+        - {name: soloDestacados, in: query, schema: {type: boolean}}
+        - {name: orden, in: query, schema: {type: string, enum: [DESTACADOS, PRECIO_ASC, PRECIO_DESC, NOMBRE_ASC]}}
+        - {name: modalidad, in: query, schema: {type: string, enum: [COMPRAR, COTIZAR]}}
+        - {name: facilInstalacion, in: query, schema: {type: boolean}}
+        - {name: precioMin, in: query, schema: {type: number, minimum: 0}}
+        - {name: precioMax, in: query, schema: {type: number, minimum: 0}, description: Mayor o igual a precioMin cuando se envían ambos.}
+        - {name: acabado, in: query, schema: {type: string}, description: Coincidencia parcial por nombre sin distinguir mayúsculas.}
+      responses: {'200': {description: Catálogo de productos públicos de la unidad, posiblemente vacío, content: {application/json: {schema: {$ref: '#/components/schemas/PublicProductCatalogResponse'}}}}, '400': {$ref: '#/components/responses/BadRequest'}, '404': {$ref: '#/components/responses/NotFound'}}
   /api/publico/sitios/{clave}/unidades/{unidadSlug}/productos/{productoSlug}:
     get:
       tags: [Público]
@@ -2382,7 +2395,7 @@ paths:
         - {name: clave, in: path, required: true, schema: {type: string}}
         - {name: unidadSlug, in: path, required: true, schema: {type: string}}
       responses:
-        '200': {description: "Home armada; las secciones sin contenido activo vienen nulas o vacías", content: {application/json: {schema: {type: object, properties: {hero: {type: object, nullable: true}, cinta: {type: array, items: {type: object}}, promociones: {type: array, items: {type: object}}, campana: {type: object, nullable: true}, tienda: {type: object, nullable: true}, facil: {type: object, nullable: true}, servicios: {type: object, nullable: true}, resenas: {type: array, items: {type: object}}}}}}}
+        '200': {description: "Home armada; las secciones sin contenido activo vienen nulas o vacías", content: {application/json: {schema: {type: object, properties: {hero: {type: object, nullable: true}, cinta: {type: array, items: {type: object}}, promociones: {type: array, items: {type: object}}, campana: {type: object, nullable: true}, tienda: {type: object, nullable: true}, facil: {type: object, nullable: true}, servicios: {type: object, nullable: true}, resenas: {type: array, items: {type: object}}, comunidad: {type: array, items: {type: object}}}}}}}
         '404': {$ref: '#/components/responses/NotFound'}
   /api/productos/{productoId}/stock:
     patch:
@@ -2498,6 +2511,87 @@ paths:
       responses:
         '200': {description: Reseña actualizada, content: {application/json: {schema: {type: object}}}}
         '400': {$ref: '#/components/responses/BadRequest'}
+        '404': {$ref: '#/components/responses/NotFound'}
+  /api/publico/sitios/{clave}/unidades/{unidadSlug}/comunidad:
+    get:
+      tags: [Público]
+      operationId: obtenerComunidadUnidadPublica
+      summary: Videos de redes sociales activos de la unidad (máximo 24)
+      x-access-intent: PUBLICO
+      parameters:
+        - {name: clave, in: path, required: true, schema: {type: string}}
+        - {name: unidadSlug, in: path, required: true, schema: {type: string}}
+      responses:
+        '200': {description: "Publicaciones con red (INSTAGRAM o TIKTOK), url, titulo y miniaturaUrl", content: {application/json: {schema: {type: array, items: {type: object}}}}}
+        '404': {$ref: '#/components/responses/NotFound'}
+  /api/isadecor/publicaciones:
+    get:
+      tags: [Público]
+      operationId: listarPublicacionesAdmin
+      summary: Videos de redes sociales de la tienda
+      x-access-intent: ADMINISTRATIVO
+      responses:
+        '200': {description: Publicaciones, content: {application/json: {schema: {type: array, items: {type: object}}}}}
+    post:
+      tags: [Público]
+      operationId: crearPublicacion
+      summary: Registra un video por su enlace; el título y la miniatura se obtienen de la red si faltan
+      x-access-intent: ADMINISTRATIVO
+      requestBody:
+        required: true
+        content: {application/json: {schema: {type: object, required: [unidadNegocioId, red, url, orden, activo], properties: {unidadNegocioId: {type: string, format: uuid}, red: {type: string, enum: [INSTAGRAM, TIKTOK]}, url: {type: string, description: "Enlace https de una publicación o reel (no el perfil)"}, titulo: {type: string}, miniaturaUrl: {type: string}, orden: {type: integer, minimum: 0}, activo: {type: boolean}}}}}
+      responses:
+        '201': {description: Publicación creada, content: {application/json: {schema: {type: object}}}}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '409': {description: La publicación ya está registrada}
+  /api/isadecor/publicaciones/{id}:
+    get:
+      tags: [Público]
+      operationId: obtenerPublicacion
+      summary: Detalle de un video
+      x-access-intent: ADMINISTRATIVO
+      parameters:
+        - $ref: '#/components/parameters/UuidId'
+      responses:
+        '200': {description: Publicación, content: {application/json: {schema: {type: object}}}}
+        '404': {$ref: '#/components/responses/NotFound'}
+    put:
+      tags: [Público]
+      operationId: actualizarPublicacion
+      summary: Actualiza un video; si cambia el enlace se vuelven a obtener título y miniatura
+      x-access-intent: ADMINISTRATIVO
+      parameters:
+        - $ref: '#/components/parameters/UuidId'
+      requestBody:
+        required: true
+        content: {application/json: {schema: {type: object}}}
+      responses:
+        '200': {description: Publicación actualizada, content: {application/json: {schema: {type: object}}}}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '404': {$ref: '#/components/responses/NotFound'}
+    delete:
+      tags: [Público]
+      operationId: eliminarPublicacion
+      summary: Elimina un video
+      x-access-intent: ADMINISTRATIVO
+      parameters:
+        - $ref: '#/components/parameters/UuidId'
+      responses:
+        '204': {description: Eliminada}
+        '404': {$ref: '#/components/responses/NotFound'}
+  /api/isadecor/publicaciones/{id}/activo:
+    patch:
+      tags: [Público]
+      operationId: cambiarActivoPublicacion
+      summary: Muestra u oculta un video
+      x-access-intent: ADMINISTRATIVO
+      parameters:
+        - $ref: '#/components/parameters/UuidId'
+      requestBody:
+        required: true
+        content: {application/json: {schema: {type: object, required: [activo], properties: {activo: {type: boolean}}}}}
+      responses:
+        '200': {description: Publicación actualizada, content: {application/json: {schema: {type: object}}}}
         '404': {$ref: '#/components/responses/NotFound'}
 
 components:
@@ -4124,10 +4218,22 @@ components:
         unidad: {$ref: '#/components/schemas/PublicProductCatalogUnitResponse'}
         categorias:
           type: array
-          items: {$ref: '#/components/schemas/PublicProductCategoryResponse'}
+          items:
+            allOf:
+              - {$ref: '#/components/schemas/PublicProductCategoryResponse'}
+              - type: object
+                properties:
+                  cantidad: {type: integer, format: int64, minimum: 0}
         productos:
-          type: array
-          items: {$ref: '#/components/schemas/PublicProductCardResponse'}
+          type: object
+          properties:
+            contenido: {type: array, items: {$ref: '#/components/schemas/PublicProductCardResponse'}}
+            pagina: {type: integer}
+            tamano: {type: integer}
+            totalElementos: {type: integer, format: int64}
+            totalPaginas: {type: integer}
+        precioMinimo: {type: number, nullable: true, description: Mínimo de todos los productos publicados de la unidad}
+        precioMaximo: {type: number, nullable: true, description: Máximo de todos los productos publicados de la unidad}
     PublicProductCatalogUnitResponse:
       type: object
       required: [nombre, slug]
@@ -4156,6 +4262,22 @@ components:
         categorias:
           type: array
           items: {$ref: '#/components/schemas/PublicProductCategoryResponse'}
+        modalidad: {type: string, enum: [COMPRAR, COTIZAR], nullable: true}
+        unidadVenta: {type: string, enum: [M2, UNIDAD, CAJA, ML], nullable: true}
+        plazoEntrega: {type: string, nullable: true}
+        facilInstalacion: {type: boolean, nullable: true}
+        estadoStock: {type: string, enum: [DISPONIBLE, QUEDAN, AGOTADO, SIN_CONTROL]}
+        quedan: {type: integer, nullable: true}
+        valoracion: {type: number, multipleOf: 0.1, nullable: true}
+        resenasCantidad: {type: integer, format: int64}
+        acabados:
+          type: array
+          items:
+            type: object
+            properties:
+              nombre: {type: string}
+              colorHex: {type: string, nullable: true}
+              agotado: {type: boolean}
     PublicProductDetailResponse:
       type: object
       required: [nombre, sku, slug, descripcion, disponibilidad, categorias, imagenes, variantes, especificaciones, documentos]
@@ -4190,6 +4312,14 @@ components:
         configuracionCalculo:
           allOf: [{$ref: '#/components/schemas/PublicProductCalculationResponse'}]
           nullable: true
+        modalidad: {type: string, enum: [COMPRAR, COTIZAR], nullable: true}
+        unidadVenta: {type: string, enum: [M2, UNIDAD, CAJA, ML], nullable: true}
+        plazoEntrega: {type: string, nullable: true}
+        facilInstalacion: {type: boolean, nullable: true}
+        estadoStock: {type: string, enum: [DISPONIBLE, QUEDAN, AGOTADO, SIN_CONTROL]}
+        quedan: {type: integer, nullable: true}
+        valoracion: {type: number, multipleOf: 0.1, nullable: true}
+        resenasCantidad: {type: integer, format: int64}
     ProductoRecomendadoResponse:
       type: object
       required: [nombre, slug, cantidadResenas]
@@ -4201,6 +4331,40 @@ components:
         categoria: {allOf: [{$ref: '#/components/schemas/PublicProductCategoryResponse'}], nullable: true}
         calificacionPromedio: {type: number, format: decimal, nullable: true}
         cantidadResenas: {type: integer, format: int64, minimum: 0}
+        tarjeta: {$ref: '#/components/schemas/IsadecorProductTileResponse'}
+    IsadecorProductTileResponse:
+      type: object
+      description: Proyección de tarjeta usada por el Home de ISADECOR y las recomendaciones.
+      properties:
+        slug: {type: string}
+        nombre: {type: string}
+        categorias:
+          type: array
+          items: {$ref: '#/components/schemas/PublicProductCategoryResponse'}
+        imagen:
+          type: object
+          nullable: true
+          properties:
+            url: {type: string}
+            alt: {type: string, nullable: true}
+        precioBase: {type: number, nullable: true}
+        precioAnterior: {type: number, nullable: true}
+        descuentoPorcentaje: {type: number, nullable: true}
+        modalidad: {type: string, enum: [COMPRAR, COTIZAR]}
+        unidadVenta: {type: string, enum: [M2, UNIDAD, CAJA, ML]}
+        plazoEntrega: {type: string, nullable: true}
+        valoracion: {type: number, multipleOf: 0.1, nullable: true}
+        resenasCantidad: {type: integer, format: int64}
+        estadoStock: {type: string, enum: [DISPONIBLE, QUEDAN, AGOTADO, SIN_CONTROL]}
+        quedan: {type: integer, nullable: true}
+        acabados:
+          type: array
+          items:
+            type: object
+            properties:
+              nombre: {type: string}
+              colorHex: {type: string, nullable: true}
+              agotado: {type: boolean}
     ResenaProductoResponse:
       type: object
       required: [id, nombreCliente, calificacion, comentario, fechaCreacion, compraVerificada, cantidadUtil]
@@ -4264,6 +4428,9 @@ components:
         disponible: {type: boolean}
         imagenUrl: {type: string, nullable: true}
         orden: {type: integer, format: int32}
+        colorHex: {type: string, nullable: true}
+        agotado: {type: boolean}
+        quedan: {type: integer, nullable: true, description: Stock bajo según el umbral del producto}
     PublicProductSpecificationResponse:
       type: object
       required: [clave, valor, orden]

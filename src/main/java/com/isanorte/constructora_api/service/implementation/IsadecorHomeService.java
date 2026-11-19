@@ -1,9 +1,10 @@
 package com.isanorte.constructora_api.service.implementation;
 
+import static com.isanorte.constructora_api.mapper.ProductoCardAssembler.card;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -17,13 +18,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.isanorte.constructora_api.dto.response.IsadecorHomeResponse;
-import com.isanorte.constructora_api.dto.response.IsadecorHomeResponse.Acabado;
 import com.isanorte.constructora_api.dto.response.IsadecorHomeResponse.Campana;
-import com.isanorte.constructora_api.dto.response.IsadecorHomeResponse.Categoria;
 import com.isanorte.constructora_api.dto.response.IsadecorHomeResponse.Cinta;
 import com.isanorte.constructora_api.dto.response.IsadecorHomeResponse.Hero;
-import com.isanorte.constructora_api.dto.response.IsadecorHomeResponse.Imagen;
-import com.isanorte.constructora_api.dto.response.IsadecorHomeResponse.ProductoCard;
 import com.isanorte.constructora_api.dto.response.IsadecorHomeResponse.Promocion;
 import com.isanorte.constructora_api.dto.response.IsadecorHomeResponse.Resena;
 import com.isanorte.constructora_api.dto.response.IsadecorHomeResponse.SeccionProductos;
@@ -31,15 +28,12 @@ import com.isanorte.constructora_api.dto.response.IsadecorHomeResponse.Servicios
 import com.isanorte.constructora_api.enums.ClaveSeccionProductos;
 import com.isanorte.constructora_api.enums.EstadoDisponibilidad;
 import com.isanorte.constructora_api.enums.EstadoPublicacion;
-import com.isanorte.constructora_api.enums.EstadoStock;
 import com.isanorte.constructora_api.exception.ModelNotFoundException;
-import com.isanorte.constructora_api.model.ImagenProducto;
 import com.isanorte.constructora_api.model.IsadecorSeccionExcluido;
 import com.isanorte.constructora_api.model.IsadecorSeccionFijado;
 import com.isanorte.constructora_api.model.IsadecorSeccionProductos;
 import com.isanorte.constructora_api.model.Producto;
 import com.isanorte.constructora_api.model.UnidadNegocio;
-import com.isanorte.constructora_api.model.VarianteProducto;
 import com.isanorte.constructora_api.repository.CotizacionRepository;
 import com.isanorte.constructora_api.repository.ConfiguracionSitioRepository;
 import com.isanorte.constructora_api.repository.IsadecorCampanaRepository;
@@ -49,6 +43,7 @@ import com.isanorte.constructora_api.repository.IsadecorPromocionRepository;
 import com.isanorte.constructora_api.repository.IsadecorSeccionExcluidoRepository;
 import com.isanorte.constructora_api.repository.IsadecorSeccionFijadoRepository;
 import com.isanorte.constructora_api.repository.IsadecorSeccionProductosRepository;
+import com.isanorte.constructora_api.repository.IsadecorPublicacionRepository;
 import com.isanorte.constructora_api.repository.IsadecorServicioEmpresaRepository;
 import com.isanorte.constructora_api.repository.IsadecorServicioPuntoRepository;
 import com.isanorte.constructora_api.repository.PedidoRepository;
@@ -59,7 +54,6 @@ import com.isanorte.constructora_api.repository.projection.DemandaProducto;
 import com.isanorte.constructora_api.repository.projection.ResumenResena;
 import com.isanorte.constructora_api.service.IIsadecorHomeService;
 import com.isanorte.constructora_api.util.BusinessTime;
-import com.isanorte.constructora_api.util.DisponibilidadStock;
 
 import lombok.RequiredArgsConstructor;
 
@@ -70,6 +64,7 @@ public class IsadecorHomeService implements IIsadecorHomeService {
 
     static final int MAX_PROMOCIONES = 3;
     static final int MAX_RESENAS = 6;
+    static final int MAX_COMUNIDAD_HOME = 4;
 
     private final ConfiguracionSitioRepository configuracionRepository;
     private final UnidadNegocioRepository unidadRepository;
@@ -86,6 +81,7 @@ public class IsadecorHomeService implements IIsadecorHomeService {
     private final PedidoRepository pedidoRepository;
     private final CotizacionRepository cotizacionRepository;
     private final ResenaProductoRepository resenaRepository;
+    private final IsadecorPublicacionRepository publicacionRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -155,7 +151,14 @@ public class IsadecorHomeService implements IIsadecorHomeService {
                         r.getCompraVerificada(), r.getProducto().getNombre(), r.getProducto().getSlug()))
                 .toList();
 
-        return new IsadecorHomeResponse(hero, cinta, promociones, campana, tienda, facil, servicios, resenas);
+        List<IsadecorHomeResponse.Publicacion> comunidad = publicacionRepository
+                .findByUnidadNegocioIdAndActivoTrueOrderByOrdenAscFechaCreacionDescIdAsc(unitId).stream()
+                .limit(MAX_COMUNIDAD_HOME)
+                .map(p -> new IsadecorHomeResponse.Publicacion(p.getRed(), p.getUrl(), p.getTitulo(), p.getMiniaturaUrl()))
+                .toList();
+
+        return new IsadecorHomeResponse(hero, cinta, promociones, campana, tienda, facil, servicios, resenas,
+                comunidad);
     }
 
     private record IsadecorPromocionView(com.isanorte.constructora_api.enums.TipoPromocion tipo, String titulo,
@@ -234,28 +237,4 @@ public class IsadecorHomeService implements IIsadecorHomeService {
                 .orElse(null);
     }
 
-    ProductoCard card(Producto p, Map<UUID, ResumenResena> resumenes) {
-        ImagenProducto img = p.getImagenes().stream()
-                .sorted(Comparator.comparing((ImagenProducto i) -> !Boolean.TRUE.equals(i.getEsPrincipal()))
-                        .thenComparing(i -> i.getOrden() == null ? 0 : i.getOrden()))
-                .findFirst().orElse(null);
-        List<Categoria> categorias = p.getCategorias().stream()
-                .sorted(Comparator.comparing(c -> c.getNombre()))
-                .map(c -> new Categoria(c.getNombre(), c.getSlug())).toList();
-        Collection<VarianteProducto> variantes = p.getVariantes();
-        List<Acabado> acabados = variantes.stream()
-                .sorted(Comparator.comparing(v -> v.getOrden() == null ? 0 : v.getOrden()))
-                .map(v -> new Acabado(v.getNombre(), v.getColorHex(),
-                        v.getStockActual() != null && v.getStockActual() <= 0))
-                .toList();
-        ResumenResena r = resumenes.get(p.getId());
-        var stock = DisponibilidadStock.resumen(p);
-        Integer quedan = stock.estado() == EstadoStock.QUEDAN ? stock.quedan() : null;
-        return new ProductoCard(p.getSlug(), p.getNombre(), categorias,
-                img == null ? null : new Imagen(img.getUrl(), img.getAltText()),
-                p.getPrecioBase(), p.getPrecioAnterior(), p.getDescuentoPorcentaje(),
-                p.getUnidadVenta(), p.getModalidad(), p.getPlazoEntrega(),
-                r == null ? null : r.getPromedio(), r == null ? 0L : r.getCantidad(),
-                acabados, stock.estado(), quedan);
-    }
 }

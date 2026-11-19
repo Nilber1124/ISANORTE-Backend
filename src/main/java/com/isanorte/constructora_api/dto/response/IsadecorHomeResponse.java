@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.isanorte.constructora_api.enums.EstadoStock;
 import com.isanorte.constructora_api.enums.ModalidadVenta;
+import com.isanorte.constructora_api.enums.RedPublicacion;
 import com.isanorte.constructora_api.enums.TipoPromocion;
 import com.isanorte.constructora_api.enums.UnidadVenta;
 
@@ -18,7 +19,8 @@ public record IsadecorHomeResponse(
         SeccionProductos tienda,
         SeccionProductos facil,
         Servicios servicios,
-        List<Resena> resenas) {
+        List<Resena> resenas,
+        List<Publicacion> comunidad) {
 
     public record Hero(String titulo, String subtitulo) {
     }
@@ -40,6 +42,10 @@ public record IsadecorHomeResponse(
 
     public record Resena(String nombreCliente, Integer calificacion, String comentario, Boolean compraVerificada,
             String productoNombre, String productoSlug) {
+    }
+
+    /** Video de una red social; `red` es INSTAGRAM o TIKTOK. */
+    public record Publicacion(RedPublicacion red, String url, String titulo, String miniaturaUrl) {
     }
 
     public record Categoria(String nombre, String slug) {

@@ -2,7 +2,6 @@ package com.isanorte.constructora_api.service.implementation;
 
 import java.util.Comparator;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.LinkedHashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -58,6 +57,7 @@ import com.isanorte.constructora_api.model.SeoPagina;
 import com.isanorte.constructora_api.model.UnidadNegocio;
 import com.isanorte.constructora_api.model.VarianteProducto;
 import com.isanorte.constructora_api.mapper.PublicProductMapper;
+import com.isanorte.constructora_api.mapper.ProductoCardAssembler;
 import com.isanorte.constructora_api.repository.CategoriaProductoRepository;
 import com.isanorte.constructora_api.repository.ConfiguracionSitioRepository;
 import com.isanorte.constructora_api.repository.ContenidoPaginaRepository;
@@ -70,6 +70,7 @@ import com.isanorte.constructora_api.repository.SeccionLandingRepository;
 import com.isanorte.constructora_api.repository.SeoPaginaRepository;
 import com.isanorte.constructora_api.repository.ServicioRepository;
 import com.isanorte.constructora_api.repository.UnidadNegocioRepository;
+import com.isanorte.constructora_api.repository.projection.ResumenResena;
 import com.isanorte.constructora_api.repository.specification.ProductoCatalogSpecifications;
 import com.isanorte.constructora_api.service.IPublicContentService;
 
@@ -268,31 +269,46 @@ public class PublicContentService implements IPublicContentService {
                 .and(ProductoCatalogSpecifications.soloDescuento(query.soloDescuento()))
                 .and(ProductoCatalogSpecifications.soloDisponible(query.soloDisponible()))
                 .and(ProductoCatalogSpecifications.soloDestacados(query.soloDestacados()))
+                .and(ProductoCatalogSpecifications.modalidad(query.modalidad()))
+                .and(ProductoCatalogSpecifications.facilInstalacion(query.facilInstalacion()))
+                .and(ProductoCatalogSpecifications.rangoPrecio(query.precioMin(), query.precioMax()))
+                .and(ProductoCatalogSpecifications.acabado(query.acabado()))
                 .and(ProductoCatalogSpecifications.ordenadoPor(query.orden()));
 
         Page<Producto> productPage = productoRepository.findAll(
                 spec, PageRequest.of(query.page(), query.size(), Sort.unsorted()));
         List<UUID> orderedIds = productPage.getContent().stream().map(Producto::getId).toList();
 
-        Map<UUID, Producto> hydratedById = productoRepository.findByIdIn(orderedIds).stream()
+        List<Producto> hydrated = orderedIds.isEmpty() ? List.of() : productoRepository.findByIdIn(orderedIds);
+        if (!orderedIds.isEmpty()) {
+            productoRepository.fetchVariantes(orderedIds);
+        }
+        Map<UUID, ResumenResena> reviews = reviewSummaries(orderedIds);
+        Map<UUID, Producto> hydratedById = hydrated.stream()
                 .collect(Collectors.toMap(Producto::getId, Function.identity(), (a, b) -> a, LinkedHashMap::new));
         List<PublicProductCardResponse> cards = orderedIds.stream()
                 .map(hydratedById::get)
                 .map(product -> publicProductMapper.toCard(
                         product,
-                        primaryImage(product),
-                        publicCategories(product, unit).stream().map(publicProductMapper::toCategory).toList()))
+                        publicCategories(product, unit).stream().map(publicProductMapper::toCategory).toList(), reviews))
                 .toList();
 
         List<PublicProductCatalogCategoryResponse> categories = categoriaProductoRepository
                 .findPublicCategoryCounts(unit.getId(), EstadoPublicacion.PUBLICADO);
 
+        var range = productoRepository.rangoPrecios(unit.getId(), EstadoPublicacion.PUBLICADO);
         return new PublicProductCatalogResponse(
                 new PublicProductCatalogResponse.Unidad(unit.getNombre(), unit.getSlug()),
                 categories,
                 new PublicProductCatalogResponse.Pagina(
                         cards, productPage.getNumber(), productPage.getSize(),
-                        productPage.getTotalElements(), productPage.getTotalPages()));
+                        productPage.getTotalElements(), productPage.getTotalPages()),
+                range == null ? null : range.getPrecioMinimo(), range == null ? null : range.getPrecioMaximo());
+    }
+
+    private Map<UUID, ResumenResena> reviewSummaries(List<UUID> ids) {
+        return ids.isEmpty() ? Map.of() : resenaProductoRepository.resumenPorProductos(ids).stream()
+                .collect(Collectors.toMap(ResumenResena::getProductoId, Function.identity()));
     }
 
     private void validateCatalogPagination(int page, int size) {
@@ -325,10 +341,11 @@ public class PublicContentService implements IPublicContentService {
                 product,
                 publicCategories(product, unit).stream().map(publicProductMapper::toCategory).toList(),
                 product.getImagenes().stream().sorted(PRODUCT_IMAGE_ORDER).map(publicProductMapper::toImage).toList(),
-                product.getVariantes().stream().sorted(PRODUCT_VARIANT_ORDER).map(publicProductMapper::toVariant).toList(),
+                product.getVariantes().stream().sorted(PRODUCT_VARIANT_ORDER).map(variant -> publicProductMapper.toVariant(variant, product.getStockMinimo())).toList(),
                 product.getEspecificaciones().stream().sorted(PRODUCT_SPECIFICATION_ORDER)
                         .map(publicProductMapper::toSpecification).toList(),
-                product.getDocumentos().stream().sorted(PRODUCT_DOCUMENT_ORDER).map(publicProductMapper::toDocument).toList());
+                product.getDocumentos().stream().sorted(PRODUCT_DOCUMENT_ORDER).map(publicProductMapper::toDocument).toList(),
+                reviewSummaries(List.of(product.getId())).get(product.getId()));
     }
 
     @Override
@@ -356,17 +373,20 @@ public class PublicContentService implements IPublicContentService {
                 .forEach(recommended::add);
         candidates.forEach(recommended::add);
 
-        return recommended.stream().limit(4).map(product -> {
-            long reviewCount = resenaProductoRepository.countByProductoId(product.getId());
-            Double average = resenaProductoRepository.averageByProductoId(product.getId());
-            BigDecimal rating = average == null
-                    ? null
-                    : BigDecimal.valueOf(average).setScale(1, RoundingMode.HALF_UP);
+        List<Producto> selected = recommended.stream().limit(4).toList();
+        List<UUID> ids = selected.stream().map(Producto::getId).toList();
+        if (!ids.isEmpty()) {
+            productoRepository.fetchVariantes(ids);
+        }
+        var reviews = reviewSummaries(ids);
+        return selected.stream().map(product -> {
+            var card = ProductoCardAssembler.card(product, reviews);
             PublicProductCategoryResponse category = publicCategories(product, unit).stream()
                     .findFirst().map(publicProductMapper::toCategory).orElse(null);
             return new ProductoRecomendadoResponse(
                     product.getNombre(), product.getSlug(), product.getPrecioBase(),
-                    publicProductMapper.toImage(primaryImage(product)), category, rating, reviewCount);
+                    publicProductMapper.toImage(ProductoCardAssembler.primaryImage(product)), category,
+                    card.valoracion() == null ? null : BigDecimal.valueOf(card.valoracion()), card.resenasCantidad(), card);
         }).toList();
     }
 
@@ -396,10 +416,6 @@ public class PublicContentService implements IPublicContentService {
                         || unit.getId().equals(category.getUnidadNegocio().getId()))
                 .sorted(PRODUCT_CATEGORY_ORDER)
                 .toList();
-    }
-
-    private ImagenProducto primaryImage(Producto product) {
-        return product.getImagenes().stream().sorted(PRODUCT_IMAGE_ORDER).findFirst().orElse(null);
     }
 
     private PublicServiceResponse toPublicService(com.isanorte.constructora_api.model.Servicio service) {

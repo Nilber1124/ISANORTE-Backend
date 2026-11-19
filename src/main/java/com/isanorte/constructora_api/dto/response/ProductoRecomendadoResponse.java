@@ -9,5 +9,6 @@ public record ProductoRecomendadoResponse(
         PublicProductImageResponse imagen,
         PublicProductCategoryResponse categoria,
         BigDecimal calificacionPromedio,
-        long cantidadResenas) {
+        long cantidadResenas,
+        IsadecorHomeResponse.ProductoCard tarjeta) {
 }

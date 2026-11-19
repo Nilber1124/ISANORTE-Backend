@@ -5,6 +5,10 @@ import java.util.List;
 
 import com.isanorte.constructora_api.enums.EstadoDisponibilidad;
 
+import com.isanorte.constructora_api.enums.EstadoStock;
+import com.isanorte.constructora_api.enums.ModalidadVenta;
+import com.isanorte.constructora_api.enums.UnidadVenta;
+
 /** Agregado público completo para el detalle de un producto de una Unidad. */
 public record PublicProductDetailResponse(
         String nombre, String sku, String slug, String resumen, String descripcion,
@@ -14,5 +18,7 @@ public record PublicProductDetailResponse(
         List<PublicProductImageResponse> imagenes, List<PublicProductVariantResponse> variantes,
         List<PublicProductSpecificationResponse> especificaciones,
         List<PublicProductDocumentResponse> documentos,
-        PublicProductCalculationResponse configuracionCalculo) {
+        PublicProductCalculationResponse configuracionCalculo,
+        ModalidadVenta modalidad, UnidadVenta unidadVenta, String plazoEntrega, Boolean facilInstalacion,
+        EstadoStock estadoStock, Integer quedan, Double valoracion, Long resenasCantidad) {
 }

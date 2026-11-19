@@ -31,6 +31,9 @@ import com.isanorte.constructora_api.dto.response.SolicitudContactoPublicRespons
 import com.isanorte.constructora_api.dto.response.ProductoRecomendadoResponse;
 import com.isanorte.constructora_api.dto.response.ResenaProductoResponse;
 import com.isanorte.constructora_api.dto.response.ResumenResenasResponse;
+import java.math.BigDecimal;
+
+import com.isanorte.constructora_api.enums.ModalidadVenta;
 import com.isanorte.constructora_api.enums.OrdenCatalogoProducto;
 import com.isanorte.constructora_api.enums.OrdenResena;
 import com.isanorte.constructora_api.enums.TipoPaginaPublica;
@@ -157,9 +160,15 @@ public class PublicContentController {
             @RequestParam(defaultValue = "false") boolean soloDescuento,
             @RequestParam(defaultValue = "false") boolean soloDisponible,
             @RequestParam(defaultValue = "false") boolean soloDestacados,
-            @RequestParam(defaultValue = "DESTACADOS") OrdenCatalogoProducto orden) {
+            @RequestParam(defaultValue = "DESTACADOS") OrdenCatalogoProducto orden,
+            @RequestParam(required = false) ModalidadVenta modalidad,
+            @RequestParam(required = false) Boolean facilInstalacion,
+            @RequestParam(required = false) BigDecimal precioMin,
+            @RequestParam(required = false) BigDecimal precioMax,
+            @RequestParam(required = false) String acabado) {
         var query = new PublicProductCatalogQuery(
-                page, size, categoria, q, soloDescuento, soloDisponible, soloDestacados, orden);
+                page, size, categoria, q, soloDescuento, soloDisponible, soloDestacados, orden,
+                modalidad, facilInstalacion, precioMin, precioMax, acabado);
         return ResponseEntity.ok(publicContentService.findProductCatalog(clave, unidadSlug, query));
     }
 

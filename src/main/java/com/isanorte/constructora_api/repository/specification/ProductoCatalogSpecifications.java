@@ -2,6 +2,7 @@ package com.isanorte.constructora_api.repository.specification;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 import org.springframework.data.jpa.domain.Specification;
@@ -9,6 +10,7 @@ import org.springframework.data.jpa.domain.Specification;
 import com.isanorte.constructora_api.enums.EstadoDisponibilidad;
 import com.isanorte.constructora_api.enums.EstadoPublicacion;
 import com.isanorte.constructora_api.enums.OrdenCatalogoProducto;
+import com.isanorte.constructora_api.enums.ModalidadVenta;
 import com.isanorte.constructora_api.model.CategoriaProducto;
 import com.isanorte.constructora_api.model.Producto;
 
@@ -103,6 +105,35 @@ public final class ProductoCatalogSpecifications {
             return (root, query, cb) -> cb.conjunction();
         }
         return (root, query, cb) -> cb.isTrue(root.get("destacado"));
+    }
+
+    public static Specification<Producto> modalidad(ModalidadVenta modalidad) {
+        return (root, query, cb) -> modalidad == null ? cb.conjunction() : cb.equal(root.get("modalidad"), modalidad);
+    }
+
+    public static Specification<Producto> facilInstalacion(Boolean facil) {
+        return (root, query, cb) -> facil == null ? cb.conjunction() : cb.equal(root.get("facilInstalacion"), facil);
+    }
+
+    public static Specification<Producto> rangoPrecio(BigDecimal minimo, BigDecimal maximo) {
+        return (root, query, cb) -> cb.and(
+                minimo == null ? cb.conjunction() : cb.ge(root.get("precioBase"), minimo),
+                maximo == null ? cb.conjunction() : cb.le(root.get("precioBase"), maximo));
+    }
+
+    public static Specification<Producto> acabado(String nombre) {
+        if (nombre == null || nombre.isBlank()) {
+            return (root, query, cb) -> cb.conjunction();
+        }
+        String patron = "%" + nombre.strip().toLowerCase(Locale.ROOT)
+                .replace("!", "!!").replace("%", "!%").replace("_", "!_") + "%";
+        return (root, query, cb) -> {
+            Subquery<UUID> subquery = query.subquery(UUID.class);
+            Root<Producto> producto = subquery.correlate(root);
+            subquery.select(producto.get("id"));
+            subquery.where(cb.like(cb.lower(producto.join("variantes").get(FIELD_NAME)), patron, '!'));
+            return cb.exists(subquery);
+        };
     }
 
     /**

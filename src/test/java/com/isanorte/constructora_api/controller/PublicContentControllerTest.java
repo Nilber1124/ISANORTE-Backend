@@ -14,6 +14,9 @@ import org.springframework.http.HttpStatus;
 import com.isanorte.constructora_api.dto.request.PublicProductCatalogQuery;
 import com.isanorte.constructora_api.dto.response.PublicProductCatalogResponse;
 import com.isanorte.constructora_api.dto.response.PublicProjectResponse;
+import java.math.BigDecimal;
+
+import com.isanorte.constructora_api.enums.ModalidadVenta;
 import com.isanorte.constructora_api.enums.OrdenCatalogoProducto;
 import com.isanorte.constructora_api.exception.ModelNotFoundException;
 import com.isanorte.constructora_api.service.IComparacionCompetidoresService;
@@ -60,14 +63,16 @@ class PublicContentControllerTest {
         IPublicContentService service = mock(IPublicContentService.class);
         PublicProductCatalogResponse catalog = new PublicProductCatalogResponse(
                 new PublicProductCatalogResponse.Unidad("Unidad", "unidad"), List.of(),
-                new PublicProductCatalogResponse.Pagina(List.of(), 0, 12, 0, 0));
+                new PublicProductCatalogResponse.Pagina(List.of(), 0, 12, 0, 0), null, null);
         var query = new PublicProductCatalogQuery(
-                0, 12, "colectivo", "muro", true, true, true, OrdenCatalogoProducto.PRECIO_ASC);
+                0, 12, "colectivo", "muro", true, true, true, OrdenCatalogoProducto.PRECIO_ASC,
+                ModalidadVenta.COMPRAR, true, BigDecimal.ZERO, BigDecimal.TEN, "Roble");
         when(service.findProductCatalog("isanorte", "unidad", query)).thenReturn(catalog);
         PublicContentController controller = controllerWith(service);
 
         var response = controller.findProductCatalog(
-                "isanorte", "unidad", 0, 12, "colectivo", "muro", true, true, true, OrdenCatalogoProducto.PRECIO_ASC);
+                "isanorte", "unidad", 0, 12, "colectivo", "muro", true, true, true, OrdenCatalogoProducto.PRECIO_ASC,
+                ModalidadVenta.COMPRAR, true, BigDecimal.ZERO, BigDecimal.TEN, "Roble");
 
         assertSame(HttpStatus.OK, response.getStatusCode());
         assertSame(catalog, response.getBody());

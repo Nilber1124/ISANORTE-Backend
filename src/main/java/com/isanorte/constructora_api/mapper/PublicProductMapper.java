@@ -1,6 +1,12 @@
 package com.isanorte.constructora_api.mapper;
 
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import com.isanorte.constructora_api.enums.EstadoStock;
+import com.isanorte.constructora_api.repository.projection.ResumenResena;
+import com.isanorte.constructora_api.util.DisponibilidadStock;
 
 import org.springframework.stereotype.Component;
 
@@ -26,14 +32,17 @@ public class PublicProductMapper {
 
     public PublicProductCardResponse toCard(
             Producto product,
-            ImagenProducto primaryImage,
-            List<PublicProductCategoryResponse> categories) {
+            List<PublicProductCategoryResponse> categories,
+            Map<UUID, ResumenResena> reviews) {
+        var card = ProductoCardAssembler.card(product, reviews);
         return new PublicProductCardResponse(
                 product.getNombre(), product.getSku(), product.getSlug(), product.getResumen(),
                 product.getDescripcion(), product.getPrecioBase(), product.getPrecioAnterior(),
                 product.getDescuentoPorcentaje(), product.getDisponibilidad(), product.getDestacado(),
                 product.getOrdenDestacado(), product.getRetiroEnTienda(),
-                toImage(primaryImage), categories);
+                toImage(ProductoCardAssembler.primaryImage(product)), categories,
+                card.modalidad(), card.unidadVenta(), card.plazoEntrega(), card.valoracion(), card.resenasCantidad(),
+                card.acabados(), card.estadoStock(), card.quedan(), product.getFacilInstalacion());
     }
 
     public PublicProductDetailResponse toDetail(
@@ -42,14 +51,18 @@ public class PublicProductMapper {
             List<PublicProductImageResponse> images,
             List<PublicProductVariantResponse> variants,
             List<PublicProductSpecificationResponse> specifications,
-            List<PublicProductDocumentResponse> documents) {
+            List<PublicProductDocumentResponse> documents, ResumenResena reviews) {
+        var stock = ProductoCardAssembler.stock(product);
         return new PublicProductDetailResponse(
                 product.getNombre(), product.getSku(), product.getSlug(), product.getResumen(),
                 product.getDescripcion(), product.getTituloSeo(), product.getDescripcionSeo(),
                 product.getPrecioBase(), product.getPrecioAnterior(),
                 product.getDescuentoPorcentaje(), product.getDisponibilidad(), product.getRetiroEnTienda(),
                 categories, images, variants, specifications, documents,
-                toCalculation(product.getConfiguracionCalculo()));
+                toCalculation(product.getConfiguracionCalculo()),
+                product.getModalidad(), product.getUnidadVenta(), product.getPlazoEntrega(), product.getFacilInstalacion(),
+                stock.estado(), stock.estado() == EstadoStock.QUEDAN ? stock.quedan() : null,
+                ProductoCardAssembler.valoracion(reviews), ProductoCardAssembler.cantidad(reviews));
     }
 
     public PublicProductCategoryResponse toCategory(CategoriaProducto category) {
@@ -61,10 +74,13 @@ public class PublicProductMapper {
                 image.getUrl(), image.getAltText(), image.getEsPrincipal(), image.getOrden());
     }
 
-    public PublicProductVariantResponse toVariant(VarianteProducto variant) {
+    public PublicProductVariantResponse toVariant(VarianteProducto variant, Integer stockMinimo) {
+        boolean agotado = ProductoCardAssembler.agotado(variant);
+        var estado = DisponibilidadStock.estado(variant.getStockActual(), stockMinimo);
         return new PublicProductVariantResponse(
                 variant.getSku(), variant.getNombre(), variant.getDescripcion(), variant.getPrecio(),
-                variant.getDisponible(), variant.getImagenUrl(), variant.getOrden());
+                variant.getDisponible(), variant.getImagenUrl(), variant.getOrden(), variant.getColorHex(), agotado,
+                !agotado && estado == EstadoStock.QUEDAN ? variant.getStockActual() : null);
     }
 
     public PublicProductSpecificationResponse toSpecification(EspecificacionProducto specification) {

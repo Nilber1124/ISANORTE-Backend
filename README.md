@@ -245,7 +245,7 @@ y los productos fijados o excluidos de cada sección en `/api/isadecor/secciones
 Las secciones «Elige tu acabado» y «Fáciles de instalar» se ordenan automáticamente por demanda
 (pedidos + cotizaciones en la ventana de días configurada), con modo `AUTOMATICO`, `MANUAL` o `MIXTO`. El stock
 se gestiona por acabado (`PATCH /api/productos/{id}/stock` y `.../variantes/{varianteId}/stock`, historial en
-`GET /api/productos/{id}/movimientos-stock`); los pedidos lo descuentan y la cancelación lo restituye. Las reseñas que salen en la Home se eligen con `GET /api/resenas` y `PATCH /api/resenas/{id}/home`. **No hay seeders ni contenido comercial en el código:** el contenido
+`GET /api/productos/{id}/movimientos-stock`); los pedidos lo descuentan y la cancelación lo restituye. Las reseñas que salen en la Home se eligen con `GET /api/resenas` y `PATCH /api/resenas/{id}/home`. Los videos de Instagram (y TikTok) de la tienda se cargan por enlace en `/api/isadecor/publicaciones` (el título y la miniatura se leen del oEmbed público de la red y la miniatura se copia a Cloudinary) y se leen en `GET /api/publico/sitios/{clave}/unidades/{unidadSlug}/comunidad`; la Home incluye los 4 primeros en `comunidad`. La migración es `V5__isadecor_publicaciones.sql`. **No hay seeders ni contenido comercial en el código:** el contenido
 (servicios, proyectos, equipo, preguntas frecuentes, etc.) se carga desde el panel administrativo o con un script
 SQL aparte, y el administrador inicial se crea con `ADMIN_EMAIL`/`ADMIN_PASSWORD`.
 
@@ -274,3 +274,16 @@ O para ejecutar un test específico:
 - `src/main/java/.../service/`: Servicios y lógica de negocio.
 - `src/main/resources/db/migration/`: Scripts SQL gestionados por Flyway para la evolución de la base de datos.
 - `src/main/resources/application.example.properties`: plantilla versionada sin secretos; copiar localmente como `application.properties`, que permanece ignorado por Git.
+
+### Catálogo público de ISADECOR
+
+El recurso `GET /api/publico/sitios/{clave}/unidades/{unidadSlug}/catalogo` acepta
+`modalidad` (COMPRAR o COTIZAR), `facilInstalacion` (booleano), `precioMin`,
+`precioMax` y `acabado` (nombre parcial, sin distinguir mayúsculas).
+Los límites se aplican al precio base, son inclusivos y no negativos. Si el
+mínimo supera al máximo, la API responde 400. El rango devuelto describe todos
+los precios base de la unidad publicados, independientemente de los filtros.
+
+Las tarjetas comparten la proyección de acabados, valoración y stock con el Home.
+El detalle publica el color y estado agotado del acabado. Solo publica sus
+unidades restantes cuando tiene stock bajo según el umbral del producto.
