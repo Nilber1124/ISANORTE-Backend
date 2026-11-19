@@ -7,6 +7,8 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.isanorte.constructora_api.enums.EstadoDisponibilidad;
+import com.isanorte.constructora_api.enums.ModalidadVenta;
+import com.isanorte.constructora_api.enums.UnidadVenta;
 import com.isanorte.constructora_api.enums.EstadoPublicacion;
 
 public record ProductoResponse(
@@ -23,6 +25,12 @@ public record ProductoResponse(
     Boolean destacado,
     Integer ordenDestacado,
     Boolean retiroEnTienda,
+    ModalidadVenta modalidad,
+    UnidadVenta unidadVenta,
+    String plazoEntrega,
+    Boolean facilInstalacion,
+    Integer stockMinimo,
+    Integer stockActual,
     EstadoPublicacion estado,
     String tituloSeo,
     String descripcionSeo,

@@ -6,6 +6,8 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.isanorte.constructora_api.enums.EstadoDisponibilidad;
+import com.isanorte.constructora_api.enums.ModalidadVenta;
+import com.isanorte.constructora_api.enums.UnidadVenta;
 import com.isanorte.constructora_api.enums.EstadoPublicacion;
 import com.isanorte.constructora_api.enums.TipoDocumentoProducto;
 
@@ -15,7 +17,9 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.Size;
 
 public record ProductoRequest(
     @NotBlank String sku,
@@ -39,7 +43,12 @@ public record ProductoRequest(
     List<@Valid ImagenRequest> imagenes,
     List<@Valid EspecificacionRequest> especificaciones,
     List<@Valid DocumentoRequest> documentos,
-    @Valid ConfiguracionCalculoRequest configuracionCalculo) {
+    @Valid ConfiguracionCalculoRequest configuracionCalculo,
+    ModalidadVenta modalidad,
+    UnidadVenta unidadVenta,
+    @Size(max = 80) String plazoEntrega,
+    Boolean facilInstalacion,
+    @PositiveOrZero Integer stockMinimo) {
 
     public record VarianteRequest(
         @NotBlank String sku,
@@ -48,7 +57,8 @@ public record ProductoRequest(
         @PositiveOrZero BigDecimal precio,
         Boolean disponible,
         String imagenUrl,
-        Integer orden) {
+        Integer orden,
+        @Pattern(regexp = "^#[0-9a-fA-F]{6}$") String colorHex) {
     }
 
     public record ImagenRequest(

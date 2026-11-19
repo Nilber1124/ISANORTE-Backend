@@ -3,6 +3,7 @@ package com.isanorte.constructora_api.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.ReportingPolicy;
 
 import com.isanorte.constructora_api.dto.request.ProductoRequest;
@@ -56,12 +57,18 @@ public interface ProductoMapper {
     @Mapping(target = "configuracionCalculo", ignore = true)
     @Mapping(target = "stockActual", ignore = true)
     @Mapping(target = "version", ignore = true)
+    @Mapping(target = "modalidad", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "unidadVenta", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "plazoEntrega", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "facilInstalacion", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "stockMinimo", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateEntity(ProductoUpdateRequest request, @MappingTarget Producto producto);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "producto", ignore = true)
     @Mapping(target = "fechaCreacion", ignore = true)
     @Mapping(target = "fechaActualizacion", ignore = true)
+    @Mapping(target = "stockActual", ignore = true)
     VarianteProducto toVarianteEntity(ProductoRequest.VarianteRequest request);
 
     @Mapping(target = "id", ignore = true)
@@ -87,12 +94,14 @@ public interface ProductoMapper {
     @Mapping(target = "producto", ignore = true)
     @Mapping(target = "fechaCreacion", ignore = true)
     @Mapping(target = "fechaActualizacion", ignore = true)
+    @Mapping(target = "stockActual", ignore = true)
     VarianteProducto toVarianteEntity(VarianteProductoRequest request);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "producto", ignore = true)
     @Mapping(target = "fechaCreacion", ignore = true)
     @Mapping(target = "fechaActualizacion", ignore = true)
+    @Mapping(target = "stockActual", ignore = true)
     void updateVarianteEntity(VarianteProductoRequest request, @MappingTarget VarianteProducto variante);
 
     @Mapping(target = "id", ignore = true)

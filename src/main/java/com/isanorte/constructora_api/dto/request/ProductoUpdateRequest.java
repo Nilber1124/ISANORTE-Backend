@@ -5,13 +5,17 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.isanorte.constructora_api.enums.EstadoDisponibilidad;
+import com.isanorte.constructora_api.enums.ModalidadVenta;
+import com.isanorte.constructora_api.enums.UnidadVenta;
 import com.isanorte.constructora_api.enums.EstadoPublicacion;
 
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.Size;
 
 public record ProductoUpdateRequest(
     @NotBlank String sku,
@@ -30,5 +34,10 @@ public record ProductoUpdateRequest(
     String tituloSeo,
     String descripcionSeo,
     @NotNull UUID unidadNegocioId,
-    @NotNull Set<@NotNull UUID> categoriaIds) {
+    @NotNull Set<@NotNull UUID> categoriaIds,
+    ModalidadVenta modalidad,
+    UnidadVenta unidadVenta,
+    @Size(max = 80) String plazoEntrega,
+    Boolean facilInstalacion,
+    @PositiveOrZero Integer stockMinimo) {
 }

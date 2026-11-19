@@ -65,6 +65,13 @@ public class VarianteProducto {
     @Column(length = 500)
     private String imagenUrl;
 
+    /** Color de la muestra del acabado (#RRGGBB). */
+    @Column(length = 7)
+    private String colorHex;
+
+    /** Stock propio del acabado; null = sin control de stock. */
+    private Integer stockActual;
+
     @Builder.Default
     @Column(nullable = false)
     private Integer orden = 0;

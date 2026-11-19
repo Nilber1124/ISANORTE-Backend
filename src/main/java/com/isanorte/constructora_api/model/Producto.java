@@ -12,6 +12,8 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.isanorte.constructora_api.enums.EstadoDisponibilidad;
+import com.isanorte.constructora_api.enums.ModalidadVenta;
+import com.isanorte.constructora_api.enums.UnidadVenta;
 import com.isanorte.constructora_api.enums.EstadoPublicacion;
 
 import jakarta.persistence.CascadeType;
@@ -102,6 +104,27 @@ public class Producto {
     /** Inventario gestionado; null significa que este producto no se controla por stock (depende solo de {@link #disponibilidad}). */
     @PositiveOrZero
     private Integer stockActual;
+
+    /** Umbral a partir del cual la tienda avisa "Quedan N"; null = sin aviso. */
+    @PositiveOrZero
+    private Integer stockMinimo;
+
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 10)
+    private ModalidadVenta modalidad = ModalidadVenta.COTIZAR;
+
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 10)
+    private UnidadVenta unidadVenta = UnidadVenta.UNIDAD;
+
+    @Column(length = 80)
+    private String plazoEntrega;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private Boolean facilInstalacion = false;
 
     @Version
     @Builder.Default
@@ -365,6 +388,15 @@ public class Producto {
 
         if (retiroEnTienda == null) {
             retiroEnTienda = false;
+        }
+        if (modalidad == null) {
+            modalidad = ModalidadVenta.COTIZAR;
+        }
+        if (unidadVenta == null) {
+            unidadVenta = UnidadVenta.UNIDAD;
+        }
+        if (facilInstalacion == null) {
+            facilInstalacion = false;
         }
 
         if (estado == null) {

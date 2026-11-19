@@ -71,6 +71,14 @@ public class ResenaProducto {
     @Column(name = "cantidad_util", nullable = false)
     private Integer cantidadUtil = 0;
 
+    @Builder.Default
+    @Column(nullable = false)
+    private Boolean mostrarEnHome = false;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private Integer ordenHome = 0;
+
     @PrePersist
     protected void onCreate() {
         if (fechaCreacion == null) {

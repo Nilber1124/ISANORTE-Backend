@@ -169,7 +169,7 @@ class ProductCategoryUnitIntegrityIntegrationTest {
                 "SKU-" + seed + "-" + random(5), "Producto " + seed + random(4),
                 "product-" + seed + "-" + random(5), null, "Descripción", null, null, null,
                 EstadoDisponibilidad.DISPONIBLE, false, 0, false, EstadoPublicacion.BORRADOR, null, null,
-                unitId, categoryIds, null, null, null, null, null);
+                unitId, categoryIds, null, null, null, null, null, null, null, null, null, null);
     }
 
     private ProductoUpdateRequest productUpdate(Producto product, UUID unitId, Set<UUID> categoryIds) {
@@ -177,7 +177,8 @@ class ProductCategoryUnitIntegrityIntegrationTest {
                 product.getSku(), product.getNombre(), product.getSlug(), product.getResumen(), product.getDescripcion(),
                 product.getPrecioBase(), product.getPrecioAnterior(), product.getDescuentoPorcentaje(),
                 product.getDisponibilidad(), Boolean.TRUE.equals(product.getDestacado()), product.getOrdenDestacado(), product.getRetiroEnTienda(),
-                product.getEstado(), product.getTituloSeo(), product.getDescripcionSeo(), unitId, categoryIds);
+                product.getEstado(), product.getTituloSeo(), product.getDescripcionSeo(), unitId, categoryIds,
+                null, null, null, null, null);
     }
 
     private CategoriaProductoUpdateRequest categoryUpdate(CategoriaProductoResponse category, UUID unitId) {

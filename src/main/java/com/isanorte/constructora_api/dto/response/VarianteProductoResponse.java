@@ -5,5 +5,5 @@ import java.util.UUID;
 
 public record VarianteProductoResponse(
         UUID id, String sku, String nombre, String descripcion, BigDecimal precio,
-        Boolean disponible, String imagenUrl, Integer orden) {
+        Boolean disponible, String imagenUrl, Integer orden, String colorHex, Integer stockActual) {
 }
