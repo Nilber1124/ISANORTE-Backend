@@ -18,11 +18,13 @@ import com.isanorte.constructora_api.dto.response.PublicPedidoResponse;
 import com.isanorte.constructora_api.enums.EstadoDisponibilidad;
 import com.isanorte.constructora_api.enums.EstadoPedido;
 import com.isanorte.constructora_api.enums.EstadoPublicacion;
+import com.isanorte.constructora_api.enums.TipoMovimientoStock;
 import com.isanorte.constructora_api.exception.ModelNotFoundException;
 import com.isanorte.constructora_api.mapper.PedidoMapper;
 import com.isanorte.constructora_api.model.Cliente;
 import com.isanorte.constructora_api.model.ConfiguracionSitio;
 import com.isanorte.constructora_api.model.DetallePedido;
+import com.isanorte.constructora_api.model.MovimientoStock;
 import com.isanorte.constructora_api.model.DireccionCliente;
 import com.isanorte.constructora_api.model.Pedido;
 import com.isanorte.constructora_api.model.Producto;
@@ -33,11 +35,14 @@ import com.isanorte.constructora_api.repository.ClienteRepository;
 import com.isanorte.constructora_api.repository.ConfiguracionSitioRepository;
 import com.isanorte.constructora_api.repository.DireccionClienteRepository;
 import com.isanorte.constructora_api.repository.IGenericRepository;
+import com.isanorte.constructora_api.repository.MovimientoStockRepository;
 import com.isanorte.constructora_api.repository.PedidoRepository;
 import com.isanorte.constructora_api.repository.ProductoRepository;
 import com.isanorte.constructora_api.repository.UnidadNegocioRepository;
 import com.isanorte.constructora_api.service.IPedidoService;
 import com.isanorte.constructora_api.util.BusinessTime;
+
+import com.isanorte.constructora_api.util.DisponibilidadStock;
 
 import lombok.RequiredArgsConstructor;
 
@@ -62,6 +67,8 @@ public class PedidoService extends GenericService<Pedido, UUID> implements IPedi
      * transacción ya marcada para rollback.
      */
     private final ObjectProvider<PedidoService> self;
+
+    private final MovimientoStockRepository movimientoStockRepository;
 
     @Override
     protected IGenericRepository<Pedido, UUID> getRepo() {
@@ -119,10 +126,7 @@ public class PedidoService extends GenericService<Pedido, UUID> implements IPedi
 
         if (estadoNuevo == EstadoPedido.CANCELADO && Boolean.TRUE.equals(pedido.getStockDescontado())) {
             for (DetallePedido detalle : pedido.getDetalles()) {
-                Producto producto = detalle.getProducto();
-                if (producto.getStockActual() != null) {
-                    producto.setStockActual(producto.getStockActual() + detalle.getCantidad());
-                }
+                reponerStock(pedido, detalle);
             }
             pedido.setStockDescontado(false);
         }
@@ -190,7 +194,9 @@ public class PedidoService extends GenericService<Pedido, UUID> implements IPedi
         PricingSummary pricing = addDetails(pedido, unit, request.detalles(), unitSlug);
         pedido.setTotalPedido(pricing.incomplete() ? null : pricing.total());
         pedido.setStockDescontado(true);
-        return pedidoMapper.toPublicResponse(pedidoRepository.saveAndFlush(pedido));
+        Pedido guardado = pedidoRepository.saveAndFlush(pedido);
+        registrarMovimientosDeCompra(guardado);
+        return pedidoMapper.toPublicResponse(guardado);
     }
 
     private PricingSummary addDetails(Pedido pedido, UnidadNegocio unit,
@@ -221,7 +227,7 @@ public class PedidoService extends GenericService<Pedido, UUID> implements IPedi
                                 + " en la unidad " + unitSlug));
         VarianteProducto variante = resolveVariante(producto, item.varianteSku());
         int cantidad = item.cantidad() != null && item.cantidad() > 0 ? item.cantidad() : 1;
-        descontarStock(producto, cantidad);
+        descontarStock(producto, variante, cantidad);
         BigDecimal precio = variante != null && variante.getPrecio() != null
                 ? variante.getPrecio()
                 : producto.getPrecioBase();
@@ -279,8 +285,22 @@ public class PedidoService extends GenericService<Pedido, UUID> implements IPedi
         pedido.setDireccionTelefonoContacto(request.direccionTelefonoContacto().trim());
     }
 
-    /** Descuenta stock si el producto gestiona inventario (stockActual no nulo); lanza si no alcanza. */
-    private void descontarStock(Producto producto, int cantidad) {
+    /**
+     * Descuenta stock del acabado elegido si lo controla; si no, del producto cuando gestiona inventario
+     * (stockActual no nulo). Lanza si no alcanza. Visibilidad de paquete para pruebas unitarias.
+     */
+    void descontarStock(Producto producto, VarianteProducto variante, int cantidad) {
+        if (variante != null && variante.getStockActual() != null) {
+            if (variante.getStockActual() < cantidad) {
+                throw new IllegalStateException("No hay stock suficiente de " + producto.getNombre() + " - "
+                        + variante.getNombre() + " para completar el pedido");
+            }
+            variante.setStockActual(variante.getStockActual() - cantidad);
+            variante.setDisponible(variante.getStockActual() > 0);
+            DisponibilidadStock.recalcular(producto);
+            productoRepository.saveAndFlush(producto);
+            return;
+        }
         if (producto.getStockActual() == null) {
             return;
         }
@@ -293,6 +313,47 @@ public class PedidoService extends GenericService<Pedido, UUID> implements IPedi
             producto.setDisponibilidad(EstadoDisponibilidad.AGOTADO);
         }
         productoRepository.saveAndFlush(producto);
+    }
+
+    /** Devuelve al acabado o al producto las unidades de un detalle de un pedido cancelado. */
+    void reponerStock(Pedido pedido, DetallePedido detalle) {
+        Producto producto = detalle.getProducto();
+        VarianteProducto variante = detalle.getVariante();
+        if (variante != null && variante.getStockActual() != null) {
+            variante.setStockActual(variante.getStockActual() + detalle.getCantidad());
+            variante.setDisponible(true);
+            DisponibilidadStock.recalcular(producto);
+            registrarMovimiento(pedido, detalle, TipoMovimientoStock.CANCELACION, variante.getStockActual());
+        } else if (producto.getStockActual() != null) {
+            producto.setStockActual(producto.getStockActual() + detalle.getCantidad());
+            DisponibilidadStock.recalcular(producto);
+            registrarMovimiento(pedido, detalle, TipoMovimientoStock.CANCELACION, producto.getStockActual());
+        }
+    }
+
+    /** Anota en el historial el descuento de cada detalle que controla stock. */
+    void registrarMovimientosDeCompra(Pedido pedido) {
+        for (DetallePedido detalle : pedido.getDetalles()) {
+            VarianteProducto variante = detalle.getVariante();
+            Producto producto = detalle.getProducto();
+            if (variante != null && variante.getStockActual() != null) {
+                registrarMovimiento(pedido, detalle, TipoMovimientoStock.PEDIDO, variante.getStockActual());
+            } else if (producto.getStockActual() != null) {
+                registrarMovimiento(pedido, detalle, TipoMovimientoStock.PEDIDO, producto.getStockActual());
+            }
+        }
+    }
+
+    private void registrarMovimiento(Pedido pedido, DetallePedido detalle, TipoMovimientoStock tipo, int stockResultante) {
+        movimientoStockRepository.save(MovimientoStock.builder()
+                .producto(detalle.getProducto())
+                .variante(detalle.getVariante())
+                .tipo(tipo)
+                .cantidad(detalle.getCantidad())
+                .stockResultante(stockResultante)
+                .motivo("Pedido " + pedido.getCodigo())
+                .pedidoId(pedido.getId())
+                .build());
     }
 
     private VarianteProducto resolveVariante(Producto producto, String varianteSku) {
