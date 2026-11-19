@@ -36,6 +36,17 @@ public class CloudinaryService {
         return cloudinary.uploader().upload(file.getBytes(), options);
     }
 
+    /** Copia una imagen pública a Cloudinary (las miniaturas de las redes caducan). */
+    public Map<String, Object> uploadFromUrl(String sourceUrl, String folder) throws IOException {
+        Map<String, Object> options = ObjectUtils.asMap(
+                "folder", folder,
+                "public_id", UUID.randomUUID().toString(),
+                "overwrite", true,
+                "resource_type", "image"
+        );
+        return cloudinary.uploader().upload(sourceUrl, options);
+    }
+
     public Map<String, Object> deleteFile(String publicId) throws IOException {
         return cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
     }
