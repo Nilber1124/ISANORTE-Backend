@@ -245,7 +245,7 @@ y los productos fijados o excluidos de cada sección en `/api/isadecor/secciones
 Las secciones «Elige tu acabado» y «Fáciles de instalar» se ordenan automáticamente por demanda
 (pedidos + cotizaciones en la ventana de días configurada), con modo `AUTOMATICO`, `MANUAL` o `MIXTO`. El stock
 se gestiona por acabado (`PATCH /api/productos/{id}/stock` y `.../variantes/{varianteId}/stock`, historial en
-`GET /api/productos/{id}/movimientos-stock`); los pedidos lo descuentan y la cancelación lo restituye. **No hay seeders ni contenido comercial en el código:** el contenido
+`GET /api/productos/{id}/movimientos-stock`); los pedidos lo descuentan y la cancelación lo restituye. Las reseñas que salen en la Home se eligen con `GET /api/resenas` y `PATCH /api/resenas/{id}/home`. **No hay seeders ni contenido comercial en el código:** el contenido
 (servicios, proyectos, equipo, preguntas frecuentes, etc.) se carga desde el panel administrativo o con un script
 SQL aparte, y el administrador inicial se crea con `ADMIN_EMAIL`/`ADMIN_PASSWORD`.
 

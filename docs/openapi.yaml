@@ -2476,6 +2476,29 @@ paths:
         '200': {description: Lista resultante, content: {application/json: {schema: {type: array, items: {type: object}}}}}
         '400': {$ref: '#/components/responses/BadRequest'}
         '404': {$ref: '#/components/responses/NotFound'}
+  /api/resenas:
+    get:
+      tags: [Productos]
+      operationId: listarResenasAdmin
+      summary: Reseñas con su producto y su estado en la Home (las marcadas primero)
+      x-access-intent: ADMINISTRATIVO
+      responses:
+        '200': {description: Reseñas, content: {application/json: {schema: {type: array, items: {type: object}}}}}
+  /api/resenas/{id}/home:
+    patch:
+      tags: [Productos]
+      operationId: marcarResenaHome
+      summary: Marca o desmarca una reseña para la Home y define su orden
+      x-access-intent: ADMINISTRATIVO
+      parameters:
+        - $ref: '#/components/parameters/UuidId'
+      requestBody:
+        required: true
+        content: {application/json: {schema: {type: object, required: [mostrarEnHome, ordenHome], properties: {mostrarEnHome: {type: boolean}, ordenHome: {type: integer, minimum: 0}}}}}
+      responses:
+        '200': {description: Reseña actualizada, content: {application/json: {schema: {type: object}}}}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '404': {$ref: '#/components/responses/NotFound'}
 
 components:
   parameters:

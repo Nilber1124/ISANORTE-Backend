@@ -22,6 +22,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "resenas_producto")
@@ -71,10 +72,12 @@ public class ResenaProducto {
     @Column(name = "cantidad_util", nullable = false)
     private Integer cantidadUtil = 0;
 
+    @Setter
     @Builder.Default
     @Column(nullable = false)
     private Boolean mostrarEnHome = false;
 
+    @Setter
     @Builder.Default
     @Column(nullable = false)
     private Integer ordenHome = 0;
