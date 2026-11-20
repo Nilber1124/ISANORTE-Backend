@@ -288,6 +288,19 @@ class PublicProductApiIntegrationTest {
                 .andExpect(jsonPath("$.productos.contenido.length()").value(1))
                 .andExpect(jsonPath("$.productos.contenido[0].slug").value(caro.getSlug()));
 
+        // Búsqueda tolerante: sin tildes, en plural, en otro orden y por acabado.
+        caro.setNombre("Panel sándwich premium");
+        productoRepository.saveAndFlush(caro);
+        for (String texto : List.of("panel sandwich", "PANELES SÁNDWICH", "premium sandwich", "nogal", "sandwich panel premium")) {
+            mockMvc.perform(get(basePath, site.getClave(), unit.getSlug()).param("q", texto).param("size", "10"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.productos.contenido[?(@.slug=='" + caro.getSlug() + "')]").exists());
+        }
+        // Todas las palabras deben coincidir.
+        mockMvc.perform(get(basePath, site.getClave(), unit.getSlug()).param("q", "sandwich inexistente").param("size", "10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.productos.contenido.length()").value(0));
+
         // Búsqueda sin coincidencias.
         mockMvc.perform(get(basePath, site.getClave(), unit.getSlug())
                         .param("q", "inexistente-xyz").param("size", "10"))

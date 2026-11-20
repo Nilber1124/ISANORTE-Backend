@@ -1,7 +1,7 @@
 package com.isanorte.constructora_api.repository.specification;
 
 import java.math.BigDecimal;
-import java.util.List;
+import java.text.Normalizer;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -77,27 +77,77 @@ public final class ProductoCatalogSpecifications {
         };
     }
 
+    private static final String ACCENTED = "áàäâãéèëêíìïîóòöôõúùüûñç";
+    private static final String PLAIN = "aaaaaeeeeiiiiooooouuuunc";
+    private static final int MAX_SEARCH_TERMS = 6;
+
+    /**
+     * Normaliza un texto para buscar: minúsculas y sin tildes («Sándwich» → «sandwich»).
+     * Debe coincidir con {@link #sinTildes(CriteriaBuilder, Expression)}, que hace lo mismo en la base de datos.
+     */
+    public static String normalizarTexto(String text) {
+        if (text == null) {
+            return "";
+        }
+        return Normalizer.normalize(text, Normalizer.Form.NFD).replaceAll("\\p{M}", "").toLowerCase(Locale.ROOT).strip();
+    }
+
+    /**
+     * Palabras de una búsqueda: normalizadas, sin repetidos y en singular («paneles» → «panel»,
+     * «pisos» → «piso»), para que escribir el plural o sin tildes encuentre el producto.
+     */
+    public static List<String> terminosDeBusqueda(String texto) {
+        return Arrays.stream(normalizarTexto(texto).split("[^a-z0-9]+"))
+                .filter(term -> !term.isEmpty())
+                .map(ProductoCatalogSpecifications::singular)
+                .distinct().limit(MAX_SEARCH_TERMS).toList();
+    }
+
+    private static String singular(String term) {
+        if (term.length() >= 6 && term.endsWith("es")) {
+            return term.substring(0, term.length() - 2);
+        }
+        if (term.length() >= 4 && term.endsWith("s")) {
+            return term.substring(0, term.length() - 1);
+        }
+        return term;
+    }
+
+    private static Expression<String> sinTildes(CriteriaBuilder cb, Expression<String> value) {
+        return cb.function("translate", String.class, cb.lower(value), cb.literal(ACCENTED), cb.literal(PLAIN));
+    }
+
+    /**
+     * Cada palabra debe aparecer (sin importar tildes, mayúsculas ni plural) en el nombre, SKU, resumen,
+     * descripción, alguna colección o algún acabado del producto.
+     */
     public static Specification<Producto> textoBusqueda(String termino) {
-        if (termino == null || termino.isBlank()) {
+        List<String> terms = terminosDeBusqueda(termino);
+        if (terms.isEmpty()) {
             return (root, query, cb) -> cb.conjunction();
         }
-        String patron = "%" + termino.trim().toLowerCase() + "%";
-        return (root, query, cb) -> {
-            Predicate coincideEnCampos = cb.or(
-                    cb.like(cb.lower(root.get(FIELD_NAME)), patron),
-                    cb.like(cb.lower(root.get("sku")), patron),
-                    cb.like(cb.lower(cb.coalesce(root.get("resumen"), "")), patron),
-                    cb.like(cb.lower(root.get("descripcion")), patron));
+        return (root, query, cb) -> cb.and(terms.stream().map(term -> {
+            String pattern = "%" + term.replace("!", "!!").replace("%", "!%").replace("_", "!_") + "%";
+            Predicate inFields = cb.or(
+                    cb.like(sinTildes(cb, root.get(FIELD_NAME)), pattern, '!'),
+                    cb.like(sinTildes(cb, root.get("sku")), pattern, '!'),
+                    cb.like(sinTildes(cb, cb.coalesce(root.<String>get("resumen"), "")), pattern, '!'),
+                    cb.like(sinTildes(cb, root.get("descripcion")), pattern, '!'));
 
-            Subquery<UUID> subquery = query.subquery(UUID.class);
-            Root<Producto> correlatedRoot = subquery.correlate(root);
-            Join<Producto, CategoriaProducto> categoria = correlatedRoot.join("categorias");
-            subquery.select(correlatedRoot.get("id"));
-            subquery.where(cb.like(cb.lower(categoria.get(FIELD_NAME)), patron));
-            Predicate coincideEnCategoria = cb.exists(subquery);
+            Subquery<UUID> categories = query.subquery(UUID.class);
+            Root<Producto> categoryRoot = categories.correlate(root);
+            Join<Producto, CategoriaProducto> category = categoryRoot.join("categorias");
+            categories.select(categoryRoot.get("id"));
+            categories.where(cb.like(sinTildes(cb, category.get(FIELD_NAME)), pattern, '!'));
 
-            return cb.or(coincideEnCampos, coincideEnCategoria);
-        };
+            Subquery<UUID> finishes = query.subquery(UUID.class);
+            Root<Producto> finishRoot = finishes.correlate(root);
+            var finish = finishRoot.join("variantes");
+            finishes.select(finishRoot.get("id"));
+            finishes.where(cb.like(sinTildes(cb, finish.<String>get(FIELD_NAME)), pattern, '!'));
+
+            return cb.or(inFields, cb.exists(categories), cb.exists(finishes));
+        }).toArray(Predicate[]::new));
     }
 
     public static Specification<Producto> soloDescuento(boolean activo) {
@@ -149,8 +199,8 @@ public final class ProductoCatalogSpecifications {
             subquery.select(producto.get("id"));
             var variante = producto.join("variantes");
             subquery.where(cb.or(values.stream().map(value -> cb.like(
-                    cb.lower(variante.get(FIELD_NAME)),
-                    "%" + value.toLowerCase(Locale.ROOT).replace("!", "!!").replace("%", "!%").replace("_", "!_") + "%",
+                    sinTildes(cb, variante.<String>get(FIELD_NAME)),
+                    "%" + normalizarTexto(value).replace("!", "!!").replace("%", "!%").replace("_", "!_") + "%",
                     '!')).toArray(jakarta.persistence.criteria.Predicate[]::new)));
             return cb.exists(subquery);
         };

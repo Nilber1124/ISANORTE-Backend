@@ -85,4 +85,24 @@ class ProductoCatalogSpecificationsTest {
         assertSame(sinFiltro,
                 ProductoCatalogSpecifications.categoriaSlug(" ", UUID.randomUUID()).toPredicate(producto, null, criteria));
     }
+
+    @Test
+    void normalizaTextoSinTildesNiMayusculas() {
+        assertEquals("panel sandwich", ProductoCatalogSpecifications.normalizarTexto("  Panel SÁNDWICH "));
+        assertEquals("diseno", ProductoCatalogSpecifications.normalizarTexto("Diseño"));
+        assertEquals("", ProductoCatalogSpecifications.normalizarTexto(null));
+    }
+
+    @Test
+    void separaLaBusquedaEnPalabrasEnSingular() {
+        assertEquals(List.of("panel", "sandwich"), ProductoCatalogSpecifications.terminosDeBusqueda("Paneles SÁNDWICH"));
+        assertEquals(List.of("piso", "autoadhesivo"), ProductoCatalogSpecifications.terminosDeBusqueda("pisos, autoadhesivos"));
+        assertEquals(List.of("pvc"), ProductoCatalogSpecifications.terminosDeBusqueda("PVC pvc"));
+        assertEquals(List.of(), ProductoCatalogSpecifications.terminosDeBusqueda("  ,, "));
+    }
+
+    @Test
+    void limitaLaCantidadDePalabrasDeUnaBusqueda() {
+        assertEquals(6, ProductoCatalogSpecifications.terminosDeBusqueda("a1 b2 c3 d4 e5 f6 g7 h8 i9").size());
+    }
 }
