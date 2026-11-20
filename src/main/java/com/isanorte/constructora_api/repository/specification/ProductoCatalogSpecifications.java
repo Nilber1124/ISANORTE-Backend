@@ -2,6 +2,8 @@ package com.isanorte.constructora_api.repository.specification;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -43,8 +45,22 @@ public final class ProductoCatalogSpecifications {
         return (root, query, cb) -> cb.equal(root.get("estado"), estado);
     }
 
-    public static Specification<Producto> categoriaSlug(String slug, UUID unidadId) {
-        if (slug == null || slug.isBlank()) {
+    /** Máximo de valores aceptados en un filtro de lista, para acotar la consulta. */
+    private static final int MAX_FILTER_VALUES = 12;
+
+    /** Separa una lista «a,b,c» en valores sin espacios ni vacíos (máx. {@value #MAX_FILTER_VALUES}). */
+    public static List<String> splitValues(String csv) {
+        if (csv == null || csv.isBlank()) {
+            return List.of();
+        }
+        return Arrays.stream(csv.split(",")).map(String::strip).filter(v -> !v.isEmpty())
+                .distinct().limit(MAX_FILTER_VALUES).toList();
+    }
+
+    /** Productos de cualquiera de las colecciones indicadas (slugs separados por coma). */
+    public static Specification<Producto> categoriaSlug(String slugs, UUID unidadId) {
+        List<String> values = splitValues(slugs);
+        if (values.isEmpty()) {
             return (root, query, cb) -> cb.conjunction();
         }
         return (root, query, cb) -> {
@@ -53,7 +69,7 @@ public final class ProductoCatalogSpecifications {
             Join<Producto, CategoriaProducto> categoria = correlatedRoot.join("categorias");
             subquery.select(correlatedRoot.get("id"));
             subquery.where(cb.and(
-                    cb.equal(categoria.get("slug"), slug),
+                    categoria.get("slug").in(values),
                     cb.isTrue(categoria.get("activo")),
                     cb.or(cb.isNull(categoria.get(FIELD_BUSINESS_UNIT)),
                             cb.equal(categoria.get(FIELD_BUSINESS_UNIT).get("id"), unidadId))));
@@ -121,17 +137,21 @@ public final class ProductoCatalogSpecifications {
                 maximo == null ? cb.conjunction() : cb.le(root.get("precioBase"), maximo));
     }
 
-    public static Specification<Producto> acabado(String nombre) {
-        if (nombre == null || nombre.isBlank()) {
+    /** Productos con algún acabado cuyo nombre contenga cualquiera de los textos indicados (separados por coma). */
+    public static Specification<Producto> acabado(String nombres) {
+        List<String> values = splitValues(nombres);
+        if (values.isEmpty()) {
             return (root, query, cb) -> cb.conjunction();
         }
-        String patron = "%" + nombre.strip().toLowerCase(Locale.ROOT)
-                .replace("!", "!!").replace("%", "!%").replace("_", "!_") + "%";
         return (root, query, cb) -> {
             Subquery<UUID> subquery = query.subquery(UUID.class);
             Root<Producto> producto = subquery.correlate(root);
             subquery.select(producto.get("id"));
-            subquery.where(cb.like(cb.lower(producto.join("variantes").get(FIELD_NAME)), patron, '!'));
+            var variante = producto.join("variantes");
+            subquery.where(cb.or(values.stream().map(value -> cb.like(
+                    cb.lower(variante.get(FIELD_NAME)),
+                    "%" + value.toLowerCase(Locale.ROOT).replace("!", "!!").replace("%", "!%").replace("_", "!_") + "%",
+                    '!')).toArray(jakarta.persistence.criteria.Predicate[]::new)));
             return cb.exists(subquery);
         };
     }

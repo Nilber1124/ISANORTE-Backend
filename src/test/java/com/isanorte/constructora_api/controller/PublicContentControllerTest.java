@@ -63,7 +63,7 @@ class PublicContentControllerTest {
         IPublicContentService service = mock(IPublicContentService.class);
         PublicProductCatalogResponse catalog = new PublicProductCatalogResponse(
                 new PublicProductCatalogResponse.Unidad("Unidad", "unidad"), List.of(),
-                new PublicProductCatalogResponse.Pagina(List.of(), 0, 12, 0, 0), null, null);
+                new PublicProductCatalogResponse.Pagina(List.of(), 0, 12, 0, 0), null, null, List.of());
         var query = new PublicProductCatalogQuery(
                 0, 12, "colectivo", "muro", true, true, true, OrdenCatalogoProducto.PRECIO_ASC,
                 ModalidadVenta.COMPRAR, true, BigDecimal.ZERO, BigDecimal.TEN, "Roble");

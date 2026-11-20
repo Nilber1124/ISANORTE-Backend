@@ -1,5 +1,6 @@
 package com.isanorte.constructora_api.repository.specification;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -7,6 +8,8 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 
@@ -58,5 +61,28 @@ class ProductoCatalogSpecificationsTest {
 
         verify(criteria).ge(precio, BigDecimal.ZERO);
         verify(criteria).le(precio, BigDecimal.TEN);
+    }
+
+    @Test
+    void separaListasPorComaSinVaciosNiRepetidos() {
+        assertEquals(List.of("pisos", "techos"), ProductoCatalogSpecifications.splitValues(" pisos, techos ,, pisos"));
+        assertEquals(List.of(), ProductoCatalogSpecifications.splitValues(null));
+        assertEquals(List.of(), ProductoCatalogSpecifications.splitValues(" , "));
+    }
+
+    @Test
+    void limitaLaCantidadDeValoresDeUnaLista() {
+        String muchos = String.join(",", java.util.stream.IntStream.range(0, 40).mapToObj(i -> "c" + i).toList());
+
+        assertEquals(12, ProductoCatalogSpecifications.splitValues(muchos).size());
+    }
+
+    @Test
+    void sinColeccionesNoRestringe() {
+        Predicate sinFiltro = mock(Predicate.class);
+        when(criteria.conjunction()).thenReturn(sinFiltro);
+
+        assertSame(sinFiltro,
+                ProductoCatalogSpecifications.categoriaSlug(" ", UUID.randomUUID()).toPredicate(producto, null, criteria));
     }
 }

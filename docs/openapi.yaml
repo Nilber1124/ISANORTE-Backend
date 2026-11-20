@@ -1715,7 +1715,7 @@ paths:
         - {name: unidadSlug, in: path, required: true, schema: {type: string}}
         - {name: page, in: query, schema: {type: integer, minimum: 0, default: 0}}
         - {name: size, in: query, schema: {type: integer, minimum: 1, maximum: 48, default: 12}}
-        - {name: categoria, in: query, schema: {type: string}}
+        - {name: categoria, in: query, schema: {type: string}, description: "Slugs de colecciones separados por coma (cualquiera de ellas, máx. 12)."}
         - {name: q, in: query, schema: {type: string}}
         - {name: soloDescuento, in: query, schema: {type: boolean}}
         - {name: soloDisponible, in: query, schema: {type: boolean}}
@@ -1725,7 +1725,7 @@ paths:
         - {name: facilInstalacion, in: query, schema: {type: boolean}}
         - {name: precioMin, in: query, schema: {type: number, minimum: 0}}
         - {name: precioMax, in: query, schema: {type: number, minimum: 0}, description: Mayor o igual a precioMin cuando se envían ambos.}
-        - {name: acabado, in: query, schema: {type: string}, description: Coincidencia parcial por nombre sin distinguir mayúsculas.}
+        - {name: acabado, in: query, schema: {type: string}, description: "Nombres de acabado separados por coma (cualquiera de ellos, máx. 12); coincidencia parcial sin distinguir mayúsculas."}
       responses: {'200': {description: Catálogo de productos públicos de la unidad, posiblemente vacío, content: {application/json: {schema: {$ref: '#/components/schemas/PublicProductCatalogResponse'}}}}, '400': {$ref: '#/components/responses/BadRequest'}, '404': {$ref: '#/components/responses/NotFound'}}
   /api/publico/sitios/{clave}/unidades/{unidadSlug}/productos/{productoSlug}:
     get:
@@ -4224,6 +4224,7 @@ components:
               - type: object
                 properties:
                   cantidad: {type: integer, format: int64, minimum: 0}
+                  imagenUrl: {type: string, nullable: true}
         productos:
           type: object
           properties:
@@ -4234,6 +4235,15 @@ components:
             totalPaginas: {type: integer}
         precioMinimo: {type: number, nullable: true, description: Mínimo de todos los productos publicados de la unidad}
         precioMaximo: {type: number, nullable: true, description: Máximo de todos los productos publicados de la unidad}
+        acabados:
+          type: array
+          description: Acabados distintos de los productos publicados, para filtrar por color
+          items:
+            type: object
+            properties:
+              nombre: {type: string}
+              colorHex: {type: string, nullable: true}
+              cantidad: {type: integer, format: int64, description: Productos publicados que lo ofrecen}
     PublicProductCatalogUnitResponse:
       type: object
       required: [nombre, slug]

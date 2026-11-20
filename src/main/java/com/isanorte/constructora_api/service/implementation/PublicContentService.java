@@ -70,6 +70,7 @@ import com.isanorte.constructora_api.repository.SeccionLandingRepository;
 import com.isanorte.constructora_api.repository.SeoPaginaRepository;
 import com.isanorte.constructora_api.repository.ServicioRepository;
 import com.isanorte.constructora_api.repository.UnidadNegocioRepository;
+import com.isanorte.constructora_api.repository.VarianteProductoRepository;
 import com.isanorte.constructora_api.repository.projection.ResumenResena;
 import com.isanorte.constructora_api.repository.specification.ProductoCatalogSpecifications;
 import com.isanorte.constructora_api.service.IPublicContentService;
@@ -119,6 +120,7 @@ public class PublicContentService implements IPublicContentService {
     private final ProyectoRepository proyectoRepository;
     private final ProductoRepository productoRepository;
     private final CategoriaProductoRepository categoriaProductoRepository;
+    private final VarianteProductoRepository varianteProductoRepository;
     private final ResenaProductoRepository resenaProductoRepository;
     private final UnidadNegocioRepository unidadRepository;
     private final ContenidoPaginaRepository contenidoRepository;
@@ -303,7 +305,8 @@ public class PublicContentService implements IPublicContentService {
                 new PublicProductCatalogResponse.Pagina(
                         cards, productPage.getNumber(), productPage.getSize(),
                         productPage.getTotalElements(), productPage.getTotalPages()),
-                range == null ? null : range.getPrecioMinimo(), range == null ? null : range.getPrecioMaximo());
+                range == null ? null : range.getPrecioMinimo(), range == null ? null : range.getPrecioMaximo(),
+                varianteProductoRepository.findPublicAcabados(unit.getId(), EstadoPublicacion.PUBLICADO));
     }
 
     private Map<UUID, ResumenResena> reviewSummaries(List<UUID> ids) {

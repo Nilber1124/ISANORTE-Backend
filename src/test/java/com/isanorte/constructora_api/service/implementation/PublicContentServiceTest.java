@@ -45,6 +45,7 @@ import com.isanorte.constructora_api.repository.SeccionLandingRepository;
 import com.isanorte.constructora_api.repository.SeoPaginaRepository;
 import com.isanorte.constructora_api.repository.ServicioRepository;
 import com.isanorte.constructora_api.repository.UnidadNegocioRepository;
+import com.isanorte.constructora_api.repository.VarianteProductoRepository;
 
 @ExtendWith(MockitoExtension.class)
 class PublicContentServiceTest {
@@ -55,6 +56,7 @@ class PublicContentServiceTest {
     @Mock private ProyectoRepository proyectoRepository;
     @Mock private ProductoRepository productoRepository;
     @Mock private CategoriaProductoRepository categoriaProductoRepository;
+    @Mock private VarianteProductoRepository varianteProductoRepository;
     @Mock private ResenaProductoRepository resenaProductoRepository;
     @Mock private UnidadNegocioRepository unidadRepository;
     @Mock private ContenidoPaginaRepository contenidoRepository;
@@ -106,12 +108,18 @@ class PublicContentServiceTest {
                 List.of(), null, null, null, null, 0L, List.of(), null, null, false);
         when(publicProductMapper.toCard(any(), any(), any())).thenReturn(card);
         List<PublicProductCatalogCategoryResponse> facet = List.of(
-                new PublicProductCatalogCategoryResponse("Muros", "muros", 3L));
+                new PublicProductCatalogCategoryResponse("Muros", "muros", 3L, null));
         when(categoriaProductoRepository.findPublicCategoryCounts(unidadId, EstadoPublicacion.PUBLICADO))
                 .thenReturn(facet);
 
+        var acabados = List.of(new com.isanorte.constructora_api.dto.response.PublicProductCatalogAcabadoResponse(
+                "Nogal", "#5c3d2a", 2L));
+        when(varianteProductoRepository.findPublicAcabados(unidadId, EstadoPublicacion.PUBLICADO)).thenReturn(acabados);
+
         PublicProductCatalogResponse response = service.findProductCatalog(
                 "isanorte", "unidad", catalogQuery(0, 12));
+
+        assertEquals(acabados, response.acabados());
 
         assertEquals("Unidad", response.unidad().nombre());
         assertEquals(facet, response.categorias());

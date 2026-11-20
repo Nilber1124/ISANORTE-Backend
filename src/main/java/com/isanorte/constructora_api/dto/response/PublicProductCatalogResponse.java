@@ -6,7 +6,8 @@ import java.util.List;
 /** Catálogo web del dominio Producto, limitado a una Unidad de Negocio pública. */
 public record PublicProductCatalogResponse(
         Unidad unidad, List<PublicProductCatalogCategoryResponse> categorias,
-        Pagina productos, BigDecimal precioMinimo, BigDecimal precioMaximo) {
+        Pagina productos, BigDecimal precioMinimo, BigDecimal precioMaximo,
+        List<PublicProductCatalogAcabadoResponse> acabados) {
 
     /** Contexto mínimo de la Unidad, sin duplicar el agregado de página raíz. */
     public record Unidad(String nombre, String slug) {

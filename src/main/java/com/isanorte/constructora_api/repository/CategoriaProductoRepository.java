@@ -32,12 +32,12 @@ public interface CategoriaProductoRepository extends IGenericRepository<Categori
      */
     @Query("""
             SELECT new com.isanorte.constructora_api.dto.response.PublicProductCatalogCategoryResponse(
-                c.nombre, c.slug, COUNT(p.id))
+                c.nombre, c.slug, COUNT(p.id), c.imagenUrl)
             FROM CategoriaProducto c JOIN c.productos p
             WHERE p.unidadNegocio.id = :unidadId AND p.estado = :estado
               AND c.activo = true
               AND (c.unidadNegocio IS NULL OR c.unidadNegocio.id = :unidadId)
-            GROUP BY c.id, c.nombre, c.slug, c.orden
+            GROUP BY c.id, c.nombre, c.slug, c.orden, c.imagenUrl
             ORDER BY c.orden ASC, c.id ASC
             """)
     List<PublicProductCatalogCategoryResponse> findPublicCategoryCounts(
