@@ -3117,6 +3117,7 @@ components:
         altText: {type: string, maxLength: 200, nullable: true}
         esPrincipal: {type: boolean}
         orden: {type: integer, format: int32}
+        varianteSku: {type: string, maxLength: 80, nullable: true, description: SKU del acabado al que pertenece la imagen; vacío = imagen general}
     EspecificacionProductoRequest:
       type: object
       required: [clave, valor, orden]
@@ -3762,6 +3763,7 @@ components:
         altText: {type: string, nullable: true}
         esPrincipal: {type: boolean, nullable: true}
         orden: {type: integer, format: int32, nullable: true}
+        varianteSku: {type: string, nullable: true, description: SKU del acabado de la imagen; nulo = imagen general}
     EspecificacionProductoResponse:
       type: object
       required: [id, clave, valor, grupo, orden]
@@ -4427,6 +4429,7 @@ components:
         alt: {type: string, nullable: true}
         esPrincipal: {type: boolean}
         orden: {type: integer, format: int32}
+        varianteSku: {type: string, nullable: true, description: SKU del acabado al que pertenece la imagen; nulo = general}
     PublicProductVariantResponse:
       type: object
       required: [sku, nombre, disponible, orden]

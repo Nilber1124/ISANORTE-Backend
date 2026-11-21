@@ -65,7 +65,8 @@ public record ProductoRequest(
         @NotBlank String url,
         String altText,
         Boolean esPrincipal,
-        Integer orden) {
+        Integer orden,
+        String varianteSku) {
     }
 
     public record EspecificacionRequest(

@@ -73,6 +73,7 @@ public interface ProductoMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "producto", ignore = true)
+    @Mapping(target = "varianteProducto", ignore = true)
     @Mapping(target = "fechaCreacion", ignore = true)
     ImagenProducto toImagenEntity(ProductoRequest.ImagenRequest request);
 
@@ -106,11 +107,13 @@ public interface ProductoMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "producto", ignore = true)
+    @Mapping(target = "varianteProducto", ignore = true)
     @Mapping(target = "fechaCreacion", ignore = true)
     ImagenProducto toImagenEntity(ImagenProductoRequest request);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "producto", ignore = true)
+    @Mapping(target = "varianteProducto", ignore = true)
     @Mapping(target = "fechaCreacion", ignore = true)
     void updateImagenEntity(ImagenProductoRequest request, @MappingTarget ImagenProducto imagen);
 
@@ -152,6 +155,7 @@ public interface ProductoMapper {
 
     VarianteProductoResponse toVarianteResponse(VarianteProducto variante);
 
+    @Mapping(target = "varianteSku", expression = "java(imagen.getVarianteProducto() == null ? null : imagen.getVarianteProducto().getSku())")
     ImagenProductoResponse toImagenResponse(ImagenProducto imagen);
 
     EspecificacionProductoResponse toEspecificacionResponse(EspecificacionProducto especificacion);

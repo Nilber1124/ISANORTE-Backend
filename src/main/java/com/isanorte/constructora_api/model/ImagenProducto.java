@@ -5,6 +5,9 @@ import com.isanorte.constructora_api.util.BusinessTime;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -53,6 +56,12 @@ public class ImagenProducto {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "producto_id", nullable = false)
     private Producto producto;
+
+    /** Acabado al que pertenece la imagen; nulo = imagen general del producto. */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "variante_id")
+    @OnDelete(action = OnDeleteAction.SET_NULL)
+    private VarianteProducto varianteProducto;
 
     @Column(nullable = false)
     private LocalDateTime fechaCreacion;

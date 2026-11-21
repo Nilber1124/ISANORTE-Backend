@@ -388,6 +388,7 @@ class PublicProductApiIntegrationTest {
                 .andExpect(jsonPath("$.id").doesNotExist())
                 .andExpect(jsonPath("$.estado").doesNotExist())
                 .andExpect(jsonPath("$.imagenes[0].id").doesNotExist())
+                .andExpect(jsonPath("$.imagenes[0].varianteSku").doesNotExist())
                 .andExpect(jsonPath("$.variantes[0].id").doesNotExist())
                 .andExpect(jsonPath("$.configuracionCalculo.id").doesNotExist());
 

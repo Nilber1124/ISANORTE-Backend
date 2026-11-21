@@ -107,9 +107,11 @@ public class ProductoService extends GenericService<Producto, UUID> implements I
                     .forEach(producto::addVariante);
         }
         if (request.imagenes() != null) {
-            request.imagenes().stream()
-                    .map(productoMapper::toImagenEntity)
-                    .forEach(producto::addImagen);
+            for (ProductoRequest.ImagenRequest imagenRequest : request.imagenes()) {
+                ImagenProducto imagen = productoMapper.toImagenEntity(imagenRequest);
+                vincularConAcabado(producto, imagen, imagenRequest.varianteSku());
+                producto.addImagen(imagen);
+            }
         }
         if (request.especificaciones() != null) {
             request.especificaciones().stream()
@@ -292,6 +294,7 @@ public class ProductoService extends GenericService<Producto, UUID> implements I
     public ImagenProductoResponse createImagen(UUID productoId, ImagenProductoRequest request) {
         Producto producto = findProductoParaAdministracion(productoId);
         ImagenProducto imagen = productoMapper.toImagenEntity(request);
+        vincularConAcabado(producto, imagen, request.varianteSku());
         producto.addImagen(imagen);
         imagenProductoRepository.saveAndFlush(imagen);
         return productoMapper.toImagenResponse(imagen);
@@ -303,6 +306,10 @@ public class ProductoService extends GenericService<Producto, UUID> implements I
         Producto producto = findProductoParaAdministracion(productoId);
         ImagenProducto imagen = findImagenDelProducto(producto, imagenId);
         productoMapper.updateImagenEntity(request, imagen);
+        // Sin varianteSku (null) se conserva el acabado actual; una cadena vacía la deja como imagen general.
+        if (request.varianteSku() != null) {
+            vincularConAcabado(producto, imagen, request.varianteSku());
+        }
         imagenProductoRepository.saveAndFlush(imagen);
         return productoMapper.toImagenResponse(imagen);
     }
@@ -432,6 +439,20 @@ public class ProductoService extends GenericService<Producto, UUID> implements I
                 .orElseThrow(() -> new ModelNotFoundException("Variante no encontrada con ID: " + varianteId));
         validarPertenencia(producto, variante.getProducto(), "variante", varianteId);
         return variante;
+    }
+
+    /** Asocia la imagen con el acabado (por SKU) de este producto; sin SKU queda como imagen general. */
+    private void vincularConAcabado(Producto producto, ImagenProducto imagen, String varianteSku) {
+        if (varianteSku == null || varianteSku.isBlank()) {
+            imagen.setVarianteProducto(null);
+            return;
+        }
+        String sku = varianteSku.trim();
+        imagen.setVarianteProducto(producto.getVariantes().stream()
+                .filter(variante -> sku.equalsIgnoreCase(variante.getSku()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "El acabado con SKU " + sku + " no pertenece a este producto")));
     }
 
     private ImagenProducto findImagenDelProducto(Producto producto, UUID imagenId) {

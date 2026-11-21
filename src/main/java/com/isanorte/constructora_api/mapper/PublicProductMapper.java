@@ -71,7 +71,8 @@ public class PublicProductMapper {
 
     public PublicProductImageResponse toImage(ImagenProducto image) {
         return image == null ? null : new PublicProductImageResponse(
-                image.getUrl(), image.getAltText(), image.getEsPrincipal(), image.getOrden());
+                image.getUrl(), image.getAltText(), image.getEsPrincipal(), image.getOrden(),
+                image.getVarianteProducto() == null ? null : image.getVarianteProducto().getSku());
     }
 
     public PublicProductVariantResponse toVariant(VarianteProducto variant, Integer stockMinimo) {

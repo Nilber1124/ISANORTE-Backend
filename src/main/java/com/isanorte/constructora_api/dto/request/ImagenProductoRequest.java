@@ -8,5 +8,6 @@ public record ImagenProductoRequest(
         @NotBlank @Size(max = 500) String url,
         @Size(max = 200) String altText,
         @NotNull Boolean esPrincipal,
-        @NotNull Integer orden) {
+        @NotNull Integer orden,
+        @Size(max = 80) String varianteSku) {
 }
