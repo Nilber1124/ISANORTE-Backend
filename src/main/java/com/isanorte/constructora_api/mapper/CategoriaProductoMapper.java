@@ -19,6 +19,7 @@ public interface CategoriaProductoMapper {
     @Mapping(target = "fechaActualizacion", ignore = true)
     @Mapping(target = "unidadNegocio", ignore = true)
     @Mapping(target = "productos", ignore = true)
+    @Mapping(target = "categoriaPadre", ignore = true)
     CategoriaProducto toEntity(CategoriaProductoRequest request);
 
     @Mapping(target = "id", ignore = true)
@@ -26,9 +27,12 @@ public interface CategoriaProductoMapper {
     @Mapping(target = "fechaActualizacion", ignore = true)
     @Mapping(target = "unidadNegocio", ignore = true)
     @Mapping(target = "productos", ignore = true)
+    @Mapping(target = "categoriaPadre", ignore = true)
     void updateEntity(CategoriaProductoUpdateRequest request, @MappingTarget CategoriaProducto categoria);
 
     CategoriaProductoResponse toResponse(CategoriaProducto categoria);
+
+    CategoriaProductoResponse.CategoriaPadreResumen toCategoriaPadreResumen(CategoriaProducto categoria);
 
     CategoriaProductoResponse.UnidadNegocioResumen toUnidadNegocioResumen(UnidadNegocio unidadNegocio);
 }

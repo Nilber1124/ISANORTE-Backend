@@ -258,21 +258,23 @@ class PublicProductApiIntegrationTest {
                     .andExpect(status().isBadRequest());
         }
 
-        // Precio ascendente con nulls al final.
+        // Los agotados (barato: disponibilidad AGOTADO; caro: su único acabado sin stock) van siempre al final,
+        // sea cual sea el orden; dentro de cada grupo se aplica el orden pedido.
+        // Precio ascendente.
         mockMvc.perform(get(basePath, site.getClave(), unit.getSlug())
                         .param("orden", "PRECIO_ASC").param("size", "10"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.productos.contenido[0].slug").value(barato.getSlug()))
-                .andExpect(jsonPath("$.productos.contenido[1].slug").value(caro.getSlug()))
-                .andExpect(jsonPath("$.productos.contenido[2].slug").value(sinPrecio.getSlug()));
+                .andExpect(jsonPath("$.productos.contenido[0].slug").value(sinPrecio.getSlug()))
+                .andExpect(jsonPath("$.productos.contenido[1].slug").value(barato.getSlug()))
+                .andExpect(jsonPath("$.productos.contenido[2].slug").value(caro.getSlug()));
 
-        // Precio descendente también deja los nulls al final (no primero, como haría el default de Postgres).
+        // Precio descendente.
         mockMvc.perform(get(basePath, site.getClave(), unit.getSlug())
                         .param("orden", "PRECIO_DESC").param("size", "10"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.productos.contenido[0].slug").value(caro.getSlug()))
-                .andExpect(jsonPath("$.productos.contenido[1].slug").value(barato.getSlug()))
-                .andExpect(jsonPath("$.productos.contenido[2].slug").value(sinPrecio.getSlug()));
+                .andExpect(jsonPath("$.productos.contenido[0].slug").value(sinPrecio.getSlug()))
+                .andExpect(jsonPath("$.productos.contenido[1].slug").value(caro.getSlug()))
+                .andExpect(jsonPath("$.productos.contenido[2].slug").value(barato.getSlug()));
 
         // Filtro por categoría.
         mockMvc.perform(get(basePath, site.getClave(), unit.getSlug())

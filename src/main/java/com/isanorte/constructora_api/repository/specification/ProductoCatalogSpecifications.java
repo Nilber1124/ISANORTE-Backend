@@ -19,6 +19,7 @@ import com.isanorte.constructora_api.model.Producto;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Order;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
@@ -67,9 +68,11 @@ public final class ProductoCatalogSpecifications {
             Subquery<UUID> subquery = query.subquery(UUID.class);
             Root<Producto> correlatedRoot = subquery.correlate(root);
             Join<Producto, CategoriaProducto> categoria = correlatedRoot.join("categorias");
+            Join<CategoriaProducto, CategoriaProducto> padre = categoria.join("categoriaPadre", JoinType.LEFT);
             subquery.select(correlatedRoot.get("id"));
+            // Elegir una categoría padre incluye los productos de sus subcategorías.
             subquery.where(cb.and(
-                    categoria.get("slug").in(values),
+                    cb.or(categoria.get("slug").in(values), padre.get("slug").in(values)),
                     cb.isTrue(categoria.get("activo")),
                     cb.or(cb.isNull(categoria.get(FIELD_BUSINESS_UNIT)),
                             cb.equal(categoria.get(FIELD_BUSINESS_UNIT).get("id"), unidadId))));
@@ -216,10 +219,42 @@ public final class ProductoCatalogSpecifications {
     public static Specification<Producto> ordenadoPor(OrdenCatalogoProducto orden) {
         return (root, query, cb) -> {
             if (query.getResultType() != Long.class && query.getResultType() != long.class) {
-                query.orderBy(buildOrders(orden, root, cb));
+                query.orderBy(buildOrders(orden, root, query, cb));
             }
             return cb.conjunction();
         };
+    }
+
+    /**
+     * Los productos agotados van siempre al final, sea cual sea el orden pedido. Agotado = disponibilidad
+     * AGOTADO, o con acabados y ninguno disponible (misma regla que {@code ProductoCardAssembler.stock}).
+     */
+    private static Order agotadosAlFinal(Root<Producto> root, jakarta.persistence.criteria.CriteriaQuery<?> query,
+            CriteriaBuilder cb) {
+        Subquery<UUID> conAcabados = query.subquery(UUID.class);
+        Root<Producto> p1 = conAcabados.correlate(root);
+        conAcabados.select(p1.join("variantes").get("id"));
+
+        Subquery<UUID> conStock = query.subquery(UUID.class);
+        Root<Producto> p2 = conStock.correlate(root);
+        var variante = p2.join("variantes");
+        conStock.select(variante.get("id"));
+        conStock.where(cb.and(
+                cb.or(cb.isNull(variante.get("disponible")), cb.isTrue(variante.get("disponible"))),
+                cb.or(cb.isNull(variante.get("stockActual")), cb.greaterThan(variante.<Integer>get("stockActual"), 0))));
+
+        Predicate agotado = cb.or(
+                cb.equal(root.get("disponibilidad"), EstadoDisponibilidad.AGOTADO),
+                cb.and(cb.exists(conAcabados), cb.not(cb.exists(conStock))));
+        return cb.asc(cb.<Integer>selectCase().when(agotado, 1).otherwise(0));
+    }
+
+    private static List<Order> buildOrders(OrdenCatalogoProducto orden, Root<Producto> root,
+            jakarta.persistence.criteria.CriteriaQuery<?> query, CriteriaBuilder cb) {
+        List<Order> orders = new java.util.ArrayList<>();
+        orders.add(agotadosAlFinal(root, query, cb));
+        orders.addAll(buildOrders(orden, root, cb));
+        return orders;
     }
 
     private static List<Order> buildOrders(OrdenCatalogoProducto orden, Root<Producto> root, CriteriaBuilder cb) {

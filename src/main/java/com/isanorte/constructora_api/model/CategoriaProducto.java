@@ -8,6 +8,9 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -75,6 +78,12 @@ public class CategoriaProducto {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "unidad_negocio_id")
     private UnidadNegocio unidadNegocio;
+
+    /** Categoría de la que cuelga esta subcategoría (null = categoría raíz). Máximo dos niveles. */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "categoria_padre_id")
+    @OnDelete(action = OnDeleteAction.SET_NULL)
+    private CategoriaProducto categoriaPadre;
 
     @Setter(AccessLevel.NONE)
     @Builder.Default

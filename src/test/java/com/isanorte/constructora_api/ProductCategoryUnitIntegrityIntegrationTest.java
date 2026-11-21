@@ -161,7 +161,7 @@ class ProductCategoryUnitIntegrityIntegrationTest {
     private CategoriaProductoResponse category(String seed, UUID unitId) {
         return categoriaService.createResponse(new CategoriaProductoRequest(
                 "Categoría " + seed + random(4), "category-" + seed + "-" + random(5), null, null,
-                true, 0, unitId));
+                true, 0, unitId, null));
     }
 
     private ProductoRequest productRequest(String seed, UUID unitId, Set<UUID> categoryIds) {
@@ -184,7 +184,7 @@ class ProductCategoryUnitIntegrityIntegrationTest {
     private CategoriaProductoUpdateRequest categoryUpdate(CategoriaProductoResponse category, UUID unitId) {
         return new CategoriaProductoUpdateRequest(
                 category.nombre(), category.slug(), category.descripcion(), category.imagenUrl(),
-                Boolean.TRUE.equals(category.activo()), category.orden(), unitId);
+                Boolean.TRUE.equals(category.activo()), category.orden(), unitId, null);
     }
 
     private UnidadNegocio unit(String seed) {

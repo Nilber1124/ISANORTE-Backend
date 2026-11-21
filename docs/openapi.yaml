@@ -2917,6 +2917,7 @@ components:
         activo: {type: boolean, nullable: true}
         orden: {type: integer, format: int32, nullable: true}
         unidadNegocioId: {type: string, format: uuid, nullable: true}
+        categoriaPadreId: {type: string, format: uuid, nullable: true, description: 'Categoría de la que cuelga (solo dos niveles; null = categoría raíz).'}
     ConfiguracionSitioRequest:
       type: object
       required: [empresaId]
@@ -3257,6 +3258,7 @@ components:
         activo: {type: boolean}
         orden: {type: integer, format: int32}
         unidadNegocioId: {type: string, format: uuid, nullable: true}
+        categoriaPadreId: {type: string, format: uuid, nullable: true, description: 'Categoría de la que cuelga (solo dos niveles; null = categoría raíz).'}
     ConfiguracionSitioUpdateRequest:
       type: object
       description: Conserva empresa, secciones, scripts e id.
@@ -3498,6 +3500,10 @@ components:
         activo: {type: boolean, nullable: true}
         orden: {type: integer, format: int32, nullable: true}
         unidadNegocio:
+          allOf:
+            - $ref: '#/components/schemas/NamedSlugSummary'
+          nullable: true
+        categoriaPadre:
           allOf:
             - $ref: '#/components/schemas/NamedSlugSummary'
           nullable: true
@@ -4227,6 +4233,7 @@ components:
                 properties:
                   cantidad: {type: integer, format: int64, minimum: 0}
                   imagenUrl: {type: string, nullable: true}
+                  padreSlug: {type: string, nullable: true, description: 'Slug de la categoría de la que cuelga (null en las raíz). El conteo de un padre incluye sus subcategorías.'}
         productos:
           type: object
           properties:

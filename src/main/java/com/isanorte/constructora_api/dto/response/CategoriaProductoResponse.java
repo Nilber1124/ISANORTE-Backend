@@ -12,8 +12,12 @@ public record CategoriaProductoResponse(
     Boolean activo,
     Integer orden,
     UnidadNegocioResumen unidadNegocio,
+    CategoriaPadreResumen categoriaPadre,
     LocalDateTime fechaCreacion,
     LocalDateTime fechaActualizacion) {
+
+    public record CategoriaPadreResumen(UUID id, String nombre, String slug) {
+    }
 
     public record UnidadNegocioResumen(UUID id, String nombre, String slug) {
     }

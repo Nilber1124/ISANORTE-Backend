@@ -11,5 +11,6 @@ public record CategoriaProductoRequest(
     String imagenUrl,
     Boolean activo,
     Integer orden,
-    UUID unidadNegocioId) {
+    UUID unidadNegocioId,
+    UUID categoriaPadreId) {
 }

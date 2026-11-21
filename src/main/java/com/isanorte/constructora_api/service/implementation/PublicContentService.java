@@ -1,6 +1,8 @@
 package com.isanorte.constructora_api.service.implementation;
 
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.math.BigDecimal;
 import java.util.LinkedHashSet;
 import java.util.LinkedHashMap;
@@ -295,8 +297,8 @@ public class PublicContentService implements IPublicContentService {
                         publicCategories(product, unit).stream().map(publicProductMapper::toCategory).toList(), reviews))
                 .toList();
 
-        List<PublicProductCatalogCategoryResponse> categories = categoriaProductoRepository
-                .findPublicCategoryCounts(unit.getId(), EstadoPublicacion.PUBLICADO);
+        List<PublicProductCatalogCategoryResponse> categories = withParentCategories(unit,
+                categoriaProductoRepository.findPublicCategoryCounts(unit.getId(), EstadoPublicacion.PUBLICADO));
 
         var range = productoRepository.rangoPrecios(unit.getId(), EstadoPublicacion.PUBLICADO);
         return new PublicProductCatalogResponse(
@@ -410,6 +412,51 @@ public class PublicContentService implements IPublicContentService {
     private UnidadNegocio findPublicBusinessUnit(ConfiguracionSitio site, String slug) {
         return unidadRepository.findByEmpresaIdAndSlugAndActivoTrue(site.getEmpresa().getId(), slug)
                 .orElseThrow(() -> new ModelNotFoundException("Unidad pública activa no encontrada con slug: " + slug));
+    }
+
+    /**
+     * Completa el árbol público de categorías: una categoría padre aparece aunque no tenga productos propios
+     * (solo sus subcategorías) y su conteo incluye los productos de sus subcategorías. Orden: raíces por
+     * {@code orden} y cada una seguida de sus subcategorías.
+     */
+    private List<PublicProductCatalogCategoryResponse> withParentCategories(
+            UnidadNegocio unit, List<PublicProductCatalogCategoryResponse> direct) {
+        List<CategoriaProducto> parents = categoriaProductoRepository.findActiveParents(unit.getId());
+        if (parents == null || parents.isEmpty()) {
+            return direct;
+        }
+        Map<String, Integer> position = new HashMap<>();
+        List<CategoriaProducto> allActive = categoriaProductoRepository.findByActivoTrueOrderByOrdenAsc();
+        for (int i = 0; allActive != null && i < allActive.size(); i++) {
+            position.put(allActive.get(i).getSlug(), i);
+        }
+        Comparator<PublicProductCatalogCategoryResponse> byPosition = Comparator.comparing(
+                category -> position.getOrDefault(category.slug(), Integer.MAX_VALUE));
+
+        Set<String> directSlugs = direct.stream().map(PublicProductCatalogCategoryResponse::slug)
+                .collect(Collectors.toSet());
+        Map<String, PublicProductCatalogCategoryResponse> roots = new LinkedHashMap<>();
+        direct.stream().filter(category -> category.padreSlug() == null)
+                .forEach(category -> roots.put(category.slug(), category));
+        for (CategoriaProducto parent : parents) {
+            long total = categoriaProductoRepository.countPublishedInTree(
+                    parent.getId(), unit.getId(), EstadoPublicacion.PUBLICADO);
+            if (total > 0 || directSlugs.contains(parent.getSlug())) {
+                roots.put(parent.getSlug(), new PublicProductCatalogCategoryResponse(
+                        parent.getNombre(), parent.getSlug(), total, parent.getImagenUrl(), null));
+            }
+        }
+
+        List<PublicProductCatalogCategoryResponse> result = new ArrayList<>();
+        roots.values().stream().sorted(byPosition).forEach(root -> {
+            result.add(root);
+            direct.stream().filter(child -> root.slug().equals(child.padreSlug()))
+                    .sorted(byPosition).forEach(result::add);
+        });
+        // Subcategorías cuyo padre no es visible: se muestran como categorías sueltas.
+        direct.stream().filter(child -> child.padreSlug() != null && !roots.containsKey(child.padreSlug()))
+                .sorted(byPosition).forEach(result::add);
+        return result;
     }
 
     private List<CategoriaProducto> publicCategories(Producto product, UnidadNegocio unit) {
