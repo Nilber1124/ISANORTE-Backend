@@ -173,8 +173,11 @@ public final class ProductoCatalogSpecifications {
         return (root, query, cb) -> cb.isTrue(root.get("destacado"));
     }
 
+    /** COMPRAR o COTIZAR incluyen también los productos que admiten ambas vías. */
     public static Specification<Producto> modalidad(ModalidadVenta modalidad) {
-        return (root, query, cb) -> modalidad == null ? cb.conjunction() : cb.equal(root.get("modalidad"), modalidad);
+        return (root, query, cb) -> modalidad == null || modalidad == ModalidadVenta.AMBAS
+                ? cb.conjunction()
+                : root.get("modalidad").in(modalidad, ModalidadVenta.AMBAS);
     }
 
     public static Specification<Producto> facilInstalacion(Boolean facil) {

@@ -1721,7 +1721,7 @@ paths:
         - {name: soloDisponible, in: query, schema: {type: boolean}}
         - {name: soloDestacados, in: query, schema: {type: boolean}}
         - {name: orden, in: query, schema: {type: string, enum: [DESTACADOS, PRECIO_ASC, PRECIO_DESC, NOMBRE_ASC]}}
-        - {name: modalidad, in: query, schema: {type: string, enum: [COMPRAR, COTIZAR]}}
+        - {name: modalidad, in: query, schema: {type: string, enum: [COMPRAR, COTIZAR, AMBAS]}}
         - {name: facilInstalacion, in: query, schema: {type: boolean}}
         - {name: precioMin, in: query, schema: {type: number, minimum: 0}}
         - {name: precioMax, in: query, schema: {type: number, minimum: 0}, description: Mayor o igual a precioMin cuando se envían ambos.}
@@ -4272,7 +4272,7 @@ components:
         categorias:
           type: array
           items: {$ref: '#/components/schemas/PublicProductCategoryResponse'}
-        modalidad: {type: string, enum: [COMPRAR, COTIZAR], nullable: true}
+        modalidad: {type: string, enum: [COMPRAR, COTIZAR, AMBAS], nullable: true}
         unidadVenta: {type: string, enum: [M2, UNIDAD, CAJA, ML], nullable: true}
         plazoEntrega: {type: string, nullable: true}
         facilInstalacion: {type: boolean, nullable: true}
@@ -4322,7 +4322,7 @@ components:
         configuracionCalculo:
           allOf: [{$ref: '#/components/schemas/PublicProductCalculationResponse'}]
           nullable: true
-        modalidad: {type: string, enum: [COMPRAR, COTIZAR], nullable: true}
+        modalidad: {type: string, enum: [COMPRAR, COTIZAR, AMBAS], nullable: true}
         unidadVenta: {type: string, enum: [M2, UNIDAD, CAJA, ML], nullable: true}
         plazoEntrega: {type: string, nullable: true}
         facilInstalacion: {type: boolean, nullable: true}
@@ -4360,7 +4360,7 @@ components:
         precioBase: {type: number, nullable: true}
         precioAnterior: {type: number, nullable: true}
         descuentoPorcentaje: {type: number, nullable: true}
-        modalidad: {type: string, enum: [COMPRAR, COTIZAR]}
+        modalidad: {type: string, enum: [COMPRAR, COTIZAR, AMBAS]}
         unidadVenta: {type: string, enum: [M2, UNIDAD, CAJA, ML]}
         plazoEntrega: {type: string, nullable: true}
         valoracion: {type: number, multipleOf: 0.1, nullable: true}

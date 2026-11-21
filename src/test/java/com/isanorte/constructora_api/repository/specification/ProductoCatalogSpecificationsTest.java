@@ -47,7 +47,7 @@ class ProductoCatalogSpecificationsTest {
         ProductoCatalogSpecifications.modalidad(ModalidadVenta.COTIZAR).toPredicate(producto, null, criteria);
         ProductoCatalogSpecifications.facilInstalacion(false).toPredicate(producto, null, criteria);
 
-        verify(criteria).equal(modalidad, ModalidadVenta.COTIZAR);
+        verify(modalidad).in(ModalidadVenta.COTIZAR, ModalidadVenta.AMBAS);
         verify(criteria).equal(facil, false);
     }
 
@@ -104,5 +104,14 @@ class ProductoCatalogSpecificationsTest {
     @Test
     void limitaLaCantidadDePalabrasDeUnaBusqueda() {
         assertEquals(6, ProductoCatalogSpecifications.terminosDeBusqueda("a1 b2 c3 d4 e5 f6 g7 h8 i9").size());
+    }
+
+    @Test
+    void ambasNoRestringePorModalidad() {
+        Predicate sinFiltro = mock(Predicate.class);
+        when(criteria.conjunction()).thenReturn(sinFiltro);
+
+        assertSame(sinFiltro,
+                ProductoCatalogSpecifications.modalidad(ModalidadVenta.AMBAS).toPredicate(producto, null, criteria));
     }
 }

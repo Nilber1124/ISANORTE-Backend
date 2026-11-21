@@ -112,7 +112,7 @@ public class Producto {
     @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 10)
-    private ModalidadVenta modalidad = ModalidadVenta.COTIZAR;
+    private ModalidadVenta modalidad = ModalidadVenta.AMBAS;
 
     @Builder.Default
     @Enumerated(EnumType.STRING)
@@ -390,7 +390,7 @@ public class Producto {
             retiroEnTienda = false;
         }
         if (modalidad == null) {
-            modalidad = ModalidadVenta.COTIZAR;
+            modalidad = ModalidadVenta.AMBAS;
         }
         if (unidadVenta == null) {
             unidadVenta = UnidadVenta.UNIDAD;
