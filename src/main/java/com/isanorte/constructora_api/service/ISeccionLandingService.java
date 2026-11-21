@@ -8,9 +8,7 @@ import com.isanorte.constructora_api.dto.request.SeccionLandingUpdateRequest;
 import com.isanorte.constructora_api.dto.request.VisibleRequest;
 import com.isanorte.constructora_api.dto.response.SeccionLandingResponse;
 import com.isanorte.constructora_api.dto.request.HeroSceneRequest;
-import com.isanorte.constructora_api.dto.request.AccionLandingRequest;
 import com.isanorte.constructora_api.dto.response.HeroSceneResponse;
-import com.isanorte.constructora_api.dto.response.AccionLandingResponse;
 import com.isanorte.constructora_api.model.SeccionLanding;
 
 public interface ISeccionLandingService extends IGenericService<SeccionLanding, UUID> {
@@ -34,7 +32,4 @@ public interface ISeccionLandingService extends IGenericService<SeccionLanding, 
     HeroSceneResponse createEscena(UUID seccionId, HeroSceneRequest request);
     HeroSceneResponse updateEscena(UUID seccionId, UUID escenaId, HeroSceneRequest request);
     void deleteEscena(UUID seccionId, UUID escenaId);
-    AccionLandingResponse createAccion(UUID seccionId, AccionLandingRequest request);
-    AccionLandingResponse updateAccion(UUID seccionId, UUID accionId, AccionLandingRequest request);
-    void deleteAccion(UUID seccionId, UUID accionId);
 }

@@ -30,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.isanorte.constructora_api.enums.TipoPaginaSeo;
 import com.isanorte.constructora_api.enums.TipoPaginaPublica;
 import com.isanorte.constructora_api.enums.TipoSeccionLanding;
+import com.isanorte.constructora_api.model.AccionLanding;
 import com.isanorte.constructora_api.model.ConfiguracionSitio;
 import com.isanorte.constructora_api.model.BeneficioServicio;
 import com.isanorte.constructora_api.model.ContenidoPagina;
@@ -149,60 +150,32 @@ class DynamicContentApiIntegrationTest {
     }
 
     @Test
-    void crudAccionRechazaEnlacePeligrosoYOwnership() throws Exception {
-        SeccionLanding hero = section(site("action"), TipoSeccionLanding.HERO, 0, true);
-        SeccionLanding other = section(site("action-other"), TipoSeccionLanding.HERO, 0, true);
-        Map<String, Object> body = Map.of("texto", "Ver", "enlace", "/nosotros", "orden", 0, "activo", true);
-        UUID id = id(mockMvc.perform(post("/api/secciones-landing/{id}/acciones", hero.getId())
-                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
-                .contentType(MediaType.APPLICATION_JSON).content(json(body))).andExpect(status().isCreated()).andReturn());
-        mockMvc.perform(put("/api/secciones-landing/{id}/acciones/{child}", hero.getId(), id)
-                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
-                .contentType(MediaType.APPLICATION_JSON).content(json(Map.of(
-                        "texto", "Conocer", "enlace", "https://isanorte.com/contacto",
-                        "orden", 1, "activo", false))))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.texto").value("Conocer"))
-                .andExpect(jsonPath("$.activo").value(false));
+    void lasAccionesDeLaLandingNoSeAdministran() throws Exception {
+        SeccionLanding hero = section(site("action-fixed"), TipoSeccionLanding.HERO, 0, true);
+        AccionLanding accion = AccionLanding.builder().texto("Ver proyectos").enlace("/proyectos").orden(0)
+                .activo(true).build();
+        hero.addAccion(accion);
+        seccionRepository.saveAndFlush(hero);
+        Map<String, Object> body = Map.of("texto", "Otro", "enlace", "/otro", "orden", 0, "activo", true);
+
         mockMvc.perform(post("/api/secciones-landing/{id}/acciones", hero.getId())
                 .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
-                .contentType(MediaType.APPLICATION_JSON).content(json(Map.of(
-                        "texto", "X", "enlace", "javascript:alert(1)", "orden", 1, "activo", true))))
-                .andExpect(status().isBadRequest());
-        mockMvc.perform(put("/api/secciones-landing/{id}/acciones/{child}", other.getId(), id)
+                .contentType(MediaType.APPLICATION_JSON).content(json(body)))
+                .andExpect(status().is4xxClientError());
+        mockMvc.perform(put("/api/secciones-landing/{id}/acciones/{child}", hero.getId(), accion.getId())
                 .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
-                .contentType(MediaType.APPLICATION_JSON).content(json(body))).andExpect(status().isBadRequest());
-        mockMvc.perform(delete("/api/secciones-landing/{id}/acciones/{child}", hero.getId(), id)
+                .contentType(MediaType.APPLICATION_JSON).content(json(body)))
+                .andExpect(status().is4xxClientError());
+        mockMvc.perform(delete("/api/secciones-landing/{id}/acciones/{child}", hero.getId(), accion.getId())
                 .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR")))
-                .andExpect(status().isNoContent());
-    }
+                .andExpect(status().is4xxClientError());
 
-    @Test
-    void accionAceptaEsquemasPermitidosYAplicaLimitesActivos() throws Exception {
-        SeccionLanding services = section(site("action-links"), TipoSeccionLanding.SERVICIOS, 0, true);
-        for (String link : List.of("/servicios", "#contacto", "https://isanorte.com", "mailto:ventas@isanorte.com",
-                "tel:+51999999999")) {
-            mockMvc.perform(post("/api/secciones-landing/{id}/acciones", services.getId())
-                    .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
-                    .contentType(MediaType.APPLICATION_JSON).content(json(Map.of(
-                            "texto", "Abrir", "enlace", link, "orden", 0, "activo", false))))
-                    .andExpect(status().isCreated());
-        }
-        for (String link : List.of("//example.com", "data:text/html,x", "vbscript:msgbox(1)", "https://")) {
-            mockMvc.perform(post("/api/secciones-landing/{id}/acciones", services.getId())
-                    .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
-                    .contentType(MediaType.APPLICATION_JSON).content(json(Map.of(
-                            "texto", "Abrir", "enlace", link, "orden", 0, "activo", false))))
-                    .andExpect(status().isBadRequest());
-        }
-
-        SeccionLanding cta = section(site("action-cta"), TipoSeccionLanding.CTA, 0, true);
-        Map<String, Object> active = Map.of("texto", "Primaria", "enlace", "/contacto", "orden", 0, "activo", true);
-        mockMvc.perform(post("/api/secciones-landing/{id}/acciones", cta.getId())
-                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
-                .contentType(MediaType.APPLICATION_JSON).content(json(active))).andExpect(status().isCreated());
-        mockMvc.perform(post("/api/secciones-landing/{id}/acciones", cta.getId())
-                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
-                .contentType(MediaType.APPLICATION_JSON).content(json(active))).andExpect(status().isBadRequest());
+        // Siguen visibles, sin cambios, en la lectura de la sección.
+        mockMvc.perform(get("/api/secciones-landing/{id}", hero.getId())
+                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))).andExpect(status().isOk())
+                .andExpect(jsonPath("$.acciones.length()").value(1))
+                .andExpect(jsonPath("$.acciones[0].texto").value("Ver proyectos"))
+                .andExpect(jsonPath("$.acciones[0].enlace").value("/proyectos"));
     }
 
     @Test
@@ -216,16 +189,9 @@ class DynamicContentApiIntegrationTest {
         mockMvc.perform(post("/api/secciones-landing/{id}/escenas", hero.getId())
                 .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
                 .contentType(MediaType.APPLICATION_JSON).content(json(sceneFirst))).andExpect(status().isCreated());
-        mockMvc.perform(post("/api/secciones-landing/{id}/acciones", hero.getId())
-                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
-                .contentType(MediaType.APPLICATION_JSON).content(json(Map.of(
-                        "texto", "Segunda", "enlace", "/dos", "orden", 2, "activo", true))))
-                .andExpect(status().isCreated());
-        mockMvc.perform(post("/api/secciones-landing/{id}/acciones", hero.getId())
-                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
-                .contentType(MediaType.APPLICATION_JSON).content(json(Map.of(
-                        "texto", "Primera", "enlace", "/uno", "orden", 0, "activo", true))))
-                .andExpect(status().isCreated());
+        hero.addAccion(AccionLanding.builder().texto("Segunda").enlace("/dos").orden(2).activo(true).build());
+        hero.addAccion(AccionLanding.builder().texto("Primera").enlace("/uno").orden(0).activo(true).build());
+        seccionRepository.saveAndFlush(hero);
 
         mockMvc.perform(get("/api/secciones-landing/{id}", hero.getId())
                 .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))).andExpect(status().isOk())
@@ -471,16 +437,9 @@ class DynamicContentApiIntegrationTest {
         visible.addEscena(HeroScene.builder().imagenUrl("/active.webp").orden(0).activo(true).build());
         visible.addEscena(HeroScene.builder().imagenUrl("/hidden.webp").orden(1).activo(false).build());
         seccionRepository.saveAndFlush(visible);
-        mockMvc.perform(post("/api/secciones-landing/{id}/acciones", visible.getId())
-                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
-                .contentType(MediaType.APPLICATION_JSON).content(json(Map.of(
-                        "texto", "Activa", "enlace", "/contacto", "orden", 0, "activo", true))))
-                .andExpect(status().isCreated());
-        mockMvc.perform(post("/api/secciones-landing/{id}/acciones", visible.getId())
-                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
-                .contentType(MediaType.APPLICATION_JSON).content(json(Map.of(
-                        "texto", "Oculta", "enlace", "/oculta", "orden", 1, "activo", false))))
-                .andExpect(status().isCreated());
+        visible.addAccion(AccionLanding.builder().texto("Activa").enlace("/contacto").orden(0).activo(true).build());
+        visible.addAccion(AccionLanding.builder().texto("Oculta").enlace("/oculta").orden(1).activo(false).build());
+        seccionRepository.saveAndFlush(visible);
         service("home-active", true, true, 0); service("home-hidden", true, false, 1);
         project("project-active", true, true, 0); project("project-hidden", false, true, 1);
         UnidadNegocio highlighted = unit(site.getEmpresa(), "highlighted", true, true, 0);

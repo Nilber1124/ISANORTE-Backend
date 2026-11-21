@@ -1,10 +1,7 @@
 package com.isanorte.constructora_api.service.implementation;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Objects;
-import java.util.EnumSet;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -15,15 +12,11 @@ import com.isanorte.constructora_api.dto.request.SeccionLandingUpdateRequest;
 import com.isanorte.constructora_api.dto.request.VisibleRequest;
 import com.isanorte.constructora_api.dto.response.SeccionLandingResponse;
 import com.isanorte.constructora_api.dto.request.HeroSceneRequest;
-import com.isanorte.constructora_api.dto.request.AccionLandingRequest;
 import com.isanorte.constructora_api.dto.response.HeroSceneResponse;
-import com.isanorte.constructora_api.dto.response.AccionLandingResponse;
 import com.isanorte.constructora_api.enums.TipoSeccionLanding;
 import com.isanorte.constructora_api.mapper.DynamicContentMapper;
 import com.isanorte.constructora_api.model.HeroScene;
-import com.isanorte.constructora_api.model.AccionLanding;
 import com.isanorte.constructora_api.repository.HeroSceneRepository;
-import com.isanorte.constructora_api.repository.AccionLandingRepository;
 import com.isanorte.constructora_api.exception.ModelNotFoundException;
 import com.isanorte.constructora_api.mapper.SeccionLandingMapper;
 import com.isanorte.constructora_api.model.ConfiguracionSitio;
@@ -44,7 +37,6 @@ public class SeccionLandingService extends GenericService<SeccionLanding, UUID> 
     private final SeccionLandingMapper seccionLandingMapper;
     private final DynamicContentMapper dynamicContentMapper;
     private final HeroSceneRepository heroSceneRepository;
-    private final AccionLandingRepository accionLandingRepository;
 
     @Override
     protected IGenericRepository<SeccionLanding, UUID> getRepo() {
@@ -169,43 +161,6 @@ public class SeccionLandingService extends GenericService<SeccionLanding, UUID> 
         seccionLandingRepository.flush();
     }
 
-    @Override
-    @Transactional
-    public AccionLandingResponse createAccion(UUID seccionId, AccionLandingRequest request) {
-        SeccionLanding seccion = findSectionForAdmin(seccionId);
-        requireActionCompatible(seccion);
-        validateLink(request.enlace());
-        validateActiveActionLimit(seccion, null, request.activo());
-        AccionLanding accion = dynamicContentMapper.toEntity(request);
-        seccion.addAccion(accion);
-        return dynamicContentMapper.toResponse(accionLandingRepository.saveAndFlush(accion));
-    }
-
-    @Override
-    @Transactional
-    public AccionLandingResponse updateAccion(UUID seccionId, UUID accionId, AccionLandingRequest request) {
-        SeccionLanding seccion = findSectionForAdmin(seccionId);
-        requireActionCompatible(seccion);
-        AccionLanding accion = accionLandingRepository.findById(accionId)
-                .orElseThrow(() -> new ModelNotFoundException("Acción landing no encontrada con ID: " + accionId));
-        requireOwnership(seccion, accion.getSeccionLanding(), "acción", accionId);
-        validateLink(request.enlace());
-        validateActiveActionLimit(seccion, accionId, request.activo());
-        dynamicContentMapper.update(request, accion);
-        return dynamicContentMapper.toResponse(accionLandingRepository.saveAndFlush(accion));
-    }
-
-    @Override
-    @Transactional
-    public void deleteAccion(UUID seccionId, UUID accionId) {
-        SeccionLanding seccion = findSectionForAdmin(seccionId);
-        AccionLanding accion = accionLandingRepository.findById(accionId)
-                .orElseThrow(() -> new ModelNotFoundException("Acción landing no encontrada con ID: " + accionId));
-        requireOwnership(seccion, accion.getSeccionLanding(), "acción", accionId);
-        seccion.removeAccion(accion);
-        seccionLandingRepository.flush();
-    }
-
     private SeccionLanding findSectionForAdmin(UUID id) {
         return seccionLandingRepository.findById(id)
                 .orElseThrow(() -> new ModelNotFoundException("Sección landing no encontrada con ID: " + id));
@@ -217,76 +172,10 @@ public class SeccionLandingService extends GenericService<SeccionLanding, UUID> 
         }
     }
 
-    private void requireActionCompatible(SeccionLanding seccion) {
-        if (!EnumSet.of(TipoSeccionLanding.HERO, TipoSeccionLanding.SERVICIOS,
-                TipoSeccionLanding.PROYECTOS, TipoSeccionLanding.CTA,
-                TipoSeccionLanding.UNIDAD_NEGOCIO).contains(seccion.getTipo())) {
-            throw new IllegalArgumentException("El tipo de sección no admite acciones landing");
-        }
-    }
-
     private void requireOwnership(SeccionLanding expected, SeccionLanding actual, String resource, UUID id) {
         if (actual == null || !Objects.equals(expected.getId(), actual.getId())) {
             throw new IllegalArgumentException("La " + resource + " " + id + " no pertenece a la sección " + expected.getId());
         }
-    }
-
-    private void validateLink(String link) {
-        String value = link.strip();
-        String normalized = value.toLowerCase();
-        boolean hasUnsafeCharacters = value.chars().anyMatch(Character::isISOControl)
-                || value.chars().anyMatch(Character::isWhitespace);
-        if (hasUnsafeCharacters || !isAllowedLink(value, normalized)) invalidLink();
-    }
-
-    private static boolean isAllowedLink(String value, String normalized) {
-        return isInternalPath(value) || value.startsWith("#") || isContactLink(value, normalized)
-                || isSecureWebLink(value, normalized);
-    }
-
-    private static boolean isInternalPath(String value) {
-        return value.startsWith("/") && !value.startsWith("//") && !value.startsWith("/\\");
-    }
-
-    private static boolean isContactLink(String value, String normalized) {
-        boolean contactScheme = normalized.startsWith("mailto:") || normalized.startsWith("tel:");
-        return contactScheme && !value.substring(value.indexOf(':') + 1).isBlank();
-    }
-
-    private static boolean isSecureWebLink(String value, String normalized) {
-        if (!normalized.startsWith("https://")) return false;
-        try {
-            URI uri = new URI(value);
-            return "https".equalsIgnoreCase(uri.getScheme()) && uri.getHost() != null;
-        } catch (URISyntaxException exception) {
-            return false;
-        }
-    }
-
-    private void invalidLink() {
-        throw new IllegalArgumentException(
-                "El enlace debe ser una ruta interna, fragmento, URL https, mailto o tel válido");
-    }
-
-    private void validateActiveActionLimit(SeccionLanding section, UUID currentId, Boolean active) {
-        if (!Boolean.TRUE.equals(active)) return;
-        long count = section.getAcciones().stream()
-                .filter(action -> Boolean.TRUE.equals(action.getActivo()))
-                .filter(action -> currentId == null || !Objects.equals(action.getId(), currentId))
-                .count();
-        int maximum = maximumActiveActions(section.getTipo());
-        if (count >= maximum) {
-            throw new IllegalArgumentException("La sección " + section.getTipo()
-                    + " admite como máximo " + maximum + " acciones activas");
-        }
-    }
-
-    private static int maximumActiveActions(TipoSeccionLanding type) {
-        return switch (type) {
-            case HERO -> 2;
-            case CTA -> 1;
-            default -> Integer.MAX_VALUE;
-        };
     }
 
     private void initializeForResponse(SeccionLanding seccion) {

@@ -21,9 +21,7 @@ import com.isanorte.constructora_api.dto.request.VisibleRequest;
 import com.isanorte.constructora_api.dto.response.SeccionLandingResponse;
 import com.isanorte.constructora_api.service.ISeccionLandingService;
 import com.isanorte.constructora_api.dto.request.HeroSceneRequest;
-import com.isanorte.constructora_api.dto.request.AccionLandingRequest;
 import com.isanorte.constructora_api.dto.response.HeroSceneResponse;
-import com.isanorte.constructora_api.dto.response.AccionLandingResponse;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -83,24 +81,6 @@ public class SeccionLandingController {
     @DeleteMapping("/{seccionId}/escenas/{escenaId}")
     public ResponseEntity<Void> deleteEscena(@PathVariable UUID seccionId, @PathVariable UUID escenaId) {
         seccionLandingService.deleteEscena(seccionId, escenaId);
-        return ResponseEntity.noContent().build();
-    }
-
-    @PostMapping("/{seccionId}/acciones")
-    public ResponseEntity<AccionLandingResponse> createAccion(@PathVariable UUID seccionId,
-            @Valid @RequestBody AccionLandingRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(seccionLandingService.createAccion(seccionId, request));
-    }
-
-    @PutMapping("/{seccionId}/acciones/{accionId}")
-    public ResponseEntity<AccionLandingResponse> updateAccion(@PathVariable UUID seccionId,
-            @PathVariable UUID accionId, @Valid @RequestBody AccionLandingRequest request) {
-        return ResponseEntity.ok(seccionLandingService.updateAccion(seccionId, accionId, request));
-    }
-
-    @DeleteMapping("/{seccionId}/acciones/{accionId}")
-    public ResponseEntity<Void> deleteAccion(@PathVariable UUID seccionId, @PathVariable UUID accionId) {
-        seccionLandingService.deleteAccion(seccionId, accionId);
         return ResponseEntity.noContent().build();
     }
 }

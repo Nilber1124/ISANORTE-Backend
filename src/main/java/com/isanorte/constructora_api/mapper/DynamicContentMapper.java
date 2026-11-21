@@ -5,7 +5,6 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;
 
-import com.isanorte.constructora_api.dto.request.AccionLandingRequest;
 import com.isanorte.constructora_api.dto.request.BeneficioServicioRequest;
 import com.isanorte.constructora_api.dto.request.CatalogoRequest;
 import com.isanorte.constructora_api.dto.request.ContenidoPaginaRequest;
@@ -16,7 +15,6 @@ import com.isanorte.constructora_api.dto.request.RecursoUnidadNegocioRequest;
 import com.isanorte.constructora_api.dto.request.SeoPaginaRequest;
 import com.isanorte.constructora_api.dto.request.SeoPaginaUpdateRequest;
 import com.isanorte.constructora_api.dto.request.SolicitudContactoCreateRequest;
-import com.isanorte.constructora_api.dto.response.AccionLandingResponse;
 import com.isanorte.constructora_api.dto.response.BeneficioServicioResponse;
 import com.isanorte.constructora_api.dto.response.CatalogoResponse;
 import com.isanorte.constructora_api.dto.response.ContenidoPaginaResponse;
@@ -26,7 +24,6 @@ import com.isanorte.constructora_api.dto.response.RecursoUnidadNegocioResponse;
 import com.isanorte.constructora_api.dto.response.SeoPaginaResponse;
 import com.isanorte.constructora_api.dto.response.SolicitudContactoPublicResponse;
 import com.isanorte.constructora_api.dto.response.SolicitudContactoResponse;
-import com.isanorte.constructora_api.model.AccionLanding;
 import com.isanorte.constructora_api.model.BeneficioServicio;
 import com.isanorte.constructora_api.model.Catalogo;
 import com.isanorte.constructora_api.model.ContenidoPagina;
@@ -46,14 +43,6 @@ public interface DynamicContentMapper {
     @Mapping(target = "fechaCreacion", ignore = true) @Mapping(target = "fechaActualizacion", ignore = true)
     void update(HeroSceneRequest request, @MappingTarget HeroScene entity);
     HeroSceneResponse toResponse(HeroScene entity);
-
-    @Mapping(target = "id", ignore = true) @Mapping(target = "seccionLanding", ignore = true)
-    @Mapping(target = "fechaCreacion", ignore = true) @Mapping(target = "fechaActualizacion", ignore = true)
-    AccionLanding toEntity(AccionLandingRequest request);
-    @Mapping(target = "id", ignore = true) @Mapping(target = "seccionLanding", ignore = true)
-    @Mapping(target = "fechaCreacion", ignore = true) @Mapping(target = "fechaActualizacion", ignore = true)
-    void update(AccionLandingRequest request, @MappingTarget AccionLanding entity);
-    AccionLandingResponse toResponse(AccionLanding entity);
 
     @Mapping(target = "id", ignore = true) @Mapping(target = "servicio", ignore = true)
     @Mapping(target = "fechaCreacion", ignore = true) @Mapping(target = "fechaActualizacion", ignore = true)
