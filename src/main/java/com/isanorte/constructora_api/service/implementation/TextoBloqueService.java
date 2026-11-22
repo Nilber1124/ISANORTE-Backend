@@ -19,7 +19,7 @@ import lombok.RequiredArgsConstructor;
 public class TextoBloqueService {
 
     /** Bloques de la Home cuyo encabezado se puede editar. */
-    public static final Set<String> CLAVES = Set.of("garantias", "testimonios", "preguntas", "proceso");
+    public static final Set<String> CLAVES = Set.of("garantias", "testimonios", "preguntas", "proceso", "equipo", "credenciales", "cobertura");
 
     private final TextoBloqueRepository repository;
 
