@@ -60,7 +60,7 @@ public class PublicConfianzaService implements IPublicConfianzaService {
                         .toList(),
                 garantiaRepository.findByActivoTrueOrderByOrdenAscIdAsc().stream()
                         .map(item -> new PublicConfianzaResponse.Garantia(
-                                item.getTitulo(), item.getTexto(), Boolean.TRUE.equals(item.getEnHero())))
+                                item.getId(), item.getTitulo(), item.getTexto(), Boolean.TRUE.equals(item.getEnHero())))
                         .toList(),
                 pasoRepository.findByActivoTrueOrderByOrdenAscIdAsc().stream()
                         .map(item -> new PublicConfianzaResponse.Paso(item.getTitulo(), item.getTexto()))

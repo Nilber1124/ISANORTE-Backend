@@ -1,6 +1,7 @@
 package com.isanorte.constructora_api.dto.response;
 
 import java.util.List;
+import java.util.UUID;
 
 /** Contenido público que construye la confianza del sitio: solo elementos activos y ordenados. */
 public record PublicConfianzaResponse(
@@ -34,7 +35,8 @@ public record PublicConfianzaResponse(
             String fotoUrl, String fotoAlt) {
     }
 
-    public record Garantia(String titulo, String texto, boolean enHero) {
+    /** El id permite al admin saber qué garantía se editó al tocarla en la vista previa. */
+    public record Garantia(UUID id, String titulo, String texto, boolean enHero) {
     }
 
     public record Paso(String titulo, String texto) {
