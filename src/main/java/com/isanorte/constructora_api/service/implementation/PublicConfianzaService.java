@@ -14,6 +14,7 @@ import com.isanorte.constructora_api.repository.PasoProcesoRepository;
 import com.isanorte.constructora_api.repository.PoliticaRepository;
 import com.isanorte.constructora_api.repository.ProyectoGaleriaRepository;
 import com.isanorte.constructora_api.repository.TestimonioRepository;
+import com.isanorte.constructora_api.repository.TextoBloqueRepository;
 import com.isanorte.constructora_api.service.IPublicConfianzaService;
 
 import lombok.RequiredArgsConstructor;
@@ -31,6 +32,7 @@ public class PublicConfianzaService implements IPublicConfianzaService {
     private final PasoProcesoRepository pasoRepository;
     private final ProyectoGaleriaRepository galeriaRepository;
     private final PoliticaRepository politicaRepository;
+    private final TextoBloqueRepository textoBloqueRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -41,7 +43,7 @@ public class PublicConfianzaService implements IPublicConfianzaService {
         return new PublicConfianzaResponse(
                 faqRepository.findByActivoTrueOrderByOrdenAscIdAsc().stream()
                         .map(item -> new PublicConfianzaResponse.Faq(
-                                item.getPregunta(), item.getRespuesta(), item.getAmbito()))
+                                item.getId(), item.getPregunta(), item.getRespuesta(), item.getAmbito()))
                         .toList(),
                 equipoRepository.findByActivoTrueOrderByOrdenAscIdAsc().stream()
                         .map(item -> new PublicConfianzaResponse.Miembro(
@@ -55,7 +57,7 @@ public class PublicConfianzaService implements IPublicConfianzaService {
                         .toList(),
                 testimonioRepository.findByActivoTrueOrderByOrdenAscIdAsc().stream()
                         .map(item -> new PublicConfianzaResponse.Testimonio(
-                                item.getAutor(), item.getCargo(), item.getTexto(), item.getProyectoSlug(),
+                                item.getId(), item.getAutor(), item.getCargo(), item.getTexto(), item.getProyectoSlug(),
                                 item.getFotoUrl(), item.getFotoAlt()))
                         .toList(),
                 garantiaRepository.findByActivoTrueOrderByOrdenAscIdAsc().stream()
@@ -63,7 +65,7 @@ public class PublicConfianzaService implements IPublicConfianzaService {
                                 item.getId(), item.getTitulo(), item.getTexto(), Boolean.TRUE.equals(item.getEnHero())))
                         .toList(),
                 pasoRepository.findByActivoTrueOrderByOrdenAscIdAsc().stream()
-                        .map(item -> new PublicConfianzaResponse.Paso(item.getTitulo(), item.getTexto()))
+                        .map(item -> new PublicConfianzaResponse.Paso(item.getId(), item.getTitulo(), item.getTexto()))
                         .toList(),
                 galeriaRepository.findByActivoTrueOrderByOrdenAscIdAsc().stream()
                         .map(item -> new PublicConfianzaResponse.ImagenProyecto(
@@ -72,6 +74,10 @@ public class PublicConfianzaService implements IPublicConfianzaService {
                 politicaRepository.findByActivoTrueOrderByOrdenAscIdAsc().stream()
                         .map(item -> new PublicConfianzaResponse.Politica(
                                 item.getSlug(), item.getTitulo(), item.getContenido()))
+                        .toList(),
+                textoBloqueRepository.findAllByOrderByClaveAsc().stream()
+                        .map(item -> new PublicConfianzaResponse.TextoBloque(
+                                item.getClave(), item.getEtiqueta(), item.getTitulo(), item.getSubtitulo()))
                         .toList());
     }
 }

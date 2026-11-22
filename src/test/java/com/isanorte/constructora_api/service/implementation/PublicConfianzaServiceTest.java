@@ -39,6 +39,7 @@ class PublicConfianzaServiceTest {
     @Mock private PasoProcesoRepository pasoRepository;
     @Mock private com.isanorte.constructora_api.repository.ProyectoGaleriaRepository galeriaRepository;
     @Mock private com.isanorte.constructora_api.repository.PoliticaRepository politicaRepository;
+    @Mock private com.isanorte.constructora_api.repository.TextoBloqueRepository textoBloqueRepository;
 
     @InjectMocks
     private PublicConfianzaService service;
