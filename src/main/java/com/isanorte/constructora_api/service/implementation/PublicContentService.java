@@ -470,7 +470,7 @@ public class PublicContentService implements IPublicContentService {
 
     private PublicServiceResponse toPublicService(com.isanorte.constructora_api.model.Servicio service) {
         return new PublicServiceResponse(
-                service.getNombre(), service.getSlug(), service.getEtiqueta(), service.getResumen(),
+                service.getId(), service.getNombre(), service.getSlug(), service.getEtiqueta(), service.getResumen(),
                 service.getDescripcion(), service.getImagenUrl(), service.getImagenAlt(), service.getOrden(),
                 service.getBeneficios().stream()
                         .filter(benefit -> Boolean.TRUE.equals(benefit.getActivo()))
@@ -501,7 +501,7 @@ public class PublicContentService implements IPublicContentService {
 
     private PublicProjectResponse toPublicProject(com.isanorte.constructora_api.model.Proyecto project) {
         return new PublicProjectResponse(
-                project.getNombre(), project.getSlug(), project.getDescripcion(), project.getUbicacion(),
+                String.valueOf(project.getId()), project.getNombre(), project.getSlug(), project.getDescripcion(), project.getUbicacion(),
                 project.getFechaProyecto(), project.getAreaM2(), project.getPlazoMeses(), project.getAlcance(),
                 project.getTipoObra(), project.getOrden(),
                 project.getImagenUrl() != null

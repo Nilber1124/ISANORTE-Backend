@@ -33,7 +33,7 @@ class PublicContentControllerTest {
     void retornaProyectoPublicoDelegandoEnElContratoDelServicio() {
         IPublicContentService service = mock(IPublicContentService.class);
         PublicProjectResponse project = new PublicProjectResponse(
-                "Proyecto", "proyecto", "Descripcion", "Lima", "2026", null, null, null, null, 1, List.of(), List.of());
+                "p-1", "Proyecto", "proyecto", "Descripcion", "Lima", "2026", null, null, null, null, 1, List.of(), List.of());
         when(service.findPublicProject("isanorte", "proyecto")).thenReturn(project);
         PublicContentController controller = controllerWith(service);
 
