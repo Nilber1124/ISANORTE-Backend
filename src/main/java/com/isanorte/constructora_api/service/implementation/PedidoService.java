@@ -17,6 +17,10 @@ import com.isanorte.constructora_api.dto.response.PedidoResponse;
 import com.isanorte.constructora_api.dto.response.PublicPedidoResponse;
 import com.isanorte.constructora_api.enums.EstadoDisponibilidad;
 import com.isanorte.constructora_api.enums.EstadoPedido;
+import com.isanorte.constructora_api.enums.MetodoEntrega;
+import com.isanorte.constructora_api.enums.TipoNotificacion;
+import com.isanorte.constructora_api.service.Notificador;
+import com.isanorte.constructora_api.service.TiendaConfig;
 import com.isanorte.constructora_api.enums.EstadoPublicacion;
 import com.isanorte.constructora_api.enums.TipoMovimientoStock;
 import com.isanorte.constructora_api.exception.ModelNotFoundException;
@@ -69,6 +73,8 @@ public class PedidoService extends GenericService<Pedido, UUID> implements IPedi
     private final ObjectProvider<PedidoService> self;
 
     private final MovimientoStockRepository movimientoStockRepository;
+    private final Notificador notificador;
+    private final TiendaConfig tiendaConfig;
 
     @Override
     protected IGenericRepository<Pedido, UUID> getRepo() {
@@ -189,13 +195,29 @@ public class PedidoService extends GenericService<Pedido, UUID> implements IPedi
                 .ruc(blankToNull(request.ruc()))
                 .razonSocial(blankToNull(request.razonSocial()))
                 .build();
-        aplicarDireccion(pedido, request, clienteId);
+        MetodoEntrega entrega = request.metodoEntrega() == null ? MetodoEntrega.DELIVERY : request.metodoEntrega();
+        pedido.setMetodoEntrega(entrega);
+        if (entrega == MetodoEntrega.RECOJO_TIENDA) {
+            if (!tiendaConfig.recojoHabilitado()) {
+                throw new IllegalArgumentException("El recojo en tienda no está disponible");
+            }
+            aplicarRecojoEnTienda(pedido, request, cliente);
+            pedido.setCostoEnvio(BigDecimal.ZERO);
+        } else {
+            aplicarDireccion(pedido, request, clienteId);
+            pedido.setCostoEnvio(tiendaConfig.costoDelivery());
+        }
 
         PricingSummary pricing = addDetails(pedido, unit, request.detalles(), unitSlug);
-        pedido.setTotalPedido(pricing.incomplete() ? null : pricing.total());
+        pedido.setTotalPedido(pricing.incomplete() ? null : pricing.total().add(pedido.getCostoEnvio()));
         pedido.setStockDescontado(true);
         Pedido guardado = pedidoRepository.saveAndFlush(pedido);
         registrarMovimientosDeCompra(guardado);
+        notificador.avisar(TipoNotificacion.PEDIDO_NUEVO, "Pedido nuevo: " + guardado.getCodigo(),
+                cliente.getNombre() + " hizo un pedido"
+                        + (guardado.getTotalPedido() == null ? "" : " por S/ " + guardado.getTotalPedido())
+                        + " (" + (entrega == MetodoEntrega.RECOJO_TIENDA ? "recojo en tienda" : "delivery") + ").",
+                "/admin/pedidos");
         return pedidoMapper.toPublicResponse(guardado);
     }
 
@@ -252,6 +274,17 @@ public class PedidoService extends GenericService<Pedido, UUID> implements IPedi
         return pedidoRepository.findByClienteIdOrderByFechaCreacionDesc(clienteId).stream()
                 .map(pedidoMapper::toPublicResponse)
                 .toList();
+    }
+
+    /** El recojo en tienda no necesita dirección: se rellena con marcadores y el teléfono del cliente. */
+    private void aplicarRecojoEnTienda(Pedido pedido, PublicPedidoRequest request, Cliente cliente) {
+        String telefono = !isBlank(request.direccionTelefonoContacto()) ? request.direccionTelefonoContacto().trim()
+                : (!isBlank(cliente.getTelefono()) ? cliente.getTelefono().trim() : "-");
+        pedido.setDireccionAlias("Recojo en tienda");
+        pedido.setDireccionCalle("Recojo en tienda");
+        pedido.setDireccionDistrito("-");
+        pedido.setDireccionCiudad("-");
+        pedido.setDireccionTelefonoContacto(telefono);
     }
 
     /** Toma la dirección de una dirección guardada (verificando que sea del cliente) o de los campos en línea del request. */

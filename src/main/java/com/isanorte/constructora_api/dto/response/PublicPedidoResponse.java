@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import com.isanorte.constructora_api.enums.EstadoPedido;
+import com.isanorte.constructora_api.enums.MetodoEntrega;
 
 public record PublicPedidoResponse(
         String codigo,
@@ -12,6 +13,11 @@ public record PublicPedidoResponse(
         String direccionDistrito,
         String direccionCiudad,
         EstadoPedido estado,
+        MetodoEntrega metodoEntrega,
+        BigDecimal costoEnvio,
+        String metodoPago,
+        String referenciaPago,
+        LocalDateTime fechaPago,
         BigDecimal totalPedido,
         List<DetallePublicoResponse> detalles,
         LocalDateTime fechaCreacion) {

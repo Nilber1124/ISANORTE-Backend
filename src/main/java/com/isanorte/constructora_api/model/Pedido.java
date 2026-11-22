@@ -10,6 +10,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 import com.isanorte.constructora_api.enums.EstadoPedido;
+import com.isanorte.constructora_api.enums.MetodoEntrega;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -100,6 +101,26 @@ public class Pedido {
     @Builder.Default
     @Column(nullable = false)
     private Boolean stockDescontado = false;
+
+    @NotNull
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private MetodoEntrega metodoEntrega = MetodoEntrega.DELIVERY;
+
+    @NotNull
+    @PositiveOrZero
+    @Builder.Default
+    @Column(nullable = false, precision = 12, scale = 2)
+    private BigDecimal costoEnvio = BigDecimal.ZERO;
+
+    @Column(length = 30)
+    private String metodoPago;
+
+    @Column(length = 80)
+    private String referenciaPago;
+
+    private LocalDateTime fechaPago;
 
     @Setter(AccessLevel.NONE)
     @Builder.Default

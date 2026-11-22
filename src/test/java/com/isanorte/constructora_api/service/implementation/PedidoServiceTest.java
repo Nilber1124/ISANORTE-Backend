@@ -139,13 +139,13 @@ class PedidoServiceTest {
 
     private PedidoResponse dummyResponse() {
         return new PedidoResponse(UUID.randomUUID(), "PED-TEST", UUID.randomUUID(), null, "calle", "distrito",
-                "ciudad", null, "999999999", null, null, EstadoPedido.PENDIENTE_PAGO, null, false,
+                "ciudad", null, "999999999", null, null, EstadoPedido.PENDIENTE_PAGO, null, java.math.BigDecimal.ZERO, null, null, null, null, false,
                 List.of(), List.of(), null, null);
     }
 
     private PublicPedidoResponse dummyPublicResponse() {
         return new PublicPedidoResponse("PED-TEST", "calle", "distrito", "ciudad",
-                EstadoPedido.PENDIENTE_PAGO, null, List.of(), null);
+                EstadoPedido.PENDIENTE_PAGO, null, java.math.BigDecimal.ZERO, null, null, null, null, List.of(), null);
     }
 
     private PedidoService service(PedidoRepository pedidoRepository, PedidoMapper mapper,
@@ -157,7 +157,8 @@ class PedidoServiceTest {
             ProductoRepository productoRepository, ObjectProvider<PedidoService> self) {
         return new PedidoService(pedidoRepository, productoRepository, mock(ConfiguracionSitioRepository.class),
                 mock(UnidadNegocioRepository.class), mock(ClienteRepository.class),
-                mock(DireccionClienteRepository.class), mapper, self, mock(MovimientoStockRepository.class));
+                mock(DireccionClienteRepository.class), mapper, self, mock(MovimientoStockRepository.class),
+                mock(com.isanorte.constructora_api.service.Notificador.class), mock(com.isanorte.constructora_api.service.TiendaConfig.class));
     }
 
     // ---- Stock por acabado e historial ----
@@ -165,7 +166,8 @@ class PedidoServiceTest {
     private PedidoService serviceConMovimientos(ProductoRepository productoRepository, MovimientoStockRepository movimientos) {
         return new PedidoService(mock(PedidoRepository.class), productoRepository, mock(ConfiguracionSitioRepository.class),
                 mock(UnidadNegocioRepository.class), mock(ClienteRepository.class),
-                mock(DireccionClienteRepository.class), mock(PedidoMapper.class), mock(ObjectProvider.class), movimientos);
+                mock(DireccionClienteRepository.class), mock(PedidoMapper.class), mock(ObjectProvider.class), movimientos,
+                mock(com.isanorte.constructora_api.service.Notificador.class), mock(com.isanorte.constructora_api.service.TiendaConfig.class));
     }
 
     private Producto productoConVariante(Integer stockProducto, VarianteProducto variante) {

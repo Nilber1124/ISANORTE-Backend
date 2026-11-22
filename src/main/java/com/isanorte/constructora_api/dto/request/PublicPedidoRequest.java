@@ -3,6 +3,7 @@ package com.isanorte.constructora_api.dto.request;
 import java.util.List;
 import java.util.UUID;
 
+import com.isanorte.constructora_api.enums.MetodoEntrega;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -25,7 +26,16 @@ public record PublicPedidoRequest(
         @Size(max = 30) String direccionTelefonoContacto,
         @Size(max = 20) String ruc,
         @Size(max = 200) String razonSocial,
+        MetodoEntrega metodoEntrega,
         @NotEmpty List<@Valid DetallePublicoRequest> detalles) {
+
+    /** Pedido de delivery (la entrega por defecto). */
+    public PublicPedidoRequest(UUID direccionId, String direccionAlias, String direccionCalle,
+            String direccionDistrito, String direccionCiudad, String direccionReferencia,
+            String direccionTelefonoContacto, String ruc, String razonSocial, List<DetallePublicoRequest> detalles) {
+        this(direccionId, direccionAlias, direccionCalle, direccionDistrito, direccionCiudad, direccionReferencia,
+                direccionTelefonoContacto, ruc, razonSocial, null, detalles);
+    }
 
     public record DetallePublicoRequest(
             @NotBlank String productoSlug,

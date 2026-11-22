@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -83,7 +84,8 @@ class PublicPedidoApiIntegrationTest {
                 .andExpect(jsonPath("$.codigo", startsWith("PED-")))
                 .andExpect(jsonPath("$.estado").value("PENDIENTE_PAGO"))
                 .andExpect(jsonPath("$.direccionCalle").value("Av. Siempre Viva 123"))
-                .andExpect(jsonPath("$.totalPedido").value(120.00))
+                .andExpect(jsonPath("$.costoEnvio").value(10.00))
+                .andExpect(jsonPath("$.totalPedido").value(130.00))
                 .andExpect(jsonPath("$.detalles.length()").value(1))
                 .andExpect(jsonPath("$.detalles[0].precioUnitario").value(30.00))
                 .andExpect(jsonPath("$.detalles[0].subtotal").value(120.00))
@@ -91,7 +93,7 @@ class PublicPedidoApiIntegrationTest {
 
         String codigo = objectMapper.readTree(result.getResponse().getContentAsString()).get("codigo").asText();
         Pedido saved = pedidoRepository.findByCodigo(codigo).orElseThrow();
-        assertEquals(new BigDecimal("120.00"), saved.getTotalPedido());
+        assertEquals(new BigDecimal("130.00"), saved.getTotalPedido());
         assertTrue(saved.getStockDescontado());
         assertNotNull(saved.getCliente());
 
@@ -192,6 +194,67 @@ class PublicPedidoApiIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(new EstadoPedidoRequest(EstadoPedido.EN_PREPARACION))))
                 .andExpect(status().isConflict());
+    }
+
+    @Test
+    void recojoEnTiendaNoCobraEnvioYElPagoSimuladoMarcaElPedidoComoPagadoYAvisaAlAdmin() throws Exception {
+        ConfiguracionSitio site = site("order-pago");
+        UnidadNegocio unit = unit(site.getEmpresa(), "isadecor", true);
+        Producto product = product(unit, "pintura", EstadoPublicacion.PUBLICADO, new BigDecimal("50.00"), 10);
+        String token = clienteToken();
+
+        PublicPedidoRequest request = new PublicPedidoRequest(null, null, null, null, null, null, "987654321",
+                null, null, com.isanorte.constructora_api.enums.MetodoEntrega.RECOJO_TIENDA,
+                List.of(new DetallePublicoRequest(product.getSlug(), null, 2)));
+
+        var result = mockMvc.perform(post("/api/publico/sitios/{siteKey}/unidades/{unitSlug}/pedidos",
+                site.getClave(), unit.getSlug())
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.metodoEntrega").value("RECOJO_TIENDA"))
+                .andExpect(jsonPath("$.costoEnvio").value(0))
+                .andExpect(jsonPath("$.totalPedido").value(100.00))
+                .andReturn();
+        String codigo = objectMapper.readTree(result.getResponse().getContentAsString()).get("codigo").asText();
+
+        // Un pago rechazado deja el pedido pendiente.
+        mockMvc.perform(post("/api/publico/cuenta/pedidos/{codigo}/pago", codigo)
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"token\":\"RECHAZADO\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.aprobado").value(false))
+                .andExpect(jsonPath("$.pedido.estado").value("PENDIENTE_PAGO"));
+
+        mockMvc.perform(post("/api/publico/cuenta/pedidos/{codigo}/pago", codigo)
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"token\":\"APROBADO\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.aprobado").value(true))
+                .andExpect(jsonPath("$.pedido.estado").value("PAGADO_ONLINE"))
+                .andExpect(jsonPath("$.pedido.referenciaPago", startsWith("SIM-")));
+
+        // Ya pagado: no se cobra dos veces.
+        mockMvc.perform(post("/api/publico/cuenta/pedidos/{codigo}/pago", codigo)
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"token\":\"APROBADO\"}"))
+                .andExpect(status().isConflict());
+
+        // Otro cliente no puede pagar un pedido ajeno.
+        mockMvc.perform(post("/api/publico/cuenta/pedidos/{codigo}/pago", codigo)
+                .header("Authorization", "Bearer " + clienteToken())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"token\":\"APROBADO\"}"))
+                .andExpect(status().isNotFound());
+
+        mockMvc.perform(get("/api/notificaciones").with(jwt().authorities(() -> "ROLE_ADMINISTRADOR")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.items[?(@.titulo == 'Pedido nuevo: " + codigo + "')]").isNotEmpty())
+                .andExpect(jsonPath("$.items[?(@.titulo == 'Pago recibido: " + codigo + "')]").isNotEmpty());
     }
 
     private ConfiguracionSitio site(String seed) {

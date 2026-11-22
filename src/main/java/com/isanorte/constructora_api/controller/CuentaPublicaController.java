@@ -32,6 +32,9 @@ import com.isanorte.constructora_api.service.ICarritoClienteService;
 import com.isanorte.constructora_api.service.IClienteAuthService;
 import com.isanorte.constructora_api.service.IDireccionClienteService;
 import com.isanorte.constructora_api.service.IPedidoService;
+import com.isanorte.constructora_api.service.implementation.PagoPedidoService;
+import com.isanorte.constructora_api.dto.request.PagoPedidoRequest;
+import com.isanorte.constructora_api.dto.response.PagoPedidoResponse;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -43,6 +46,7 @@ public class CuentaPublicaController {
     private final IClienteAuthService clienteAuthService;
     private final ICotizacionService cotizacionService;
     private final IPedidoService pedidoService;
+    private final PagoPedidoService pagoPedidoService;
     private final ICarritoClienteService carritoService;
     private final IDireccionClienteService direccionService;
 
@@ -87,6 +91,13 @@ public class CuentaPublicaController {
     public ResponseEntity<List<PublicPedidoResponse>> misPedidos(@AuthenticationPrincipal Jwt jwt) {
         return ResponseEntity.ok().cacheControl(CacheControl.noStore())
                 .body(pedidoService.findPublicByCliente(UUID.fromString(jwt.getSubject())));
+    }
+
+    @PostMapping("/pedidos/{codigo}/pago")
+    public ResponseEntity<PagoPedidoResponse> pagarPedido(@AuthenticationPrincipal Jwt jwt,
+            @PathVariable String codigo, @Valid @RequestBody PagoPedidoRequest request) {
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore())
+                .body(pagoPedidoService.pagar(UUID.fromString(jwt.getSubject()), codigo, request.token()));
     }
 
     @GetMapping("/direcciones")

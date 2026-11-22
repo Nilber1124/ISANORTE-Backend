@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.isanorte.constructora_api.enums.EstadoPedido;
+import com.isanorte.constructora_api.enums.MetodoEntrega;
 
 public record PedidoResponse(
         UUID id,
@@ -20,6 +21,11 @@ public record PedidoResponse(
         String ruc,
         String razonSocial,
         EstadoPedido estado,
+        MetodoEntrega metodoEntrega,
+        BigDecimal costoEnvio,
+        String metodoPago,
+        String referenciaPago,
+        LocalDateTime fechaPago,
         BigDecimal totalPedido,
         Boolean stockDescontado,
         List<DetalleResponse> detalles,
