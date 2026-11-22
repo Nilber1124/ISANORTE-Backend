@@ -46,6 +46,9 @@ public class OEmbedPublicacionMetadataProvider implements IPublicacionMetadataPr
 
     @Override
     public Optional<Metadata> fetch(RedPublicacion red, String url) {
+        if (red == RedPublicacion.FACEBOOK) {
+            return Optional.empty(); // el oEmbed de Facebook exige token de app: la miniatura se sube a mano
+        }
         try {
             String endpoint = red == RedPublicacion.INSTAGRAM ? instagramEndpoint : tiktokEndpoint;
             URI uri = UriComponentsBuilder.fromUriString(endpoint)

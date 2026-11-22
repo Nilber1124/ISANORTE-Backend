@@ -43,6 +43,7 @@ import com.isanorte.constructora_api.repository.IsadecorPromocionRepository;
 import com.isanorte.constructora_api.repository.IsadecorSeccionExcluidoRepository;
 import com.isanorte.constructora_api.repository.IsadecorSeccionFijadoRepository;
 import com.isanorte.constructora_api.repository.IsadecorSeccionProductosRepository;
+import com.isanorte.constructora_api.model.IsadecorPublicacion;
 import com.isanorte.constructora_api.repository.IsadecorPublicacionRepository;
 import com.isanorte.constructora_api.repository.IsadecorServicioEmpresaRepository;
 import com.isanorte.constructora_api.repository.IsadecorServicioPuntoRepository;
@@ -65,6 +66,27 @@ public class IsadecorHomeService implements IIsadecorHomeService {
     static final int MAX_PROMOCIONES = 3;
     static final int MAX_RESENAS = 6;
     static final int MAX_COMUNIDAD_HOME = 4;
+
+    /**
+     * Para el Home: primero el video más reciente de cada red (así cada tarjeta de «Síguenos» tiene el suyo) y,
+     * hasta completar {@value #MAX_COMUNIDAD_HOME}, los siguientes en el orden del administrador.
+     */
+    static List<IsadecorPublicacion> seleccionComunidad(List<IsadecorPublicacion> ordenadas) {
+        java.util.LinkedHashSet<IsadecorPublicacion> elegidas = new java.util.LinkedHashSet<>();
+        java.util.Set<com.isanorte.constructora_api.enums.RedPublicacion> vistas = new java.util.HashSet<>();
+        for (IsadecorPublicacion p : ordenadas) {
+            if (vistas.add(p.getRed())) {
+                elegidas.add(p);
+            }
+        }
+        for (IsadecorPublicacion p : ordenadas) {
+            if (elegidas.size() >= MAX_COMUNIDAD_HOME) {
+                break;
+            }
+            elegidas.add(p);
+        }
+        return ordenadas.stream().filter(elegidas::contains).limit(MAX_COMUNIDAD_HOME).toList();
+    }
 
     private final ConfiguracionSitioRepository configuracionRepository;
     private final UnidadNegocioRepository unidadRepository;
@@ -151,9 +173,9 @@ public class IsadecorHomeService implements IIsadecorHomeService {
                         r.getCompraVerificada(), r.getProducto().getNombre(), r.getProducto().getSlug()))
                 .toList();
 
-        List<IsadecorHomeResponse.Publicacion> comunidad = publicacionRepository
-                .findByUnidadNegocioIdAndActivoTrueOrderByOrdenAscFechaCreacionDescIdAsc(unitId).stream()
-                .limit(MAX_COMUNIDAD_HOME)
+        List<IsadecorPublicacion> publicaciones = publicacionRepository
+                .findByUnidadNegocioIdAndActivoTrueOrderByOrdenAscFechaCreacionDescIdAsc(unitId);
+        List<IsadecorHomeResponse.Publicacion> comunidad = seleccionComunidad(publicaciones).stream()
                 .map(p -> new IsadecorHomeResponse.Publicacion(p.getRed(), p.getUrl(), p.getTitulo(), p.getMiniaturaUrl()))
                 .toList();
 

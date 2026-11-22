@@ -37,6 +37,8 @@ public class IsadecorPublicacionService implements IIsadecorPublicacionService {
             "^https://(www\\.)?instagram\\.com/(p|reel|reels|tv)/[A-Za-z0-9_-]+/?(\\?.*)?$");
     private static final Pattern TIKTOK = Pattern.compile(
             "^https://(www\\.|vm\\.|vt\\.)?tiktok\\.com/.+$");
+    private static final Pattern FACEBOOK = Pattern.compile(
+            "^https://((www|m|web)\\.)?facebook\\.com/.+$|^https://fb\\.watch/.+$");
 
     private final IsadecorPublicacionRepository repository;
     private final UnidadNegocioRepository unidadRepository;
@@ -115,11 +117,17 @@ public class IsadecorPublicacionService implements IIsadecorPublicacionService {
     /** Valida que el enlace sea de la red indicada y lo deja sin parámetros de seguimiento. */
     String normalizeUrl(RedPublicacion red, String raw) {
         String url = raw.trim();
-        boolean valid = red == RedPublicacion.INSTAGRAM ? INSTAGRAM.matcher(url).matches() : TIKTOK.matcher(url).matches();
+        boolean valid = switch (red) {
+            case INSTAGRAM -> INSTAGRAM.matcher(url).matches();
+            case TIKTOK -> TIKTOK.matcher(url).matches();
+            case FACEBOOK -> FACEBOOK.matcher(url).matches();
+        };
         if (!valid) {
-            throw new IllegalArgumentException(red == RedPublicacion.INSTAGRAM
-                    ? "El enlace debe ser de una publicación o reel de Instagram (instagram.com/p/… o /reel/…)"
-                    : "El enlace debe ser de un video de TikTok");
+            throw new IllegalArgumentException(switch (red) {
+                case INSTAGRAM -> "El enlace debe ser de una publicación o reel de Instagram (instagram.com/p/… o /reel/…)";
+                case TIKTOK -> "El enlace debe ser de un video de TikTok";
+                case FACEBOOK -> "El enlace debe ser de un video o reel de Facebook";
+            });
         }
         if (red == RedPublicacion.INSTAGRAM) {
             int query = url.indexOf('?');

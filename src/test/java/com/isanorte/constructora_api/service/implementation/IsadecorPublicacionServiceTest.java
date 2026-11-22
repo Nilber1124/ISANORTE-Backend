@@ -100,6 +100,15 @@ class IsadecorPublicacionServiceTest {
     }
 
     @Test
+    void createAceptaVideosDeFacebookYNoConsultaSuOEmbed() {
+        var response = service.create(request(RedPublicacion.FACEBOOK, "https://www.facebook.com/isadecor.pe/videos/123456", null, null));
+
+        assertEquals("https://www.facebook.com/isadecor.pe/videos/123456", response.url());
+        assertThrows(IllegalArgumentException.class,
+                () -> service.create(request(RedPublicacion.FACEBOOK, "https://evil.com/facebook.com/x", null, null)));
+    }
+
+    @Test
     void createRechazaUnaPublicacionRepetida() {
         when(repository.existsByUnidadNegocioIdAndUrl(unitId, "https://www.instagram.com/p/Abc123/")).thenReturn(true);
 
