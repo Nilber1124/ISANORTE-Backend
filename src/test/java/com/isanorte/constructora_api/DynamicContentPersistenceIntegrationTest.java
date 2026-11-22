@@ -73,12 +73,12 @@ class DynamicContentPersistenceIntegrationTest {
 
     @Test
     void flywayAplicaElEsquemaInicialAntesDeValidarJpa() {
-        // Con H2 se aplican las migraciones comunes (V1 y de V4 a V9); V2 y V3 viven en db/migration/postgresql
+        // Con H2 se aplican las migraciones comunes (V1 y de V4 a V10); V2 y V3 viven en db/migration/postgresql
         // porque son exclusivas de PostgreSQL (índices parciales y datos iniciales).
-        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("9");
+        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("10");
         assertThat(flyway.info().applied())
                 .extracting(info -> info.getVersion().getVersion())
-                .containsExactly("1", "4", "5", "6", "7", "8", "9");
+                .containsExactly("1", "4", "5", "6", "7", "8", "9", "10");
     }
 
     @Test
