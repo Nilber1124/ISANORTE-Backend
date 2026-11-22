@@ -329,6 +329,6 @@ class PublicCotizacionApiIntegrationTest {
 
     private String clienteToken() {
         return clienteAuthService.registrar(new ClienteRegistroRequest(
-                "Cliente", "Prueba", "cliente." + random(8) + "@example.com", "claveSegura123", null, true)).token();
+                "Cliente", "Prueba", "cliente." + random(8) + "@example.com", "claveSegura123", "987654321", true)).token();
     }
 }

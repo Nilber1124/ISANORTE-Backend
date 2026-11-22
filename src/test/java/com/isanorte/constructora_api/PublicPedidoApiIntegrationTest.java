@@ -257,6 +257,18 @@ class PublicPedidoApiIntegrationTest {
                 .andExpect(jsonPath("$.items[?(@.titulo == 'Pago recibido: " + codigo + "')]").isNotEmpty());
     }
 
+    @Test
+    void elRegistroDeClientePideUnTelefonoValido() throws Exception {
+        String body = "{\"nombre\":\"Ana\",\"email\":\"ana.%s@example.com\",\"password\":\"claveSegura123\","
+                + "\"telefono\":%s,\"aceptaTratamientoDatos\":true}";
+        mockMvc.perform(post("/api/publico/cuenta/registro").contentType(MediaType.APPLICATION_JSON)
+                .content(body.formatted(random(6), "null"))).andExpect(status().isBadRequest());
+        mockMvc.perform(post("/api/publico/cuenta/registro").contentType(MediaType.APPLICATION_JSON)
+                .content(body.formatted(random(6), "\"abc\""))).andExpect(status().isBadRequest());
+        mockMvc.perform(post("/api/publico/cuenta/registro").contentType(MediaType.APPLICATION_JSON)
+                .content(body.formatted(random(6), "\"+51 987 654 321\""))).andExpect(status().isCreated());
+    }
+
     private ConfiguracionSitio site(String seed) {
         Empresa company = company(seed);
         ConfiguracionSitio site = ConfiguracionSitio.builder()
@@ -308,7 +320,7 @@ class PublicPedidoApiIntegrationTest {
 
     private String clienteToken() {
         return clienteAuthService.registrar(new ClienteRegistroRequest(
-                "Cliente", "Prueba", "cliente." + random(8) + "@example.com", "claveSegura123", null, true)).token();
+                "Cliente", "Prueba", "cliente." + random(8) + "@example.com", "claveSegura123", "987654321", true)).token();
     }
 
 }
