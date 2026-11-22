@@ -15,7 +15,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.isanorte.constructora_api.enums.EstadoSolicitudContacto;
 import com.isanorte.constructora_api.enums.RobotsSeo;
 import com.isanorte.constructora_api.enums.TipoPaginaPublica;
 import com.isanorte.constructora_api.enums.TipoPaginaSeo;
@@ -34,7 +33,6 @@ import com.isanorte.constructora_api.model.RecursoUnidadNegocio;
 import com.isanorte.constructora_api.model.SeccionLanding;
 import com.isanorte.constructora_api.model.SeoPagina;
 import com.isanorte.constructora_api.model.Servicio;
-import com.isanorte.constructora_api.model.SolicitudContacto;
 import com.isanorte.constructora_api.model.UnidadNegocio;
 import com.isanorte.constructora_api.repository.AccionLandingRepository;
 import com.isanorte.constructora_api.repository.BeneficioServicioRepository;
@@ -48,7 +46,6 @@ import com.isanorte.constructora_api.repository.RecursoUnidadNegocioRepository;
 import com.isanorte.constructora_api.repository.CatalogoRepository;
 import com.isanorte.constructora_api.repository.SeoPaginaRepository;
 import com.isanorte.constructora_api.repository.ServicioRepository;
-import com.isanorte.constructora_api.repository.SolicitudContactoRepository;
 import com.isanorte.constructora_api.repository.UnidadNegocioRepository;
 
 import jakarta.persistence.EntityManager;
@@ -73,16 +70,15 @@ class DynamicContentPersistenceIntegrationTest {
     @Autowired private EstadisticaEmpresaRepository estadisticaEmpresaRepository;
     @Autowired private ContenidoPaginaRepository contenidoPaginaRepository;
     @Autowired private SeoPaginaRepository seoPaginaRepository;
-    @Autowired private SolicitudContactoRepository solicitudContactoRepository;
 
     @Test
     void flywayAplicaElEsquemaInicialAntesDeValidarJpa() {
-        // Con H2 se aplican las migraciones comunes (V1, V4, V5, V6 y V7); V2 y V3 viven en db/migration/postgresql
+        // Con H2 se aplican las migraciones comunes (V1 y de V4 a V9); V2 y V3 viven en db/migration/postgresql
         // porque son exclusivas de PostgreSQL (índices parciales y datos iniciales).
-        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("8");
+        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("9");
         assertThat(flyway.info().applied())
                 .extracting(info -> info.getVersion().getVersion())
-                .containsExactly("1", "4", "5", "6", "7", "8");
+                .containsExactly("1", "4", "5", "6", "7", "8", "9");
     }
 
     @Test
@@ -262,19 +258,6 @@ class DynamicContentPersistenceIntegrationTest {
 
         assertThatThrownBy(() -> seoPaginaRepository.saveAndFlush(seoInvalido))
                 .isInstanceOf(DataIntegrityViolationException.class);
-    }
-
-    @Test
-    void persisteSolicitudContactoConEstado() {
-        SolicitudContacto solicitud = SolicitudContacto.builder()
-                .nombre("Ana Pérez").email("ana@example.com").telefono("999999999")
-                .empresa("Empresa demo").mensaje("Quiero información").build();
-        UUID id = solicitudContactoRepository.saveAndFlush(solicitud).getId();
-        entityManager.clear();
-
-        SolicitudContacto guardada = solicitudContactoRepository.findById(id).orElseThrow();
-        assertThat(guardada.getEstado()).isEqualTo(EstadoSolicitudContacto.NUEVA);
-        assertThat(guardada.getFechaCreacion()).isNotNull();
     }
 
     private ConfiguracionSitio persistedSite(String seed) {

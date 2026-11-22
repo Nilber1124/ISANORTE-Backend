@@ -19,7 +19,7 @@ class ComparacionCompetidoresControllerTest {
                         new ProductoComparable("Piso", null, null, "PEN", null, List.of()),
                         List.of(), List.of(), OffsetDateTime.now()));
         var controller = new PublicContentController(mock(IPublicContentService.class),
-                mock(ISolicitudContactoService.class), mock(IComparacionPrecioService.class), service,
+                mock(IComparacionPrecioService.class), service,
                 mock(ICotizacionService.class), mock(IPedidoService.class), mock(IResenaProductoService.class));
         var mvc = MockMvcBuilders.standaloneSetup(controller).build();
 

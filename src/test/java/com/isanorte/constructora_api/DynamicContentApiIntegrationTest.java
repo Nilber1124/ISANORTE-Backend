@@ -365,46 +365,14 @@ class DynamicContentApiIntegrationTest {
     }
 
     @Test
-    void contactoPublicoYBandejaAdministrativa() throws Exception {
-        Map<String, Object> body = Map.of("nombre", "Ana", "email", "ana@example.com", "telefono", "999999999",
-                "ubicacion", "Cajamarca", "servicioInteres", "Remodelaciones",
-                "mensaje", "Necesito información", "consentimiento", true);
-        UUID id = id(mockMvc.perform(post("/api/publico/contacto").contentType(MediaType.APPLICATION_JSON)
-                .content(json(body))).andExpect(status().isCreated()).andExpect(jsonPath("$.estado").value("NUEVA"))
-                .andExpect(jsonPath("$.email").doesNotExist()).andReturn());
+    void elContactoPublicoYLaBandejaDeSolicitudesYaNoExisten() throws Exception {
+        // Las solicitudes se atienden por WhatsApp: ni se guardan ni se consultan en el sistema.
         mockMvc.perform(post("/api/publico/contacto").contentType(MediaType.APPLICATION_JSON)
-                .content(json(Map.of("nombre", "Ana", "email", "incorrecto", "telefono", "1", "mensaje", "X",
-                        "consentimiento", true))))
-                .andExpect(status().isBadRequest());
-        mockMvc.perform(post("/api/publico/contacto").contentType(MediaType.APPLICATION_JSON)
-                .content(json(Map.of("nombre", "Ana", "email", "ana@example.com", "telefono", "1",
-                        "consentimiento", true))))
-                .andExpect(status().isBadRequest());
-        // Sin consentimiento no se registra la solicitud.
-        mockMvc.perform(post("/api/publico/contacto").contentType(MediaType.APPLICATION_JSON)
-                .content(json(Map.of("nombre", "Ana", "email", "ana@example.com", "telefono", "1",
-                        "mensaje", "Hola", "consentimiento", false))))
-                .andExpect(status().isBadRequest());
-        mockMvc.perform(get("/api/solicitudes-contacto").with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
-                .param("estado", "NUEVA"))
-                .andExpect(status().isOk()).andExpect(jsonPath("$[0].id").value(id.toString()));
+                .content(json(Map.of("nombre", "Ana", "email", "ana@example.com", "telefono", "999999999",
+                        "mensaje", "Hola", "consentimiento", true))))
+                .andExpect(status().is4xxClientError());
         mockMvc.perform(get("/api/solicitudes-contacto").with(jwt().authorities(() -> "ROLE_ADMINISTRADOR")))
-                .andExpect(status().isOk()).andExpect(jsonPath("$[0].id").value(id.toString()));
-        mockMvc.perform(get("/api/solicitudes-contacto/{id}", id)
-                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))).andExpect(status().isOk())
-                .andExpect(jsonPath("$.ubicacion").value("Cajamarca"))
-                .andExpect(jsonPath("$.servicioInteres").value("Remodelaciones"))
-                .andExpect(jsonPath("$.consentimiento").value(true))
-                .andExpect(jsonPath("$.fechaConsentimiento").isNotEmpty());
-        mockMvc.perform(patch("/api/solicitudes-contacto/{id}/estado", id)
-                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR")).contentType(MediaType.APPLICATION_JSON)
-                .content("{\"estado\":\"RESPONDIDA\"}"))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.estado").value("RESPONDIDA"));
-        mockMvc.perform(get("/api/solicitudes-contacto/{id}", UUID.randomUUID())
-                .with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))).andExpect(status().isNotFound());
-        mockMvc.perform(get("/api/solicitudes-contacto").with(jwt().authorities(() -> "ROLE_ADMINISTRADOR"))
-                .param("estado", "DESCONOCIDA"))
-                .andExpect(status().isBadRequest()).andExpect(jsonPath("$.status").value(400));
+                .andExpect(status().is4xxClientError());
     }
 
     @Test
@@ -581,7 +549,7 @@ class DynamicContentApiIntegrationTest {
                 .andExpect(jsonPath("$.servicios[0].beneficios[1].texto").value("Segundo activo"))
                 .andExpect(jsonPath("$.servicios[0].beneficios[*].texto", not(hasItem("Beneficio oculto"))))
                 .andExpect(jsonPath("$.servicios[*].slug", not(hasItem(inactive.getSlug()))))
-                .andExpect(jsonPath("$.servicios[0].id").doesNotExist())
+                .andExpect(jsonPath("$.servicios[0].id").isNotEmpty())
                 .andExpect(jsonPath("$.servicios[0].activo").doesNotExist())
                 .andExpect(jsonPath("$.servicios[0].destacado").doesNotExist())
                 .andExpect(jsonPath("$.servicios[0].fechaCreacion").doesNotExist())
@@ -654,7 +622,7 @@ class DynamicContentApiIntegrationTest {
                 .andExpect(jsonPath("$.proyectos[1].imagenes.length()").value(0))
                 .andExpect(jsonPath("$.proyectos[1].servicios.length()").value(0))
                 .andExpect(jsonPath("$.proyectos[*].slug", not(hasItem(inactive.getSlug()))))
-                .andExpect(jsonPath("$.proyectos[0].id").doesNotExist())
+                .andExpect(jsonPath("$.proyectos[0].id").isNotEmpty())
                 .andExpect(jsonPath("$.proyectos[0].activo").doesNotExist())
                 .andExpect(jsonPath("$.proyectos[0].destacado").doesNotExist())
                 .andExpect(jsonPath("$.proyectos[0].fechaCreacion").doesNotExist())

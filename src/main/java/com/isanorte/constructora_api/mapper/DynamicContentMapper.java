@@ -14,7 +14,6 @@ import com.isanorte.constructora_api.dto.request.HeroSceneRequest;
 import com.isanorte.constructora_api.dto.request.RecursoUnidadNegocioRequest;
 import com.isanorte.constructora_api.dto.request.SeoPaginaRequest;
 import com.isanorte.constructora_api.dto.request.SeoPaginaUpdateRequest;
-import com.isanorte.constructora_api.dto.request.SolicitudContactoCreateRequest;
 import com.isanorte.constructora_api.dto.response.BeneficioServicioResponse;
 import com.isanorte.constructora_api.dto.response.CatalogoResponse;
 import com.isanorte.constructora_api.dto.response.ContenidoPaginaResponse;
@@ -22,8 +21,6 @@ import com.isanorte.constructora_api.dto.response.EstadisticaEmpresaResponse;
 import com.isanorte.constructora_api.dto.response.HeroSceneResponse;
 import com.isanorte.constructora_api.dto.response.RecursoUnidadNegocioResponse;
 import com.isanorte.constructora_api.dto.response.SeoPaginaResponse;
-import com.isanorte.constructora_api.dto.response.SolicitudContactoPublicResponse;
-import com.isanorte.constructora_api.dto.response.SolicitudContactoResponse;
 import com.isanorte.constructora_api.model.BeneficioServicio;
 import com.isanorte.constructora_api.model.Catalogo;
 import com.isanorte.constructora_api.model.ContenidoPagina;
@@ -31,7 +28,6 @@ import com.isanorte.constructora_api.model.EstadisticaEmpresa;
 import com.isanorte.constructora_api.model.HeroScene;
 import com.isanorte.constructora_api.model.RecursoUnidadNegocio;
 import com.isanorte.constructora_api.model.SeoPagina;
-import com.isanorte.constructora_api.model.SolicitudContacto;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.ERROR)
 public interface DynamicContentMapper {
@@ -98,11 +94,4 @@ public interface DynamicContentMapper {
     @Mapping(target = "configuracionSitioId", source = "configuracionSitio.id")
     @Mapping(target = "unidadNegocioId", source = "unidadNegocio.id")
     SeoPaginaResponse toResponse(SeoPagina entity);
-
-    @Mapping(target = "id", ignore = true) @Mapping(target = "estado", ignore = true)
-    @Mapping(target = "fechaCreacion", ignore = true) @Mapping(target = "fechaActualizacion", ignore = true)
-    @Mapping(target = "fechaConsentimiento", ignore = true)
-    SolicitudContacto toEntity(SolicitudContactoCreateRequest request);
-    SolicitudContactoResponse toResponse(SolicitudContacto entity);
-    SolicitudContactoPublicResponse toPublicResponse(SolicitudContacto entity);
 }

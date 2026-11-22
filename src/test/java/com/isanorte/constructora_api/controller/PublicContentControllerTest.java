@@ -25,7 +25,6 @@ import com.isanorte.constructora_api.service.ICotizacionService;
 import com.isanorte.constructora_api.service.IPedidoService;
 import com.isanorte.constructora_api.service.IPublicContentService;
 import com.isanorte.constructora_api.service.IResenaProductoService;
-import com.isanorte.constructora_api.service.ISolicitudContactoService;
 
 class PublicContentControllerTest {
 
@@ -80,7 +79,7 @@ class PublicContentControllerTest {
     }
 
     private PublicContentController controllerWith(IPublicContentService service) {
-        return new PublicContentController(service, mock(ISolicitudContactoService.class),
+        return new PublicContentController(service, 
                 mock(IComparacionPrecioService.class), mock(IComparacionCompetidoresService.class),
                 mock(ICotizacionService.class), mock(IPedidoService.class), mock(IResenaProductoService.class));
     }

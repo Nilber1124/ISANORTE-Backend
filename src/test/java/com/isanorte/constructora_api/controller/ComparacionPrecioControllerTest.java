@@ -18,7 +18,7 @@ class ComparacionPrecioControllerTest {
                 .thenReturn(new ComparacionPrecioResponse("Mesa", null, null, null, null, null,
                         "PEN", null, null, null, false, PRICE_NOT_FOUND, "Sin precio", OffsetDateTime.now()));
         var mvc = MockMvcBuilders.standaloneSetup(new PublicContentController(
-                mock(IPublicContentService.class), mock(ISolicitudContactoService.class), service,
+                mock(IPublicContentService.class), service,
                 mock(IComparacionCompetidoresService.class), mock(ICotizacionService.class),
                 mock(IPedidoService.class), mock(IResenaProductoService.class)))
                 .setControllerAdvice(new GlobalExceptionHandler()).build();

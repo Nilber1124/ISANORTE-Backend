@@ -18,7 +18,6 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
-import com.isanorte.constructora_api.dto.request.SolicitudContactoCreateRequest;
 import com.isanorte.constructora_api.dto.request.CrearResenaRequest;
 import com.isanorte.constructora_api.dto.response.PublicBusinessUnitResponse;
 import com.isanorte.constructora_api.dto.response.PublicHomeResponse;
@@ -27,7 +26,6 @@ import com.isanorte.constructora_api.dto.response.PublicProductCatalogResponse;
 import com.isanorte.constructora_api.dto.response.PublicProductDetailResponse;
 import com.isanorte.constructora_api.dto.response.PublicProjectResponse;
 import com.isanorte.constructora_api.dto.response.PublicSiteResponse;
-import com.isanorte.constructora_api.dto.response.SolicitudContactoPublicResponse;
 import com.isanorte.constructora_api.dto.response.ProductoRecomendadoResponse;
 import com.isanorte.constructora_api.dto.response.ResenaProductoResponse;
 import com.isanorte.constructora_api.dto.response.ResumenResenasResponse;
@@ -50,7 +48,6 @@ import com.isanorte.constructora_api.dto.response.ComparacionPrecioResponse;
 import com.isanorte.constructora_api.dto.response.ComparacionCompetidoresResponse;
 import com.isanorte.constructora_api.dto.response.PublicCotizacionResponse;
 import com.isanorte.constructora_api.dto.response.PublicPedidoResponse;
-import com.isanorte.constructora_api.service.ISolicitudContactoService;
 import com.isanorte.constructora_api.service.IResenaProductoService;
 
 import jakarta.validation.Valid;
@@ -61,7 +58,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class PublicContentController {
     private final IPublicContentService publicContentService;
-    private final ISolicitudContactoService contactoService;
     private final IComparacionPrecioService comparacionPrecioService;
     private final IComparacionCompetidoresService comparacionCompetidoresService;
     private final ICotizacionService cotizacionService;
@@ -114,12 +110,6 @@ public class PublicContentController {
             @Valid @RequestBody ComparacionPrecioRequest request) {
         return ResponseEntity.ok().cacheControl(org.springframework.http.CacheControl.noStore())
                 .body(comparacionPrecioService.comparar(clave, unidadSlug, productoSlug, request));
-    }
-
-    @PostMapping("/contacto")
-    public ResponseEntity<SolicitudContactoPublicResponse> createContact(
-            @Valid @RequestBody SolicitudContactoCreateRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(contactoService.createPublic(request));
     }
 
     @GetMapping("/sitios/{clave}")
