@@ -25,11 +25,13 @@ public record PublicConfianzaResponse(
     public record Faq(UUID id, String pregunta, String respuesta, String ambito) {
     }
 
-    public record Miembro(String nombre, String cargo, String especialidad, String biografia,
+    /** El id permite al admin saber qué miembro se tocó en la vista previa de la página Nosotros. */
+    public record Miembro(UUID id, String nombre, String cargo, String especialidad, String biografia,
             String fotoUrl, String fotoAlt) {
     }
 
-    public record Credencial(String nombre, String entidad, String tipo, String codigo, Integer anio,
+    /** El id permite al admin saber qué credencial se tocó en la vista previa de la página Nosotros. */
+    public record Credencial(UUID id, String nombre, String entidad, String tipo, String codigo, Integer anio,
             String imagenUrl, String imagenAlt) {
     }
 

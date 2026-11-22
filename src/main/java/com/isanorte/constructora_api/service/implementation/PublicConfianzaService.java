@@ -47,12 +47,12 @@ public class PublicConfianzaService implements IPublicConfianzaService {
                         .toList(),
                 equipoRepository.findByActivoTrueOrderByOrdenAscIdAsc().stream()
                         .map(item -> new PublicConfianzaResponse.Miembro(
-                                item.getNombre(), item.getCargo(), item.getEspecialidad(),
+                                item.getId(), item.getNombre(), item.getCargo(), item.getEspecialidad(),
                                 item.getBiografia(), item.getFotoUrl(), item.getFotoAlt()))
                         .toList(),
                 credencialRepository.findByActivoTrueOrderByOrdenAscIdAsc().stream()
                         .map(item -> new PublicConfianzaResponse.Credencial(
-                                item.getNombre(), item.getEntidad(), item.getTipo(), item.getCodigo(),
+                                item.getId(), item.getNombre(), item.getEntidad(), item.getTipo(), item.getCodigo(),
                                 item.getAnio(), item.getImagenUrl(), item.getImagenAlt()))
                         .toList(),
                 testimonioRepository.findByActivoTrueOrderByOrdenAscIdAsc().stream()
