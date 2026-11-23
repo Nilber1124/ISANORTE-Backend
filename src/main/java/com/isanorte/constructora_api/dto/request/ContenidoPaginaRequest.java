@@ -19,5 +19,5 @@ public record ContenidoPaginaRequest(
         @Size(max = 300) String imagenAlt,
         @Size(max = 500) String imagenFondoUrl,
         @NotNull Boolean activo,
-        List<@jakarta.validation.constraints.NotBlank @Size(max = 80) String> tags) {
+        @Size(max = 20) List<@jakarta.validation.constraints.NotBlank @Size(max = 80) String> tags) {
 }

@@ -1,5 +1,6 @@
 package com.isanorte.constructora_api.service.implementation;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -52,10 +53,8 @@ public class ContenidoPaginaService implements IContenidoPaginaService {
     public ContenidoPaginaResponse update(UUID id, ContenidoPaginaUpdateRequest request) {
         ContenidoPagina entity = find(id);
         mapper.update(request, entity);
-        entity.getTags().clear();
-        if (request.tags() != null) {
-            entity.getTags().addAll(request.tags());
-        }
+        // Se asigna una lista nueva para que Hibernate detecte el cambio en la columna convertida.
+        entity.setTags(request.tags() == null ? new ArrayList<>() : new ArrayList<>(request.tags()));
         return mapper.toResponse(repository.saveAndFlush(entity));
     }
 

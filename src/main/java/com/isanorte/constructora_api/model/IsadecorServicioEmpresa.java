@@ -1,5 +1,10 @@
 package com.isanorte.constructora_api.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.isanorte.constructora_api.util.ServicioPuntosConverter;
+
 import com.isanorte.constructora_api.util.BusinessTime;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -42,6 +47,12 @@ public class IsadecorServicioEmpresa {
     @Builder.Default
     @Column(nullable = false)
     private Boolean activo = true;
+
+    /** Puntos del bloque (antes tabla isadecor_servicio_puntos). Para modificarlos, asignar una lista nueva. */
+    @Builder.Default
+    @Convert(converter = ServicioPuntosConverter.class)
+    @Column(columnDefinition = "TEXT")
+    private List<IsadecorServicioPunto> puntos = new ArrayList<>();
 
     @Column(nullable = false)
     private LocalDateTime fechaCreacion;

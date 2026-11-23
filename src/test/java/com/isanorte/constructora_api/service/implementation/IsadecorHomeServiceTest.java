@@ -42,7 +42,6 @@ import com.isanorte.constructora_api.repository.IsadecorSeccionFijadoRepository;
 import com.isanorte.constructora_api.repository.IsadecorSeccionProductosRepository;
 import com.isanorte.constructora_api.repository.IsadecorPublicacionRepository;
 import com.isanorte.constructora_api.repository.IsadecorServicioEmpresaRepository;
-import com.isanorte.constructora_api.repository.IsadecorServicioPuntoRepository;
 import com.isanorte.constructora_api.repository.PedidoRepository;
 import com.isanorte.constructora_api.repository.ProductoRepository;
 import com.isanorte.constructora_api.repository.ResenaProductoRepository;
@@ -59,7 +58,6 @@ class IsadecorHomeServiceTest {
     @Mock private IsadecorPromocionRepository promocionRepository;
     @Mock private IsadecorCampanaRepository campanaRepository;
     @Mock private IsadecorServicioEmpresaRepository servicioRepository;
-    @Mock private IsadecorServicioPuntoRepository puntoRepository;
     @Mock private IsadecorSeccionProductosRepository seccionRepository;
     @Mock private IsadecorSeccionFijadoRepository fijadoRepository;
     @Mock private IsadecorSeccionExcluidoRepository excluidoRepository;

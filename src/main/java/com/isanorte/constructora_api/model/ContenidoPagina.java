@@ -1,6 +1,7 @@
 package com.isanorte.constructora_api.model;
 
 import com.isanorte.constructora_api.util.BusinessTime;
+import com.isanorte.constructora_api.util.ListaTextoConverter;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -9,9 +10,8 @@ import java.util.UUID;
 
 import com.isanorte.constructora_api.enums.TipoPaginaPublica;
 
-import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -21,7 +21,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OrderColumn;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -83,10 +82,8 @@ public class ContenidoPagina {
     private ConfiguracionSitio configuracionSitio;
 
     @Builder.Default
-    @ElementCollection
-    @CollectionTable(name = "contenido_pagina_tags", joinColumns = @JoinColumn(name = "contenido_pagina_id"))
-    @OrderColumn(name = "orden")
-    @Column(name = "tag", nullable = false, length = 80)
+    @Convert(converter = ListaTextoConverter.class)
+    @Column(name = "tags", length = 2000)
     private List<String> tags = new ArrayList<>();
 
     @Column(nullable = false)

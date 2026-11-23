@@ -142,10 +142,6 @@ proceso, políticas (privacidad, etc.) y galería de proyectos (`ANTES|PROCESO|F
 `/api/testimonios`, `/api/garantias`, `/api/pasos-proceso`, `/api/politicas`, `/api/proyecto-galeria`; JWT administrativo, con
 `PATCH /{id}/activo`). Los proyectos tienen ficha técnica (`areaM2`, `plazoMeses`, `alcance`, `tipoObra`). El sitio lee todo, solo activos y ordenados, en `GET /api/publico/sitios/{clave}/confianza`.
 
-El modulo de anuncios administra `GET/POST /api/anuncios`, `GET/PUT/DELETE /api/anuncios/{id}` y
-`PATCH /api/anuncios/{id}/activo`. Estas rutas requieren JWT administrativo. Las imagenes reutilizan
-la carga Cloudinary existente en `POST /api/archivos/subir-imagen`.
-
 - Todas las rutas bajo `/api/**` que no sean públicas requieren el rol `ADMINISTRADOR`.
 - Requieren sesión de cliente (rol `CLIENTE`, cabecera `Authorization: Bearer <token>`):
   - `GET /api/publico/cuenta/me` y `GET /api/publico/cuenta/cotizaciones`.
@@ -163,16 +159,6 @@ la carga Cloudinary existente en `POST /api/archivos/subir-imagen`.
 - `V1` crea `clientes` y relaciona `cotizaciones.cliente_id`.
 - `V1` crea `carritos_cliente`, un carrito por cuenta.
 - `V1` incorpora catálogos, inventario, pedidos y direcciones.
-
-### Anuncios públicos
-
-- `GET /api/publico/anuncios/ISANORTE` y `GET /api/publico/anuncios/ISADECOR` no requieren autenticación.
-- Solo retornan anuncios activos, vigentes y destinados al sitio solicitado o a `AMBOS`, ordenados por
-  orden de visualización, fecha de creación e identificador.
-- `V1` crea la tabla de anuncios, las restricciones de enums y vigencia, y el índice de consulta pública.
-- El parámetro opcional `ubicacion` permite consultar `GENERAL`, `CINTA_HOME`,
-  `PROMOCION_PRINCIPAL`, `PROMOCION_SECUNDARIA`, `ANUNCIOS_HOME` o `CATEGORIA_SUPERIOR`.
-- `V1` amplía anuncios para estas ubicaciones y agrega el orden
 
 ### 1. Iniciar Sesión (`Login`)
 Envía una petición `POST` a `/api/auth/login`:
@@ -235,7 +221,12 @@ Started ConstructoraApiApplication in ... seconds
 ### Datos iniciales y de ejemplo
 
 Flyway crea el esquema (`V1`), los índices exclusivos de PostgreSQL (`V2`), una empresa mínima con su sitio
-`isanorte` y la unidad ISADECOR (`V3`) y las tablas de la Home de ISADECOR y del inventario (`V4`). Las
+`isanorte` y la unidad ISADECOR (`V3`) y las tablas de la Home de ISADECOR y del inventario (`V4`).
+`V13` elimina tablas sin uso (`anuncios`, `permisos`, `rol_permiso`, `solicitudes_contacto`); los permisos
+de acceso se deciden solo por rol (`ADMINISTRADOR` / `CLIENTE`). `V14` junta tablas de detalle sin cambiar la API:
+los fijados y excluidos de las secciones de la Home van en `isadecor_seccion_seleccion` (columna `tipo`), las
+etiquetas de `contenidos_pagina` en su columna `tags` (una por línea) y los puntos del bloque de servicios de
+ISADECOR en la columna `isadecor_servicios_empresa.puntos` (JSON). Las
 migraciones comunes están en `db/migration/common/` y las propias de PostgreSQL en `db/migration/postgresql/`
 (los tests con H2 solo ejecutan las comunes, vía `{vendor}`).
 

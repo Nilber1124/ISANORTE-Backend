@@ -13,8 +13,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
@@ -56,12 +54,6 @@ public class Rol {
 
     @Setter(AccessLevel.NONE)
     @Builder.Default
-    @ManyToMany
-    @JoinTable(name = "rol_permiso", joinColumns = @JoinColumn(name = "rol_id"), inverseJoinColumns = @JoinColumn(name = "permiso_id"))
-    private Set<Permiso> permisos = new HashSet<>();
-
-    @Setter(AccessLevel.NONE)
-    @Builder.Default
     @ManyToMany(mappedBy = "roles")
     private Set<Administrador> administradores = new HashSet<>();
 
@@ -70,31 +62,6 @@ public class Rol {
 
     @Column(nullable = false)
     private LocalDateTime fechaActualizacion;
-
-    /**
-     * Asocia un permiso a este rol, sincronizando ambos lados de la relación {@code ManyToMany}.
-     *
-     * @param permiso el permiso a asociar (no nulo)
-     * @throws NullPointerException si {@code permiso} es {@code null}
-     */
-    public void addPermiso(Permiso permiso) {
-        Objects.requireNonNull(permiso, "El permiso no puede ser null");
-        this.permisos.add(permiso);
-        permiso.getRoles().add(this);
-    }
-
-    /**
-     * Desvincula un permiso de este rol, sincronizando ambos lados de la relación {@code ManyToMany}.
-     *
-     * @param permiso el permiso a desvincular (no nulo)
-     * @throws NullPointerException si {@code permiso} es {@code null}
-     */
-    public void removePermiso(Permiso permiso) {
-        Objects.requireNonNull(permiso, "El permiso no puede ser null");
-        if (this.permisos.remove(permiso)) {
-            permiso.getRoles().remove(this);
-        }
-    }
 
     /**
      * Asocia un administrador a este rol, sincronizando ambos lados de la relación {@code ManyToMany}.

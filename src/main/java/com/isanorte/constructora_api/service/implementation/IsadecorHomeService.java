@@ -46,7 +46,6 @@ import com.isanorte.constructora_api.repository.IsadecorSeccionProductosReposito
 import com.isanorte.constructora_api.model.IsadecorPublicacion;
 import com.isanorte.constructora_api.repository.IsadecorPublicacionRepository;
 import com.isanorte.constructora_api.repository.IsadecorServicioEmpresaRepository;
-import com.isanorte.constructora_api.repository.IsadecorServicioPuntoRepository;
 import com.isanorte.constructora_api.repository.PedidoRepository;
 import com.isanorte.constructora_api.repository.ProductoRepository;
 import com.isanorte.constructora_api.repository.ResenaProductoRepository;
@@ -95,7 +94,6 @@ public class IsadecorHomeService implements IIsadecorHomeService {
     private final IsadecorPromocionRepository promocionRepository;
     private final IsadecorCampanaRepository campanaRepository;
     private final IsadecorServicioEmpresaRepository servicioRepository;
-    private final IsadecorServicioPuntoRepository puntoRepository;
     private final IsadecorSeccionProductosRepository seccionRepository;
     private final IsadecorSeccionFijadoRepository fijadoRepository;
     private final IsadecorSeccionExcluidoRepository excluidoRepository;
@@ -129,7 +127,8 @@ public class IsadecorHomeService implements IIsadecorHomeService {
         Servicios servicios = servicioRepository.findByUnidadNegocioIdAndActivoTrueOrderByFechaCreacionAscIdAsc(unitId)
                 .stream().findFirst()
                 .map(s -> new Servicios(s.getEtiqueta(), s.getTitulo(), s.getDescripcion(),
-                        puntoRepository.findByServicioIdOrderByOrdenAscIdAsc(s.getId()).stream()
+                        s.getPuntos().stream()
+                                .sorted(IsadecorServicioPuntoService.ORDEN)
                                 .map(p -> p.getTexto()).toList(),
                         s.getTextoBoton(), s.getEnlace()))
                 .orElse(null);

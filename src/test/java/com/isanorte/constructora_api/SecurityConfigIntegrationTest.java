@@ -76,26 +76,26 @@ class SecurityConfigIntegrationTest {
     }
 
     @Test
-    @DisplayName("Consulta pública de anuncios permite acceso anónimo")
-    void publicAnnouncementsAllowAnonymousAccess() throws Exception {
-        mockMvc.perform(get("/api/publico/anuncios/ISANORTE"))
+    @DisplayName("Consulta pública de configuración de tienda permite acceso anónimo")
+    void publicStoreConfigAllowsAnonymousAccess() throws Exception {
+        mockMvc.perform(get("/api/publico/tienda/config"))
                 .andExpect(status().isOk());
     }
 
     @Test
-    @DisplayName("Administración de anuncios deniega acceso anónimo")
-    void adminAnnouncementsDenyAnonymousAccess() throws Exception {
-        mockMvc.perform(get("/api/anuncios"))
+    @DisplayName("Administración de preguntas frecuentes deniega acceso anónimo")
+    void adminFaqsDenyAnonymousAccess() throws Exception {
+        mockMvc.perform(get("/api/faqs"))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
-    @DisplayName("Administración de anuncios acepta JWT de administrador")
-    void adminAnnouncementsAllowAdminAccess() throws Exception {
+    @DisplayName("Administración de preguntas frecuentes acepta JWT de administrador")
+    void adminFaqsAllowAdminAccess() throws Exception {
         Instant now = Instant.now();
         String token = createToken("admin@isanorte.com", Set.of("ADMINISTRADOR"), now, now.plusSeconds(3600));
 
-        mockMvc.perform(get("/api/anuncios").header("Authorization", "Bearer " + token))
+        mockMvc.perform(get("/api/faqs").header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk());
     }
 
