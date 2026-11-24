@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
@@ -30,6 +31,8 @@ public class OEmbedPublicacionMetadataProvider implements IPublicacionMetadataPr
     private final String instagramEndpoint;
     private final String tiktokEndpoint;
 
+    /** Constructor que usa Spring: apunta a los endpoints oficiales de cada red. */
+    @Autowired
     public OEmbedPublicacionMetadataProvider() {
         this(INSTAGRAM_OEMBED, TIKTOK_OEMBED);
     }
