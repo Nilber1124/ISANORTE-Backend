@@ -42,6 +42,10 @@ public class DecorplasProductoProvider extends AbstractHtmlCompetidorProvider {
                 && !url.contains("?search=");
     }
 
+    /** Su buscador se renderiza con JavaScript: reintentar con menos palabras no aporta resultados. */
+    @Override
+    protected int[] longitudesConsulta() { return new int[] {9}; }
+
     /** El catálogo renderiza resultados con JavaScript; se prueba como máximo la ruta canónica derivada. */
     @Override
     protected List<String> urlsDirectas(ProductoReferencia referencia) {

@@ -15,6 +15,7 @@ import com.isanorte.constructora_api.service.implementation.scraping.SitioOficia
 
 public abstract class AbstractHtmlCompetidorProvider implements CompetidorProductoProvider {
     private static final int MAX_CANDIDATOS = 6;
+    private static final int MAX_TERMINOS = 9;
     private static final Pattern UNIDAD = Pattern.compile("(?i)(?:/|\\bpor\\s+)(m[²2]|caja|unidad|und|c/u|ml)\\b");
     protected final SitioOficialClient client;
     protected final PrecioHtmlExtractor precioExtractor;
@@ -30,15 +31,28 @@ public abstract class AbstractHtmlCompetidorProvider implements CompetidorProduc
     protected abstract boolean esUrlProducto(String url);
     protected List<String> urlsDirectas(ProductoReferencia referencia) { return List.of(); }
 
+    /**
+     * Longitudes (en palabras) con las que se reintenta la búsqueda si la anterior no devolvió productos.
+     * Los buscadores tipo WordPress exigen todas las palabras, así que una consulta larga suele quedar vacía.
+     */
+    protected int[] longitudesConsulta() { return new int[] {MAX_TERMINOS, 3, 2}; }
+
     @Override
     public List<ProductoCompetidor> buscar(ProductoReferencia referencia) {
-        String query = construirConsulta(referencia);
-        Document resultados = client.obtener(urlBusqueda(URLEncoder.encode(query, StandardCharsets.UTF_8)), dominios());
+        List<String> terminos = construirTerminos(referencia);
         LinkedHashSet<String> urls = new LinkedHashSet<>();
-        for (Element enlace : resultados.select(selectorEnlaces())) {
-            String url = enlace.absUrl("href");
-            if (esUrlProducto(url) && dominios().contains(host(url))) urls.add(url);
-            if (urls.size() == MAX_CANDIDATOS) break;
+        Set<String> consultasHechas = new HashSet<>();
+        for (int longitud : longitudesConsulta()) {
+            String query = String.join(" ", terminos.subList(0, Math.min(longitud, terminos.size())));
+            if (query.isBlank() || !consultasHechas.add(query)) continue;
+            Document resultados = client.obtener(
+                    urlBusqueda(URLEncoder.encode(query, StandardCharsets.UTF_8)), dominios());
+            for (Element enlace : resultados.select(selectorEnlaces())) {
+                String url = enlace.absUrl("href");
+                if (esUrlProducto(url) && dominios().contains(host(url))) urls.add(url);
+                if (urls.size() == MAX_CANDIDATOS) break;
+            }
+            if (!urls.isEmpty()) break;
         }
         for (String url : urlsDirectas(referencia)) {
             if (urls.size() == MAX_CANDIDATOS) break;
@@ -82,7 +96,8 @@ public abstract class AbstractHtmlCompetidorProvider implements CompetidorProduc
                 normalizarMoneda(moneda, textPrecio), unidad, null, caracteristicas, BigDecimal.ZERO);
     }
 
-    private static String construirConsulta(ProductoReferencia ref) {
+    /** Términos de búsqueda en orden de relevancia: primero el nombre del producto. */
+    static List<String> construirTerminos(ProductoReferencia ref) {
         LinkedHashSet<String> terms = new LinkedHashSet<>();
         agregarTokens(terms, ref.nombre());
         agregarTokens(terms, ref.categoria());
@@ -91,7 +106,7 @@ public abstract class AbstractHtmlCompetidorProvider implements CompetidorProduc
             if (key.contains("material") || key.contains("modelo") || key.contains("color")
                     || key.contains("espesor") || key.contains("dimension")) agregarTokens(terms, v);
         });
-        return String.join(" ", terms.stream().limit(9).toList());
+        return terms.stream().limit(MAX_TERMINOS).toList();
     }
 
     private static void agregarTokens(Set<String> terms, String value) {

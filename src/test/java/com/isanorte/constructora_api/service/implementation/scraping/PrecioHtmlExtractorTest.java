@@ -135,6 +135,43 @@ class PrecioHtmlExtractorTest {
         assertEquals(NOT_COMPARABLE, exception.getEstado());
     }
 
+    @Test void extraeImporteWooCommerceSinMainIgnorandoRelacionadosYUnidad() {
+        var result = extractor.extraer(Jsoup.parse("""
+            <meta property="og:title" content="PISO SPC CUMARÚ - Pisopak Perú">
+            <div class="product type-product shipping-taxable purchasable"><div class="nuevo-precio"><p class="price"><span class="woocommerce-Price-amount amount"><bdi>
+            <span class="woocommerce-Price-currencySymbol">S/</span>155.88</bdi></span>
+            <span class="unidad-medida"> Precio por caja</span></p></div></div>
+            <div class="envio-gratis"><p class="price"><span class="woocommerce-Price-amount amount"><bdi>
+            S/ 10.00</bdi></span></p></div>
+            <section class="related products"><ul class="products">
+              <li><h2>Zócalo</h2><span class="price"><span class="woocommerce-Price-amount amount"><bdi>
+              <span class="woocommerce-Price-currencySymbol">S/</span>30.90</bdi></span></span></li>
+              <li><h2>Piso</h2><span class="price"><span class="woocommerce-Price-amount amount"><bdi>
+              <span class="woocommerce-Price-currencySymbol">S/</span>14.90</bdi></span> M2</span></li>
+            </ul></section>
+            """));
+        assertEquals("155.88", result.precio().toPlainString());
+        assertEquals("PEN", result.moneda());
+    }
+
+    @Test void wooCommerceEnOfertaTomaElPrecioVigenteYNoElTachado() {
+        var result = extractor.extraer(Jsoup.parse("""
+            <p class="price"><del><span class="woocommerce-Price-amount amount"><bdi>S/ 120.00</bdi></span></del>
+            <ins><span class="woocommerce-Price-amount amount"><bdi>S/ 99.90</bdi></span></ins></p>
+            """));
+        assertEquals("99.90", result.precio().toPlainString());
+    }
+
+    @Test void wooCommerceConDosPreciosPrincipalesDistintosEsAmbiguo() {
+        Document document = Jsoup.parse("""
+            <p class="price"><span class="woocommerce-Price-amount amount"><bdi>S/ 50.00</bdi></span></p>
+            <p class="price"><span class="woocommerce-Price-amount amount"><bdi>S/ 80.00</bdi></span></p>
+            """);
+        ScrapingPrecioException exception = assertThrows(ScrapingPrecioException.class,
+                () -> extractor.extraer(document));
+        assertEquals(NOT_COMPARABLE, exception.getEstado());
+    }
+
     private void assertPriceNotFound(Document document) {
         ScrapingPrecioException exception = assertThrows(ScrapingPrecioException.class,
                 () -> extractor.extraer(document));

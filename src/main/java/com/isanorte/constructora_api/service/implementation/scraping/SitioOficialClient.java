@@ -41,7 +41,7 @@ public class SitioOficialClient {
                 return Jsoup.parse(new ByteArrayInputStream(pagina.html()), pagina.charset(), actual.toString());
             }
         } catch (IOException | IllegalArgumentException ex) {
-            throw noDisponible();
+            throw new ScrapingPrecioException(SITE_UNREACHABLE, "No fue posible consultar esta tienda.", ex);
         }
     }
 

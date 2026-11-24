@@ -14,7 +14,9 @@ import com.isanorte.constructora_api.service.IComparacionCompetidoresService;
 import com.isanorte.constructora_api.service.IPublicContentService;
 import com.isanorte.constructora_api.service.competitor.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ComparacionCompetidoresService implements IComparacionCompetidoresService {
@@ -56,6 +58,7 @@ public class ComparacionCompetidoresService implements IComparacionCompetidoresS
                     comparable ? "Precios expresados en la misma moneda y unidad."
                             : "Los precios no se comparan porque falta la unidad o no coincide con ISADECOR.");
         } catch (RuntimeException ex) {
+            log.warn("No se pudo consultar {}: {}", provider.empresa(), ex.toString(), ex);
             return vacio(provider.empresa(), EstadoComparacionCompetidor.STORE_UNAVAILABLE,
                     "No fue posible consultar esta tienda.");
         }

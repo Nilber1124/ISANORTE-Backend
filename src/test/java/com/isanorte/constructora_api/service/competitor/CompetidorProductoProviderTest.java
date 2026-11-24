@@ -71,4 +71,33 @@ class CompetidorProductoProviderTest {
         assertEquals(product, candidates.getFirst().url());
         verify(client).obtener(eq(search), anySet());
     }
+
+    @Test
+    void pisopakReintentaConMenosPalabrasCuandoLaBusquedaCompletaNoDevuelveProductos() {
+        var client = mock(SitioOficialClient.class);
+        var extractor = mock(PrecioHtmlExtractor.class);
+        var provider = new PisopakProductoProvider(client, extractor);
+        when(extractor.extraer(any())).thenReturn(new PrecioHtmlExtractor.Precio(
+                new BigDecimal("39.90"), "PEN", "PISO SPC CEMENTO"));
+        var reference = new ProductoReferencia("Piso SPC cemento gris", "Pisos", null, "PEN", null, Map.of());
+        String completa = "https://www.pisopak.com/?s=piso+spc+cemento+gris+pisos";
+        String tres = "https://www.pisopak.com/?s=piso+spc+cemento";
+        String dos = "https://www.pisopak.com/?s=piso+spc";
+        String product = "https://www.pisopak.com/producto/piso-spc-cemento/";
+        when(client.obtener(eq(completa), anySet())).thenReturn(Jsoup.parse("<main></main>", completa));
+        when(client.obtener(eq(tres), anySet())).thenReturn(Jsoup.parse("<main></main>", tres));
+        when(client.obtener(eq(dos), anySet())).thenReturn(Jsoup.parse(
+                "<a href='" + product + "'>Piso</a>", dos));
+        when(client.obtener(eq(product), anySet())).thenReturn(Jsoup.parse(
+                "<main><h1>PISO SPC CEMENTO</h1></main>", product));
+
+        var candidates = provider.buscar(reference);
+
+        assertEquals(1, candidates.size());
+        assertEquals(product, candidates.getFirst().url());
+        var orden = inOrder(client);
+        orden.verify(client).obtener(eq(completa), anySet());
+        orden.verify(client).obtener(eq(tres), anySet());
+        orden.verify(client).obtener(eq(dos), anySet());
+    }
 }

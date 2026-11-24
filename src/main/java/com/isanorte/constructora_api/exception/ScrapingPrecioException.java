@@ -11,6 +11,12 @@ public class ScrapingPrecioException extends RuntimeException {
         this.estado = estado;
     }
 
+    /** La causa solo se usa en los logs del servidor; nunca se expone en la respuesta. */
+    public ScrapingPrecioException(EstadoComparacionPrecio estado, String mensaje, Throwable causa) {
+        super(mensaje, causa);
+        this.estado = estado;
+    }
+
     public EstadoComparacionPrecio getEstado() { return estado; }
 }
 

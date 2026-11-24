@@ -112,9 +112,13 @@ class CuentaClienteIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
                 .andExpect(status().isUnauthorized());
+    }
 
+    @Test
+    @DisplayName("Buscar productos similares en la competencia no requiere cuenta")
+    void comparacionCompetidoresEsPublica() throws Exception {
         mockMvc.perform(get("/api/publico/sitios/isanorte/unidades/isadecor/productos/x/comparacion-competidores"))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isNotFound());
     }
 
     @Test

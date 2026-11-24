@@ -69,12 +69,11 @@ public class SecurityConfig {
                         // Cuentas de cliente: registro y login abiertos; el resto exige sesión de cliente.
                         .requestMatchers("/api/publico/cuenta/registro", "/api/publico/cuenta/login").permitAll()
                         .requestMatchers("/api/publico/cuenta/**").hasAuthority(clienteAuthority)
-                        // Cotizar y comparar precios requieren cuenta; el catálogo sigue siendo público.
+                        // Cotizar y comparar con una URL externa requieren cuenta; el catálogo y la
+                        // búsqueda de productos similares en la competencia siguen siendo públicos.
                         .requestMatchers(HttpMethod.POST, "/api/publico/sitios/*/unidades/*/cotizaciones",
                                 "/api/publico/sitios/*/unidades/*/pedidos",
                                 "/api/publico/sitios/*/unidades/*/productos/*/comparar-precio").hasAuthority(clienteAuthority)
-                        .requestMatchers(HttpMethod.GET,
-                                "/api/publico/sitios/*/unidades/*/productos/*/comparacion-competidores").hasAuthority(clienteAuthority)
                         .requestMatchers(HttpMethod.POST,
                                 "/api/publico/sitios/*/unidades/*/productos/*/resenas").hasAuthority(clienteAuthority)
                         .requestMatchers("/api/publico/**").permitAll()

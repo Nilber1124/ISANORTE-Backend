@@ -36,6 +36,7 @@ public class PrecioHtmlExtractor {
             "recommended|related|recomendado|relacionado", CASE_INSENSITIVE_UNICODE);
     private static final Pattern HIDDEN_STYLE = Pattern.compile(
             "display\\s*:\\s*none|line-through", Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+    private static final Pattern WOO_SHIPPING_TAXABLE = Pattern.compile("(?<![\\w-])shipping-taxable(?![\\w-])");
     private static final Pattern ISO = Pattern.compile(
             "(?i)\\b(PEN|USD|EUR|GBP|CLP|COP|MXN|ARS|BRL|CAD|AUD|JPY|CNY|CHF|BOB|UYU)\\b");
 
@@ -125,7 +126,10 @@ public class PrecioHtmlExtractor {
         for (String selector : List.of(
                 "main .sale-price, main .special-price, main .price--sale, main ins .amount, main ins.price",
                 "main [data-product-price], main .product-price, main .price-current, main .current-price,"
-                        + " main .product .price, main .product-detail .price, main .product-info .price")) {
+                        + " main .product .price, main .product-detail .price, main .product-info .price",
+                // WooCommerce sin <main> (p. ej. maquetado con Elementor): solo el importe, no el texto de unidad
+                // que lo acompaña. Los listados de relacionados y los precios tachados quedan excluidos.
+                ".price > .woocommerce-Price-amount, .price ins .woocommerce-Price-amount")) {
             for (Element element : document.select(selector)) {
                 if (!excluded(element)) {
                     add(candidates, element.hasAttr("data-product-price") ? element.attr("data-product-price")
@@ -247,10 +251,18 @@ public class PrecioHtmlExtractor {
                 current = current.parent()) {
             if (Set.of("del", "s", "strike", "nav", "footer", "aside").contains(current.tagName())
                     || current.hasAttr("hidden") || current.attr("aria-hidden").equals("true")
-                    || isExcludedText(current.className() + " " + current.id())
+                    || isExcludedText(clasesSinEstadoWooCommerce(current.className()) + " " + current.id())
                     || HIDDEN_STYLE.matcher(current.attr("style")).find()) return true;
         }
         return isExcludedText(element.text());
+    }
+
+    /**
+     * WooCommerce marca todo producto con "shipping-taxable" (indica que paga impuestos de envío), lo que
+     * no significa que el elemento sea un coste de envío. Se ignora para no descartar el precio principal.
+     */
+    private static String clasesSinEstadoWooCommerce(String className) {
+        return WOO_SHIPPING_TAXABLE.matcher(className).replaceAll(" ");
     }
 
     private static void add(List<Precio> prices, String raw, String explicitCurrency, String name, boolean machine) {
